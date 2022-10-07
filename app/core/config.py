@@ -3,11 +3,11 @@ from typing import List, Union
 
 from pydantic import AnyHttpUrl, BaseSettings, validator
 
-
-
 class Settings(BaseSettings):
     PROJECT_NAME: str = "PyRobots"
     BACKEND_CORS_ORIGINS: List[AnyHttpUrl] = []
+    DB_PROVIDER: str = "sqlite"
+    DB_NAME: str = "pyrobots-db.sqlite"
 
     @validator("BACKEND_CORS_ORIGINS", pre=True)
     def assemble_cors_origins(cls, v: Union[str, List[str]]) -> Union[List[str], str]:

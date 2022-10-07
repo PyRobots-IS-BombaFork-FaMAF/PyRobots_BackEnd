@@ -1,8 +1,10 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-
 from app.core.config import settings
+from app.core.models.base import define_database_and_entities
 
+define_database_and_entities(
+    provider=settings.DB_PROVIDER, filename=settings.DB_NAME, create_db=True)
 
 def get_application():
     _app = FastAPI(title=settings.PROJECT_NAME)
@@ -18,7 +20,3 @@ def get_application():
     return _app
 
 app = get_application()
-
-@app.get("/")
-async def root():
-    return {"message": "Hello World"}
