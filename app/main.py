@@ -1,7 +1,11 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
+from app.core.models.base import define_database_and_entities
 from app.core.config import settings
+from app.core.router import users
 
+define_database_and_entities(
+    provider=settings.DB_PROVIDER, filename=settings.DB_NAME, create_db=True)
 
 def get_application():
     _app = FastAPI(title=settings.PROJECT_NAME)
@@ -13,6 +17,8 @@ def get_application():
         allow_methods=["*"],
         allow_headers=["*"],
     )
+
+    _app.include_router(users.router)
 
     return _app
 
