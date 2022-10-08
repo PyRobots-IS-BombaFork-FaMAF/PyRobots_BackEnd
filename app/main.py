@@ -1,6 +1,5 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-
 from app.core.config import settings
 
 
@@ -18,7 +17,3 @@ def get_application():
     return _app
 
 app = get_application()
-
-@app.get("/")
-async def root():
-    return {"message": "Hello World"}
