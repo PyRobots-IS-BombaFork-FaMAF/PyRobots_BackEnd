@@ -4,3 +4,4 @@ pony
 passlib
 bcrypt
 pytest
+pip install pydantic[email]
