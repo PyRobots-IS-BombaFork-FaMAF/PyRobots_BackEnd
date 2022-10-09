@@ -11,6 +11,6 @@ class User(BaseModel):
     username: str
     email: EmailStr
     password: str = Field(..., min_length=8,
-                          regex="^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$")
+                          regex="^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)[a-zA-Z\d]{8,}$")
     # avatar ?
     email_confirmed: Optional[bool] = False
