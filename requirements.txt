@@ -4,3 +4,6 @@ pony
 passlib
 bcrypt
 pytest
+pydantic
+pydantic[email]
+pydantic[dotenv]
