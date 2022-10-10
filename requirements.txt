@@ -5,3 +5,4 @@ passlib
 bcrypt
 pytest
 pip install pydantic[email]
+pip install python-multipart

@@ -13,6 +13,7 @@ class User(db.Entity):
     username = PrimaryKey(str)
     email = Required(str, unique=True)
     password = Required(str, unique=False)
+    avatar = Optional(str)
     validated = Required(bool, unique=False, default=0)
 
 class Validation_data(db.Entity):
