@@ -28,7 +28,7 @@ def register(
     avatar: Optional[UploadFile] = File(None)):
     if not(is_username_registered(user) or is_email_registered(user)):
         if avatar != None and avatar.filename != "":
-            if avatar.content_type not in ['image/jpeg', 'image/png', 'image/tiff']:
+            if avatar.content_type not in ['image/jpeg', 'image/png', 'image/tiff', 'image/jpg']:
                 raise HTTPException(
                     409, detail="Tipo de archivo inválido")
             else:
