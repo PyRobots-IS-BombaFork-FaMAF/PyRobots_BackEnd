@@ -25,7 +25,8 @@ router = APIRouter()
 @db_session
 def register(
     user: UserIn = Depends(UserIn.as_form), 
-    avatar: Optional[UploadFile] = File(None)):
+    avatar: Optional[UploadFile] = File(None),
+    background_t: BackgroundTasks = BackgroundTasks()):
     if not(is_username_registered(user) or is_email_registered(user)):
         if avatar != None and avatar.filename != "":
             if avatar.content_type not in ['image/jpeg', 'image/png', 'image/tiff', 'image/jpg']:
@@ -58,7 +59,6 @@ def register(
 
         validator = ValidationMail()
         msg = user.username + ", se ha enviado un mail de verificación a " + user.email 
-        background_t = BackgroundTasks()
         background_t.add_task(validator.send_mail, user.email, user.username)
         
     else:
