@@ -23,18 +23,29 @@ router = APIRouter()
 
 @router.post("/users/register", tags=["Users"], status_code=201)
 @db_session
-async def register(
+def register(
     user: UserIn = Depends(UserIn.as_form), 
     avatar: Optional[UploadFile] = File(None)):
-    msg = ""
     if not(is_username_registered(user) or is_email_registered(user)):
-        if avatar != None :
-            avatar.filename = f"{user.username + str(uuid.uuid4())}.jpg"
-            contents = await avatar.read()  # Important to wait
-            avatar_name = IMAGEDIR + avatar.filename
+        if avatar != None and avatar.filename != "":
+            if avatar.content_type not in ['image/jpeg', 'image/png', 'image/tiff']:
+                raise HTTPException(
+                    409, detail="Tipo de archivo inválido")
+            else:
+                avatar.filename = f"{user.username + str(uuid.uuid4())}.jpg"
+                try:
+                    avatar.file.seek(0)
+                    contents = avatar.file.read()  # Important to wait
+                    avatar_name = IMAGEDIR + avatar.filename
 
-            with open(f"{avatar_name}", "wb") as f:
-                f.write(contents)
+                    with open(f"{avatar_name}", "wb") as f:
+                        f.write(contents)
+                except:
+                    raise HTTPException(
+                        400, detail="Error leyendo imagen")
+                finally:
+                    avatar.file.close()
+
         else:
             avatar_name = "default.jpg"
 
@@ -46,20 +57,18 @@ async def register(
         )
 
         validator = ValidationMail()
-        msg += user.username + ", se ha enviado un mail de verificación a " + user.email 
+        msg = user.username + ", se ha enviado un mail de verificación a " + user.email 
         background_t = BackgroundTasks()
         background_t.add_task(validator.send_mail, user.email, user.username)
         
     else:
         if is_username_registered(user):
-            msg += "Usuario ya existente"
             raise HTTPException(
-                status_code = 409, detail = "Usuario ya existente"
+                409, detail = "Usuario ya existente"
             )
         elif is_email_registered(user):
-            msg+= "El e-mail ya se encuentra registrado"
             raise HTTPException(
-                status_code = 409, detail = "El e-mail ya se encuentra registrado"
+                409, detail = "El e-mail ya se encuentra registrado"
             )
     
     return {msg}
