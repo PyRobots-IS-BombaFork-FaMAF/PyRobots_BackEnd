@@ -1,10 +1,11 @@
-from fastapi import FastAPI
+# test_main.py
+from fastapi import FastAPI, Depends
+from fastapi.middleware.cors import CORSMiddleware
 from fastapi.exceptions import RequestValidationError, ValidationError
 from fastapi.responses import PlainTextResponse
-from fastapi.middleware.cors import CORSMiddleware
-from app.core.models.base import define_database_and_entities
 from app.core.config import settings
 from app.core.router import users
+from app.core.models.base import define_database_and_entities
 
 define_database_and_entities(
     provider=settings.DB_PROVIDER, filename=settings.DB_NAME, create_db=True)
@@ -24,9 +25,9 @@ def get_application():
 
     return _app
 
-app = get_application()
+app_test = get_application()
 
-@app.exception_handler(RequestValidationError)
-@app.exception_handler(ValidationError)
+@app_test.exception_handler(RequestValidationError)
+@app_test.exception_handler(ValidationError)
 async def validation_exception_handler(request, exc):
-    return PlainTextResponse(str(exc), status_code=400)
+    return PlainTextResponse(str(exc), status_code=422)
