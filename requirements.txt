@@ -4,5 +4,7 @@ pony
 passlib
 bcrypt
 pytest
-pip install pydantic[email]
-pip install python-multipart
+pydantic 
+pydantic[email]
+pydantic[dotenv]
+python-multipart
