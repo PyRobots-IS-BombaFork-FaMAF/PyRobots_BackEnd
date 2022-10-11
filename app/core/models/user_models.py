@@ -1,4 +1,3 @@
-from tkinter import Image
 from tokenize import String
 from pydantic import BaseModel, Field, HttpUrl
 from typing import Optional
