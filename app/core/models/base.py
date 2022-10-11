@@ -19,7 +19,15 @@ class User(db.Entity):
     def verify_password(self, plain_password: str) -> bool:
         return pwd_context.verify(plain_password, self.password)
 
-
+class Robot(db.Entity):
+    """
+    Database table to store the robot data
+    """
+    id = PrimaryKey(int, auto=True)
+    name = Required(str)
+    code = Required(str) #preguntar por tipo
+    avatar = Optional(str) #same
+    
 def define_database_and_entities(**db_params):
     global db
 
