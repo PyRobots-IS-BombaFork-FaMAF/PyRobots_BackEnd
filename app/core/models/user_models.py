@@ -9,9 +9,9 @@ class UserIn(BaseModel):
     BaseModel for the user, determines the data collected 
     to access the user endpoints
     '''
-    username: str
+    username: str = Field(..., min_length=6, max_length=12)
     email: EmailStr
-    password: str = Field(..., min_length=8,
+    password: str = Field(..., min_length=8, max_length=16,
                           regex="^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)[a-zA-Z\d\w\W]{8,}$")
 
     @classmethod

@@ -28,20 +28,27 @@ def test_register_valid_user_without_avatar():
                             )
     assert response.status_code == 201
 
-def test_register_valid_user_without_avatar():
-    with open('app/avatars/default.jpg', 'rb') as f:
-        avatar_img = f.read()
-        f.close()
-    avatar = {"avatar" : ("image_file", avatar_img, "image/jpeg")}
+def test_register_existing_user_without_avatar():
     response = client.post("users/register",
                             data={
                                 "username": "tiffbro",
+                                "email": "tiffanybricett111996@gmail.com",
+                                "password": "Tiffanyb19!"
+                            }
+                            )
+    print(response.json())
+    assert response.status_code == 409
+
+def test_register_existing_email_without_avatar():
+    response = client.post("users/register",
+                            data={
+                                "username": "tiffbro19",
                                 "email": "tiffanybricett1996@gmail.com",
                                 "password": "Tiffanyb19!"
                             }
                             )
     print(response.json())
-    assert response.status_code == 201
+    assert response.status_code == 409
 
 def test_post_invalid_email_user_without_avatar():
     response = client.post("users/register",
@@ -102,6 +109,26 @@ def test_post_invalid_password_user4():
     response = client.post("users/register",
                             data={
                                 "username": "tiffbro",
+                                "email": "tiffanybricett1996@gmail.com",
+                                "password": "Tb19" #length < 8
+                            }
+                            )
+    assert response.status_code == 422
+
+def test_post_invalid_username1():
+    response = client.post("users/register",
+                            data={
+                                "username": "tiff", #length < 6
+                                "email": "tiffanybricett1996@gmail.com",
+                                "password": "Tb19" #length < 8
+                            }
+                            )
+    assert response.status_code == 422
+
+def test_post_invalid_usernam2():
+    response = client.post("users/register",
+                            data={
+                                "username": "tiffbroeuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuu", #length > 16
                                 "email": "tiffanybricett1996@gmail.com",
                                 "password": "Tb19" #length < 8
                             }
