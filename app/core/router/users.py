@@ -53,7 +53,7 @@ def register(
                     avatar.file.close()
 
         else:
-            avatar_name = "default.jpg"
+            avatar_name = IMAGEDIR + "default.jpg"
 
         db.User(
             username = user.username,
@@ -78,21 +78,22 @@ def register(
     
     return {msg}
 
-@db_session
+
 @router.get("/validate", tags=["Users"], status_code=200)
 async def validate_user(email: str, code: str):
-    try:
-        email = unquote(email)
-        data = db.get("select email,code from Validation_data where email=$email")
-    except:
-        raise HTTPException(status_code=404, detail="Email not found")
+    with db_session:
+        try:
+            email = unquote(email)
+            data = db.get("select email,code from Validation_data where email=$email")
+        except:
+            raise HTTPException(status_code=404, detail="Email not found")
 
-    if data[1] != code:
-        raise HTTPException(status_code=409, detail="Invalid validation code")
-    print()
-    user = db.User.get(email=email)
-    user.validated = True
-    db.commit()
+        if data[1] != code:
+            raise HTTPException(status_code=409, detail="Invalid validation code")
+        print()
+        user = db.User.get(email=email)
+        user.validated = True
+        db.commit()
     html = """
 <!DOCTYPE html>
 <html>
