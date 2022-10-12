@@ -1,14 +1,19 @@
 from tokenize import String
+from datetime import datetime, timedelta
 from fastapi import *
-from fastapi.responses import JSONResponse
+from fastapi.responses import JSONResponse, HTMLResponse
+from fastapi.security import OAuth2PasswordRequestForm
 from pony.orm import *
 from typing import Union, Optional
 from app.core.models.base import db 
-from app.core.models.user_models import UserIn, User
+from app.core.models.user_models import UserIn, User, Token
+from app.core.handlers.auth_handlers import *
 from app.core.handlers.password_handlers import *
 from app.core.handlers.validation_handlers import *
 from app.core.handlers.userdb_handlers import *
+from urllib.parse import unquote
 import uuid
+
 
 IMAGEDIR = "app/avatars/"
 
@@ -72,3 +77,64 @@ def register(
             )
     
     return {msg}
+
+@db_session
+@router.get("/validate", tags=["Users"], status_code=200)
+async def validate_user(email: str, code: str):
+    try:
+        email = unquote(email)
+        data = db.get("select email,code from Validation_data where email=$email")
+    except:
+        raise HTTPException(status_code=404, detail="Email not found")
+
+    if data[1] != code:
+        raise HTTPException(status_code=409, detail="Invalid validation code")
+    print()
+    user = db.User.get(email=email)
+    user.validated = True
+    db.commit()
+    html = """
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>PyRobots</title>
+    </head>
+    <body style="background-color:white; text-align: center;">
+        <h1 style="text-align: center; padding-top: 60px;font-family:verdana" >¡E-mail validado!</h1>
+        <h5 style="text-align: center;font-family:verdana" >
+            ¡Ya puedes empezar a jugar!
+        </h5>
+        <div>
+            <img src="https://img.freepik.com/vector-gratis/juguete-robot-vintage-sobre-fondo-blanco_1308-77501.jpg"; style="width: 300px;height: 400px;">
+            </img>
+        </div>
+    </body>
+</html>
+"""
+    return HTMLResponse(html)
+
+
+@router.post("/token", tags=["Login"], response_model=Token, status_code=200)
+async def login_for_token(form_data: OAuth2PasswordRequestForm = Depends()):
+    """
+    LogIn endpoint, first, authenticates the user checking that the
+    email and the password submitted by the user are correct.
+    Then it creates a valid token for the user.
+    """
+    user = authenticate_user(form_data.username, form_data.password)
+    if not user:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Incorrect password",
+            headers={"WWW-Authenticate": "Bearer"},
+        )
+    access_token_expires = timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES)
+    access_token = create_access_token(
+        data={"username": user["username"]},
+        expires_delta=access_token_expires,
+    )
+    return {"access_token": access_token, "token_type": "bearer"}
+
+@router.get("/users/me/", response_model=User)
+async def read_users_me(current_user: User = Depends(get_current_active_user)):
+    return current_user
