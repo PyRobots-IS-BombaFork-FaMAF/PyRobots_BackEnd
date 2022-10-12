@@ -11,7 +11,8 @@ class User(db.Entity):
     email = Required(str, unique=True)
     password = Required(str, unique=False)
     validated = Required(bool, unique=False, default=0)
-
+    robots = Set('Robot')
+    
     @staticmethod
     def hash_password(plain_password: str) -> str:
         return pwd_context.hash(plain_password)
@@ -25,8 +26,9 @@ class Robot(db.Entity):
     """
     id = PrimaryKey(int, auto=True)
     name = Required(str)
-    code = Required(str) #preguntar por tipo
-    avatar = Optional(str) #same
+    code = Required(str) 
+    avatar = Optional(str)
+    user = Required(User)
     
 def define_database_and_entities(**db_params):
     global db
