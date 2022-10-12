@@ -23,4 +23,3 @@ class Robot(BaseModel):
     name: str
     code: str
     avatar: Optional[str] = None
-

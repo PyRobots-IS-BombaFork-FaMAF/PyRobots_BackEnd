@@ -4,6 +4,8 @@ pony
 passlib
 bcrypt
 pytest
-pydantic
+pydantic 
 pydantic[email]
 pydantic[dotenv]
+python-multipart
+yagmail
