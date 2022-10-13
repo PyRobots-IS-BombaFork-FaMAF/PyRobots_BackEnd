@@ -25,7 +25,7 @@ def authenticate_user(username: str, password: str):
         user_tuple = db.get("select * from User where username=$username")
     except:
         raise HTTPException(
-            status_code=400, detail="Incorrect username")
+            status_code=401, detail="Contraseña o usuario incorrecto")
     user = dict(zip(keys, user_tuple))
     if not verify_password(password, user['password']):
         return False
