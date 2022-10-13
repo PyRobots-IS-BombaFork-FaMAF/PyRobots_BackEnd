@@ -28,6 +28,7 @@ router = APIRouter()
 
 @router.post("/users/register", tags=["Users"], status_code=201)
 @db_session
+
 def register(
     user: UserIn = Depends(UserIn.as_form), 
     avatar: Optional[UploadFile] = File(None),
@@ -56,8 +57,8 @@ def register(
             avatar_name = IMAGEDIR + "default.jpg"
 
         db.User(
-            username = user.username,
-            email = user.email,
+            username = user.username.lower(),
+            email = user.email.lower(),
             password = hash_password(user.password),
             avatar = avatar_name
         )
@@ -81,15 +82,20 @@ def register(
 
 @router.get("/validate", tags=["Users"], status_code=200)
 async def validate_user(email: str, code: str):
+    """
+    validation endpoint to allow users to validate their account by
+    clicking on the link they receive by e-mail, that way they can 
+    log in and start playing
+    """
     with db_session:
         try:
             email = unquote(email)
             data = db.get("select email,code from Validation_data where email=$email")
         except:
-            raise HTTPException(status_code=404, detail="Email not found")
+            raise HTTPException(status_code=404, detail="Email no encontrado")
 
         if data[1] != code:
-            raise HTTPException(status_code=409, detail="Invalid validation code")
+            raise HTTPException(status_code=409, detail="Código de validación invalido")
         print()
         user = db.User.get(email=email)
         user.validated = True
@@ -119,14 +125,14 @@ async def validate_user(email: str, code: str):
 async def login_for_token(form_data: OAuth2PasswordRequestForm = Depends()):
     """
     LogIn endpoint, first, authenticates the user checking that the
-    email and the password submitted by the user are correct.
+    username and the password submitted by the user are correct.
     Then it creates a valid token for the user.
     """
     user = authenticate_user(form_data.username, form_data.password)
     if not user:
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
-            detail="Incorrect password",
+            detail="Contraseña incorrecta",
             headers={"WWW-Authenticate": "Bearer"},
         )
     access_token_expires = timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES)
@@ -136,6 +142,43 @@ async def login_for_token(form_data: OAuth2PasswordRequestForm = Depends()):
     )
     return {"access_token": access_token, "token_type": "bearer"}
 
+
+@router.put("/users/refresh", tags=["Login"], response_model=Token, status_code=201)
+async def refresh_token(username: str = Depends(valid_credentials)):
+    """
+    Endpoint that creates a new web token.
+    Need to be logged in to use.
+    """
+    if not username:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Contraseña incorrecta",
+            headers={"WWW-Authenticate": "Bearer"},
+        )
+
+    try:
+        access_token_expires = timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES)
+        access_token = create_access_token(
+            data={"username": username},
+            expires_delta=access_token_expires,
+        )
+        return {"access_token": access_token, "token_type": "bearer"}
+    except:
+        raise HTTPException(
+            status_code=405,
+            detail="Algo salió mal"
+        )
+
+
 @router.get("/users/me/", response_model=User)
 async def read_users_me(current_user: User = Depends(get_current_active_user)):
     return current_user
+
+
+@router.get("/logout")
+async def logout(request: Request, current_user: User = Depends(get_current_active_user)):
+    raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Incorrect password",
+            headers={"WWW-Authenticate": "Bearer"},
+        )

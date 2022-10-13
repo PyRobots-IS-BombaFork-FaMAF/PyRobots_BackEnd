@@ -21,7 +21,8 @@ def authenticate_user(username: str, password: str):
     keys = ('username', 'email', 'password',
             'avatar', 'validated')
     try:
-        user_tuple = db.get("select * from User where username = $username")
+        username = username.lower()
+        user_tuple = db.get("select * from User where username=$username")
     except:
         raise HTTPException(
             status_code=400, detail="Incorrect username")
@@ -58,6 +59,16 @@ async def get_current_active_user(current_user: User = Depends(get_current_user)
         raise HTTPException(status_code=400, detail="Usuario no validado")
     return current_user
 
+def valid_credentials(token: str = Depends(oauth2_scheme)):
+    try:
+        payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
+        username: str = payload.get("username")
+        if username is None:
+            return None
+    except JWTError:
+        return None
+    return username
+
 def create_access_token(data: dict, expires_delta: Optional[timedelta] = None):
     to_encode = data.copy()
     if expires_delta:
@@ -67,3 +78,4 @@ def create_access_token(data: dict, expires_delta: Optional[timedelta] = None):
     to_encode.update({"exp": expire})
     encoded_jwt = jwt.encode(to_encode, SECRET_KEY, algorithm=ALGORITHM)
     return encoded_jwt
+
