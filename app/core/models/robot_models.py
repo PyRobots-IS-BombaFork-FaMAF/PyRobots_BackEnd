@@ -17,8 +17,8 @@ class RobotIn(BaseModel):
 
 class Robot(BaseModel):
     """
-    BaseModel for the user, determines the data collected 
-    to access the user endpoints
+    BaseModel for the robot, determines the data collected 
+    to access the robot endpoints
     """
     name: str
     code: str
