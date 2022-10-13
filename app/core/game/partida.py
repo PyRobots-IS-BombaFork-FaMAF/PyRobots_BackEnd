@@ -1,4 +1,5 @@
 from datetime import date, datetime
+<<<<<<< HEAD
 from app.core.models.base import Partida, db 
 from pony.orm import *
 import json
@@ -55,6 +56,5 @@ class PartidaObject():
         index = ['{}'.format(x) for x in range(len(self.all))]
         data = dict(zip(index, partidas))
         return json.dumps(data)
-
 
 

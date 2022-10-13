@@ -6,7 +6,6 @@ from app.core.models.base import define_database_and_entities
 from app.core.config import settings
 from app.core.router import users, robots, game
 from app.core.game.partida import *
-from app.core.router import users, game, robots
 
 define_database_and_entities(
     provider=settings.DB_PROVIDER, filename=settings.DB_NAME, create_db=True)
