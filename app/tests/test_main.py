@@ -8,7 +8,7 @@ from app.core.router import users
 from app.core.models.base import define_database_and_entities
 
 define_database_and_entities(
-    provider=settings.DB_PROVIDER, filename=settings.DB_NAME, create_db=True)
+    provider=settings.DB_PROVIDER, filename=settings.DB_TEST_NAME, create_db=True)
 
 def get_application():
     _app = FastAPI(title=settings.PROJECT_NAME)

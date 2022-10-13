@@ -1,5 +1,7 @@
 from fastapi.testclient import TestClient
 from app.tests.test_main import app_test
+from app.core.models.base import User, Validation_data, db, Robot
+from pony.orm import *
 
 client = TestClient(app_test)
 
@@ -10,8 +12,8 @@ def test_register_valid_user_with_avatar():
     avatar = {"avatar" : ("image_file", avatar_img, "image/jpeg")}
     response = client.post("users/register",
                             data={
-                                "username": "tiffbr",
-                                "email": "tiffanybricett1r996@gmail.com",
+                                "username": "tiffbro",
+                                "email": "tiffanybricettr1996@gmail.com",
                                 "password": "Tiffanyb19!"
                             },
                             files = avatar
@@ -21,7 +23,7 @@ def test_register_valid_user_with_avatar():
 def test_register_valid_user_without_avatar():
     response = client.post("users/register",
                             data={
-                                "username": "tiffbro",
+                                "username": "tiffbr",
                                 "email": "tiffanybricett1996@gmail.com",
                                 "password": "Tiffanyb19!"
                             }
