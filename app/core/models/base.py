@@ -1,3 +1,4 @@
+from enum import unique
 from pony.orm import *
 from datetime import date
 from passlib.context import CryptContext
@@ -15,6 +16,17 @@ class User(db.Entity):
     password = Required(str, unique=False)
     avatar = Optional(str)
     validated = Required(bool, unique=False, default=0)
+    robots = Set('Robot')
+    
+class Robot(db.Entity):
+    """
+    Database table to store the robot data
+    """
+    id = PrimaryKey(int, auto=True)
+    name = Required(str, unique=True)
+    code = Required(str) 
+    avatar = Optional(str)
+    user = Required(User)
 
 class Validation_data(db.Entity):
     """
