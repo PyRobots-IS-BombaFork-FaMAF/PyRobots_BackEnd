@@ -26,3 +26,11 @@ class PartidaIn(BaseModel):
         return v
 
 
+class Filters(BaseModel):
+    """
+    BaseModel for the games filters, determines the game data
+    that is returned to the user
+    """
+    game_name: Optional[str] = Field(None, min_length=3, max_length=12)
+    game_creation_date: Optional[datetime] = None
+    created_by_user: Optional[bool] = None

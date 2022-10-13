@@ -46,6 +46,15 @@ class PartidaObject():
                 partida.created_by,
                 partida.creation_date)
 
+    def filter_by(self, date=None, creator=None, name=None):
+        partidas = [
+            vars(x) for x in self.all if 
+                (not date or x._creation_date == date.strftime("%d/%m/%Y")) and
+                (not creator or x._creator.lower() == creator.lower()) and 
+                (not name or x._name.lower() == name.lower())]
+        index = ['{}'.format(x) for x in range(len(self.all))]
+        data = dict(zip(index, partidas))
+        return json.dumps(data)
 
 
 

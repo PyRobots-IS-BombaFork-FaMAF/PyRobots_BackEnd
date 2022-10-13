@@ -32,5 +32,22 @@ async def create_game(
     msg = {"msg" : "Se creo la partida con éxito!"}
     return msg
 
-
-
+@router.post("/game/list", status_code=200, tags=["Game"])
+async def list_games(
+    filtros: Filters, 
+    current_user: User = Depends(get_current_active_user)
+):
+    """
+    Returns a json with the data of the games created
+    The filters are optional
+    """
+    if filtros.created_by_user:
+        username = current_user["username"]
+    else:
+        username = None
+    games = Partida.filter_by(Partida,
+        filtros.game_creation_date, 
+        username, 
+        filtros.game_name
+    )
+    return games
