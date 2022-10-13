@@ -1,11 +1,12 @@
+from asyncio.windows_events import NULL
 from pony.orm import *
 from datetime import date
 from app.core.models.base import User, db, Robot
-from app.core.models.base import define_database_and_entities
+from fastapi.testclient import TestClient
+from app.tests.test_main import app_test
 from app.core.handlers.password_handlers import verify_password, hash_password
 
-define_database_and_entities(
-    provider='sqlite', filename='pyrobots-db.sqlite', create_db=True)
+client = TestClient(app_test)
 
 @db_session
 def test_create_and_read_user():
@@ -27,14 +28,14 @@ def test_update_password():
     assert verify_password(tiff, "54321")  == True
 
 @db_session
-def create_and_read_robot():
+def test_create_and_read_robot():
     tiff = User["tiffb"]
     Robot(name="Maximus", code="robot.py", user=tiff)
     maximus = Robot[1]
     assert maximus.name == "Maximus"
 
 @db_session
-def update_code():
+def test_update_code():
     maximus = Robot[1]
     maximus.code = "prueba.py"
     flush()
@@ -42,7 +43,7 @@ def update_code():
     assert maximus.code == "prueba.py"
 
 @db_session
-def delete_robot():
+def test_delete_robot():
     Robot[1].delete()
     try:
         maximus = Robot[1]
@@ -56,5 +57,5 @@ def test_delete_user():
     try:
         tiff = User["tiffb"]
     except ObjectNotFound:
-        tiff = None 
+        tiff = None
     assert tiff == None
