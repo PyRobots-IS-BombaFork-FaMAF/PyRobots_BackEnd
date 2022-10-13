@@ -1,6 +1,6 @@
 from pony.orm import *
 from datetime import date
-from app.core.models.base import User, db, Robot
+from app.core.models.base import User, db, Robot, Validation_data
 from fastapi.testclient import TestClient
 from app.tests.test_main import app_test
 from app.core.handlers.password_handlers import verify_password, hash_password
@@ -16,7 +16,7 @@ def test_create_and_read_user():
 @db_session
 def test_verify_password():
     tiff = User["tiffb"]
-    assert verify_password(tiff, "12345") == True
+    assert verify_password(tiff.password, "12345") == True
 
 @db_session
 def test_update_password():
@@ -24,12 +24,13 @@ def test_update_password():
     tiff.password = hash_password("54321")
     flush()
     tiff = User["tiffb"]
-    assert verify_password(tiff, "54321")  == True
+    assert verify_password(tiff.password, "54321")  == True
 
 @db_session
 def test_create_and_read_robot():
     tiff = User["tiffb"]
     Robot(name="Maximus", code="robot.py", user=tiff)
+    flush()
     maximus = Robot[1]
     assert maximus.name == "Maximus"
 

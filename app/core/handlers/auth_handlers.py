@@ -27,7 +27,7 @@ def authenticate_user(username: str, password: str):
         raise HTTPException(
             status_code=401, detail="Contraseña o usuario incorrecto")
     user = dict(zip(keys, user_tuple))
-    if not verify_password(password, user['password']):
+    if not verify_password(user["password"], password):
         return False
     return user
 
