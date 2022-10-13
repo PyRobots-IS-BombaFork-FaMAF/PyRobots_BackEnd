@@ -1,3 +1,4 @@
+from enum import unique
 from pony.orm import *
 from datetime import date
 from passlib.context import CryptContext
@@ -22,7 +23,7 @@ class Robot(db.Entity):
     Database table to store the robot data
     """
     id = PrimaryKey(int, auto=True)
-    name = Required(str)
+    name = Required(str, unique=True)
     code = Required(str) 
     avatar = Optional(str)
     user = Required(User)
