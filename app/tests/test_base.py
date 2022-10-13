@@ -1,4 +1,3 @@
-from asyncio.windows_events import NULL
 from pony.orm import *
 from datetime import date
 from app.core.models.base import User, db, Robot
