@@ -1,5 +1,8 @@
 from datetime import date, datetime
 <<<<<<< HEAD
+<<<<<<< HEAD
+=======
+>>>>>>> 3bba74a (PYR-44 se añade funcionalidad para guardar datos en bd en caso de caida del server)
 from app.core.models.base import Partida, db 
 from pony.orm import *
 import json
@@ -15,7 +18,7 @@ class PartidaObject():
         self._games = games 
         self._max_players = max_players
         self._min_players = min_players
-        self._creator = creator 
+        self._creator = creator
         self._creation_date = datetime.now().strftime("%Y/%m/%d %H:%M:%S") if not creation_date else creation_date
         self.all.append(self)
         Partida(
@@ -56,5 +59,4 @@ class PartidaObject():
         index = ['{}'.format(x) for x in range(len(self.all))]
         data = dict(zip(index, partidas))
         return json.dumps(data)
-
 
