@@ -21,7 +21,7 @@ async def create_game(
     Creates a game with the parameters passed, the game can
     be started later by the user who created it
     """
-    Partida(
+    PartidaObject(
         partida.name,
         partida.rounds,
         partida.games,
