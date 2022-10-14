@@ -45,7 +45,8 @@ async def list_games(
         username = current_user["username"]
     else:
         username = None
-    games = Partida.filter_by(Partida,
+    games = PartidaObject.filter_by(
+        PartidaObject,
         filtros.game_creation_date, 
         username, 
         filtros.game_name
