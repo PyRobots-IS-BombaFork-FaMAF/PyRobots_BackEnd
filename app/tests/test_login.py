@@ -49,7 +49,6 @@ def test_validate_user_wrong_code():
     code = "Ai992kjHsnwh"
     url = "/validate?email="+quote(email)+"&code="+code
     response = client.get(url)
-    print()
     assert response.status_code == 409
 
 @db_session
@@ -59,7 +58,6 @@ def test_validate_user():
     code = validation_tuple[1]
     url = "/validate?email="+quote(email)+"&code="+code
     response = client.get(url)
-    print()
     assert response.status_code == 200
 
 def test_validate_non_registered_user():
@@ -67,7 +65,6 @@ def test_validate_non_registered_user():
     code = "A820akkHWhnd"
     url = "/validate?email="+quote(email)+"&code="+code
     response = client.get(url)
-    print()
     assert response.status_code == 404
 
 def test_login_user_valid():

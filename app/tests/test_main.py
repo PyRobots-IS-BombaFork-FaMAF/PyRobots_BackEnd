@@ -4,7 +4,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi.exceptions import RequestValidationError, ValidationError
 from fastapi.responses import PlainTextResponse
 from app.core.config import settings
-from app.core.router import users
+from app.core.router import users, robots
 from app.core.models.base import define_database_and_entities
 
 define_database_and_entities(
@@ -22,6 +22,7 @@ def get_application():
     )
 
     _app.include_router(users.router)
+    _app.include_router(robots.router)
 
     return _app
 

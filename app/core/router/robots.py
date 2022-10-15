@@ -19,8 +19,7 @@ def register(
     current_user: User = Depends(get_current_active_user),
     robot: RobotIn = Depends(RobotIn.form),
     avatar: Optional[UploadFile] = File(None),
-    code: UploadFile = File(...),
-    background_t: BackgroundTasks = BackgroundTasks()):
+    code: UploadFile = File(...)):
     if not(is_robot_created(current_user, robot)):
         if code == None or code.filename == "":
             raise HTTPException(
@@ -29,7 +28,6 @@ def register(
         elif (code.content_type not in 
             ["text/x-python", "application/x-python-code", "application/octet-stream"]
             or '.py' not in code.filename):
-            print(code.content_type)
             raise HTTPException(
                 415, detail="Tipo de archivo inválido")
         else:
@@ -41,7 +39,8 @@ def register(
                 raise HTTPException(
                     409, detail="Tipo de archivo inválido")
             else:
-                avatar.filename = f"{current_user.username + robot.name + str(uuid.uuid4())}.jpg"
+                uname = current_user["username"]
+                avatar.filename = f"{uname + robot.name + str(uuid.uuid4())}.jpg"
                 try:
                     avatar.file.seek(0)
                     contents = avatar.file.read()  # Important to wait
