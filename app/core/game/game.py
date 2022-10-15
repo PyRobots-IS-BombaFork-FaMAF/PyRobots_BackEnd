@@ -1,4 +1,5 @@
 from robot import *
+import json
 
 class game():
 
@@ -18,10 +19,29 @@ class game():
                 robot.respond()
                 #robot.__mover_robot()
                 self.robotPosition = {
-                                        'coords': robot.get_position(),
-                                        'direction': robot.get_direction(),
-                                        'speed': robot.get_velocity()
+                                        'name': robot.name,
+                                        'rounds': [{
+                                            'position': robot.get_position(),
+                                            'direction': robot.get_direction(),
+                                            'speed': robot.get_velocity()
+                                        }],
+                                        'cause_of_death?': "robot execution error"
                                     }
-                self.listMove.append(self.robotPosition)
-            self.round += 1
-            print(self.listMove)
+                jsonRobotPosition = json.dumps(self.robotPosition)
+                self.listMove.append(jsonRobotPosition)
+            self.round += 1 
+        return self.listMove
+
+
+r1 = Robot('robot_1')
+r2 = Robot('robot_2')
+r3 = Robot('robot_3')
+
+juego = game(4)
+
+juego.add(r1)
+juego.add(r2)
+juego.add(r3)
+
+
+
