@@ -1,11 +1,7 @@
 from fastapi import *
 from pony.orm import *
 from typing import Union, Optional
-<<<<<<< HEAD
 from app.core.models.base import db
-=======
-from app.core.models.base import db 
->>>>>>> c62b291 (PYR-41 merge con rama creada por error)
 from app.core.models.robot_models import *
 from app.core.models.user_models import *
 from app.core.handlers.robot_handlers import *
@@ -16,6 +12,7 @@ IMAGEDIR = "app/robot_avatars/"
 CODEDIR = "app/robot_code/"
 
 router = APIRouter()
+
 
 @router.post("/robots/create", tags=["robots"], status_code=201)
 @db_session
@@ -29,18 +26,19 @@ def register(
             raise HTTPException(
                 400, detail="El archivo con el código es obligatorio"
             )
-        elif (code.content_type not in 
-            ["text/x-python", "application/x-python-code", "application/octet-stream"]
-            or '.py' not in code.filename):
-            print(code.content_type)
+        elif (code.content_type not in
+              ["text/x-python", "application/x-python-code",
+                  "application/octet-stream"]
+                or '.py' not in code.filename):
             raise HTTPException(
                 415, detail="Tipo de archivo inválido")
         else:
-            code.filename = generate_file_name(code.filename, current_user, robot)
-    
+            code.filename = generate_file_name(
+                code.filename, current_user, robot)
+
         if avatar != None and avatar.filename != "":
-            if (avatar.content_type not in 
-            ['image/jpeg', 'image/png', 'image/tiff', 'image/jpg']):
+            if (avatar.content_type not in
+                    ['image/jpeg', 'image/png', 'image/tiff', 'image/jpg']):
                 raise HTTPException(
                     409, detail="Tipo de archivo inválido")
             else:
@@ -68,27 +66,26 @@ def register(
             code_name = CODEDIR + code.filename
 
             with open(f"{code_name}", "wb") as f:
-                        f.write(contents)
+                f.write(contents)
         except:
             raise HTTPException(
-                        400, detail="Error leyendo archivo")
+                400, detail="Error leyendo archivo")
         finally:
             code.file.close()
 
         db.Robot(
-            name = robot.name,
-            avatar = avatar_name,
-            code = code_name,
-            user = current_user["username"]
+            name=robot.name,
+            avatar=avatar_name,
+            code=code_name,
+            user=current_user["username"]
         )
 
-        msg = "¡Se creo el robot " + robot.name +  " con éxito!"
-        
+        msg = "¡Se creo el robot " + robot.name + " con éxito!"
+
     else:
         if is_robot_created(current_user, robot):
             raise HTTPException(
-                409, detail = "Ya existe un robot con ese nombre"
+                409, detail="Ya existe un robot con ese nombre"
             )
-    
-    return {msg}
 
+    return {msg}

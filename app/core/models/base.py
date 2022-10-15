@@ -20,6 +20,7 @@ class User(db.Entity):
     robots = Set('Robot')
     created_games = Set('Partida')
     
+
 class Robot(db.Entity):
     """
     Database table to store the robot data

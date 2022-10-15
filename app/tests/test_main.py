@@ -10,6 +10,7 @@ from app.core.models.base import define_database_and_entities
 define_database_and_entities(
     provider=settings.DB_PROVIDER, filename=settings.DB_TEST_NAME, create_db=True)
 
+
 def get_application():
     _app = FastAPI(title=settings.PROJECT_NAME)
 
@@ -28,7 +29,9 @@ def get_application():
 
     return _app
 
+
 app_test = get_application()
+
 
 @app_test.exception_handler(RequestValidationError)
 @app_test.exception_handler(ValidationError)
