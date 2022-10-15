@@ -27,7 +27,8 @@ async def create_game(
         partida.games,
         partida.max_players,
         partida.min_players,
-        current_user["username"]
+        current_user["username"],
+        password=partida.password
     )
     msg = {"msg" : "Se creo la partida con éxito!"}
     return msg

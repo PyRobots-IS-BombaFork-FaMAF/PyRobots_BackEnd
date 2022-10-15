@@ -55,6 +55,7 @@ class Partida(db.Entity):
     created_by = Required(User)
     creation_date = Required(datetime)
     game_over = Required(bool, default=0)
+    password = Optional(str)
 
 def define_database_and_entities(**db_params):
     global db
