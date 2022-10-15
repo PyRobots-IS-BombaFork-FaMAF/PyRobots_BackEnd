@@ -1,7 +1,11 @@
 from fastapi import *
 from pony.orm import *
 from typing import Union, Optional
+<<<<<<< HEAD
 from app.core.models.base import db
+=======
+from app.core.models.base import db 
+>>>>>>> c62b291 (PYR-41 merge con rama creada por error)
 from app.core.models.robot_models import *
 from app.core.models.user_models import *
 from app.core.handlers.robot_handlers import *
@@ -56,7 +60,7 @@ def register(
                     avatar.file.close()
         else:
             avatar_name = IMAGEDIR + "default.jpg"
-
+            
         try:
             code.file.seek(0)
             contents = code.file.read()  # Important to wait

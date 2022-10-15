@@ -28,7 +28,6 @@ def get_application():
     _app.include_router(users.router)
     _app.include_router(robots.router)
     _app.include_router(game.router)
-
     return _app
 
 
