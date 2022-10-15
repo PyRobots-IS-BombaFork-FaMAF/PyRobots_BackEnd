@@ -5,7 +5,7 @@ from fastapi.responses import JSONResponse, HTMLResponse
 from fastapi.security import OAuth2PasswordRequestForm
 from pony.orm import *
 from typing import Union, Optional
-from app.core.models.base import db 
+from app.core.models.base import db
 from app.core.models.user_models import UserIn, User, Token
 from app.core.handlers.auth_handlers import *
 from app.core.handlers.password_handlers import *
@@ -26,13 +26,13 @@ tags_metadata = [
 
 router = APIRouter()
 
+
 @router.post("/users/register", tags=["Users"], status_code=201)
 @db_session
-
 def register(
-    user: UserIn = Depends(UserIn.as_form), 
-    avatar: Optional[UploadFile] = File(None),
-    background_t: BackgroundTasks = BackgroundTasks()):
+        user: UserIn = Depends(UserIn.as_form),
+        avatar: Optional[UploadFile] = File(None),
+        background_t: BackgroundTasks = BackgroundTasks()):
     if not(is_username_registered(user) or is_email_registered(user)):
         if avatar != None and avatar.filename != "":
             if avatar.content_type not in ['image/jpeg', 'image/png', 'image/tiff', 'image/jpg']:
@@ -57,26 +57,26 @@ def register(
             avatar_name = IMAGEDIR + "default.jpg"
 
         db.User(
-            username = user.username.lower(),
-            email = user.email.lower(),
-            password = hash_password(user.password),
-            avatar = avatar_name
+            username=user.username.lower(),
+            email=user.email.lower(),
+            password=hash_password(user.password),
+            avatar=avatar_name
         )
 
         validator = ValidationMail()
-        msg = user.username + ", se ha enviado un mail de verificación a " + user.email 
+        msg = user.username + ", se ha enviado un mail de verificación a " + user.email
         background_t.add_task(validator.send_mail, user.email, user.username)
-        
+
     else:
         if is_username_registered(user):
             raise HTTPException(
-                409, detail = "Usuario ya existente"
+                409, detail="Usuario ya existente"
             )
         elif is_email_registered(user):
             raise HTTPException(
-                409, detail = "El e-mail ya se encuentra registrado"
+                409, detail="El e-mail ya se encuentra registrado"
             )
-    
+
     return {msg}
 
 
@@ -90,12 +90,14 @@ async def validate_user(email: str, code: str):
     with db_session:
         try:
             email = unquote(email)
-            data = db.get("select email,code from Validation_data where email=$email")
+            data = db.get(
+                "select email,code from Validation_data where email=$email")
         except:
             raise HTTPException(status_code=404, detail="Email no encontrado")
 
         if data[1] != code:
-            raise HTTPException(status_code=409, detail="Código de validación invalido")
+            raise HTTPException(
+                status_code=409, detail="Código de validación invalido")
         print()
         user = db.User.get(email=email)
         user.validated = True
@@ -178,7 +180,7 @@ async def read_users_me(current_user: User = Depends(get_current_active_user)):
 @router.get("/logout")
 async def logout(request: Request, current_user: User = Depends(get_current_active_user)):
     raise HTTPException(
-            status_code=status.HTTP_401_UNAUTHORIZED,
-            detail="Incorrect password",
-            headers={"WWW-Authenticate": "Bearer"},
-        )
+        status_code=status.HTTP_401_UNAUTHORIZED,
+        detail="Incorrect password",
+        headers={"WWW-Authenticate": "Bearer"},
+    )

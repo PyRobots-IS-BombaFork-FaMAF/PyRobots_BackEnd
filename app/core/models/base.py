@@ -5,6 +5,7 @@ from passlib.context import CryptContext
 
 db = Database()
 
+
 class User(db.Entity):
     """
     Database table to store the user data, the 
@@ -17,16 +18,18 @@ class User(db.Entity):
     avatar = Optional(str)
     validated = Required(bool, unique=False, default=0)
     robots = Set('Robot')
-    
+
+
 class Robot(db.Entity):
     """
     Database table to store the robot data
     """
     id = PrimaryKey(int, auto=True)
     name = Required(str, unique=True)
-    code = Required(str) 
+    code = Required(str)
     avatar = Optional(str)
     user = Required(User)
+
 
 class Validation_data(db.Entity):
     """
