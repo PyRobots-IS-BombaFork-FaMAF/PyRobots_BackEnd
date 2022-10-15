@@ -50,6 +50,7 @@ async def list_games(
         PartidaObject,
         filtros.game_creation_date, 
         username, 
-        filtros.game_name
+        filtros.game_name,
+        filtros.only_private
     )
     return games

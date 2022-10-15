@@ -56,13 +56,14 @@ class PartidaObject():
                 fromdb=True,
                 password=partida.password)
 
-    def filter_by(self, datec=None, creator=None, name=None):
+    def filter_by(self, datec=None, creator=None, name=None, private=None):
         partidas = [
             vars(x) for x in self.all if 
                 (not datec 
                 or datetime.strptime(x._creation_date,"%Y-%m-%d %H:%M:%S.%f").date() == datec.date()) 
                 and (not creator or x._creator.lower() == creator.lower()) 
-                and (not name or x._name.lower() == name.lower())]
+                and (not name or x._name.lower() == name.lower())
+                and (x._private == private if private!=None else not private)]
         index = ['{}'.format(x) for x in range(len(self.all))]
         data = dict(zip(index, partidas))
         return json.dumps(data)
