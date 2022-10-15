@@ -4,7 +4,7 @@ from fastapi.responses import PlainTextResponse
 from fastapi.middleware.cors import CORSMiddleware
 from app.core.models.base import define_database_and_entities
 from app.core.config import settings
-from app.core.router import users
+from app.core.router import users, robots
 
 define_database_and_entities(
     provider=settings.DB_PROVIDER, filename=settings.DB_NAME, create_db=True)
@@ -21,6 +21,7 @@ def get_application():
     )
 
     _app.include_router(users.router)
+    _app.include_router(robots.router)
 
     return _app
 
