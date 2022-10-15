@@ -40,7 +40,8 @@ def register(
                 raise HTTPException(
                     409, detail="Tipo de archivo inválido")
             else:
-                avatar.filename = f"{current_user.username + robot.name + str(uuid.uuid4())}.jpg"
+                uname = current_user["username"]
+                avatar.filename = f"{uname + robot.name + str(uuid.uuid4())}.jpg"
                 try:
                     avatar.file.seek(0)
                     contents = avatar.file.read()  # Important to wait

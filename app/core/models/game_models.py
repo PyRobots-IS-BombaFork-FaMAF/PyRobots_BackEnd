@@ -21,7 +21,7 @@ class PartidaIn(BaseModel):
 
     @validator("min_players")
     def check_range(cls, v, values):
-        if v > values["max_players"]:
+        if "max_players" in values and v > values["max_players"]:
             raise ValidationError('La cantidad máxima de jugadores no puede ser menor a la mínima')
         return v
 
