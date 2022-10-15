@@ -13,8 +13,9 @@ Definition of constants and algorithms used in the json web token
 """
 SECRET_KEY = "09d25e094faa6ca2556c818166b7a9563b93f7099f6f0f4caa6cf63b88e8d3e7"
 ALGORITHM = "HS256"
-ACCESS_TOKEN_EXPIRE_MINUTES = 259200 #180 días
+ACCESS_TOKEN_EXPIRE_MINUTES = 259200  # 180 días
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="token")
+
 
 @db_session
 def authenticate_user(username: str, password: str):
@@ -30,6 +31,7 @@ def authenticate_user(username: str, password: str):
     if not verify_password(user["password"], password):
         return False
     return user
+
 
 @db_session
 def get_current_user(token: str = Depends(oauth2_scheme)):
@@ -54,10 +56,12 @@ def get_current_user(token: str = Depends(oauth2_scheme)):
         raise credentials_exception
     return user
 
+
 async def get_current_active_user(current_user: User = Depends(get_current_user)):
     if not current_user['validated']:
         raise HTTPException(status_code=400, detail="Usuario no validado")
     return current_user
+
 
 def valid_credentials(token: str = Depends(oauth2_scheme)):
     try:
@@ -69,6 +73,7 @@ def valid_credentials(token: str = Depends(oauth2_scheme)):
         return None
     return username
 
+
 def create_access_token(data: dict, expires_delta: Optional[timedelta] = None):
     to_encode = data.copy()
     if expires_delta:
@@ -78,4 +83,3 @@ def create_access_token(data: dict, expires_delta: Optional[timedelta] = None):
     to_encode.update({"exp": expire})
     encoded_jwt = jwt.encode(to_encode, SECRET_KEY, algorithm=ALGORITHM)
     return encoded_jwt
-

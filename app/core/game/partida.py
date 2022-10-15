@@ -60,4 +60,3 @@ class PartidaObject():
         return json.dumps(data)
 
 
-
