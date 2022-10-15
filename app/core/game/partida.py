@@ -14,7 +14,7 @@ class PartidaObject():
         self._games = games 
         self._max_players = max_players
         self._min_players = min_players
-        self._creator = creator
+        self._creator = creator 
         self._creation_date = datetime.now().strftime("%Y/%m/%d %H:%M:%S") if not creation_date else creation_date
         self.all.append(self)
         Partida(
