@@ -5,7 +5,6 @@ from passlib.context import CryptContext
 
 db = Database()
 
-
 class User(db.Entity):
     """
     Database table to store the user data, the 
@@ -20,7 +19,6 @@ class User(db.Entity):
     robots = Set('Robot')
     created_games = Set('Partida')
     
-
 class Robot(db.Entity):
     """
     Database table to store the robot data
