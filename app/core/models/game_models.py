@@ -18,8 +18,7 @@ class PartidaIn(BaseModel):
     name: str = Field(..., min_length=3, max_length=12)
     max_players: Optional[int] = Field(4, ge=2, le=4)
     min_players: Optional[int] = Field(2, ge=2, le=4)
-    password: str = Field(None, min_length=8, max_length=16,
-                          regex=r"^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)[a-zA-Z\d\w\W]{8,}$")
+    password: str = Field(None, min_length=8, max_length=16)
 
     @validator("min_players")
     def check_range(cls, v, values):
