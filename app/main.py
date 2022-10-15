@@ -4,7 +4,9 @@ from fastapi.responses import PlainTextResponse
 from fastapi.middleware.cors import CORSMiddleware
 from app.core.models.base import define_database_and_entities
 from app.core.config import settings
-from app.core.router import users, robots
+from app.core.router import users, robots, game
+from app.core.game.partida import *
+from app.core.router import users, game, robots
 
 define_database_and_entities(
     provider=settings.DB_PROVIDER, filename=settings.DB_NAME, create_db=True)
@@ -22,8 +24,11 @@ def get_application():
         allow_headers=["*"],
     )
 
+    PartidaObject.init_from_db(Partida)
+
     _app.include_router(users.router)
     _app.include_router(robots.router)
+    _app.include_router(game.router)
 
     return _app
 
