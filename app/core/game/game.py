@@ -1,11 +1,13 @@
-from robot import *
-import json
+from app.core.game.robot import *
 
 class game():
 
     def __init__(self, quantityRound):
         self.round = 1
-        self.quantityRound = quantityRound
+        if(quantityRound < 10000):
+            self.quantityRound = quantityRound
+        else:
+            self.quantityRound = 10000
         self.listRobot = []
         self.listMove = []
         self.robotPosition = dict() 
@@ -13,35 +15,28 @@ class game():
     def add(self, robotList):
         self.listRobot.append(robotList)
 
-    def AdvanceRound(self):
+    def advance_round(self):
         if(self.round <= self.quantityRound):
             for robot in self.listRobot:
                 robot.respond()
                 #robot.__mover_robot()
+                cause_of_death = False
                 self.robotPosition = {
                                         'name': robot.name,
                                         'rounds': [{
                                             'position': robot.get_position(),
                                             'direction': robot.get_direction(),
                                             'speed': robot.get_velocity()
-                                        }],
-                                        'cause_of_death?': "robot execution error"
+                                        }]
                                     }
-                jsonRobotPosition = json.dumps(self.robotPosition)
-                self.listMove.append(jsonRobotPosition)
+                if(cause_of_death):
+                    self.robotPosition['cause_of_death?'] = "robot execution error"
+                self.listMove.append(self.robotPosition)
             self.round += 1 
-        return self.listMove
-
-
-r1 = Robot('robot_1')
-r2 = Robot('robot_2')
-r3 = Robot('robot_3')
-
-juego = game(4)
-
-juego.add(r1)
-juego.add(r2)
-juego.add(r3)
-
+    
+    def execute_simulacion(self):
+        while(self.round <= self.quantityRound):
+            self.advance_round()
+        
 
 
