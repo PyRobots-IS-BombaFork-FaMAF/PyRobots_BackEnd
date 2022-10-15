@@ -8,7 +8,7 @@ class PartidaObject():
     all = []
 
     @db_session
-    def __init__(self, name, rounds, games, max_players, min_players, creator, creation_date=None, fromdb=None):
+    def __init__(self, name, rounds, games, max_players, min_players, creator, creation_date=None):
         self._name = name
         self._rounds = rounds
         self._games = games 
@@ -17,16 +17,15 @@ class PartidaObject():
         self._creator = creator
         self._creation_date = datetime.now().strftime("%Y/%m/%d %H:%M:%S") if not creation_date else creation_date
         self.all.append(self)
-        if not fromdb:
-            Partida(
-                rounds = rounds,
-                games = games,
-                name = name,
-                max_players = max_players,
-                min_players = min_players,
-                created_by = creator,
-                creation_date = self._creation_date
-            )
+        Partida(
+            rounds = rounds,
+            games = games,
+            name = name,
+            max_players = max_players,
+            min_players = min_players,
+            created_by = creator,
+            creation_date = self._creation_date
+        )
 
     def partida_json(self):
         return self.__dict__
@@ -45,16 +44,14 @@ class PartidaObject():
                 partida.max_players,
                 partida.min_players,
                 partida.created_by,
-                partida.creation_date,
-                fromdb=True)
+                partida.creation_date)
 
-    def filter_by(self, datec=None, creator=None, name=None):
+    def filter_by(self, date=None, creator=None, name=None):
         partidas = [
             vars(x) for x in self.all if 
-                (not datec 
-                or datetime.strptime(x._creation_date,"%Y-%m-%d %H:%M:%S.%f").date() == datec.date()) 
-                and (not creator or x._creator.lower() == creator.lower()) 
-                and (not name or x._name.lower() == name.lower())]
+                (not date or x._creation_date == date.strftime("%d/%m/%Y")) and
+                (not creator or x._creator.lower() == creator.lower()) and 
+                (not name or x._name.lower() == name.lower())]
         index = ['{}'.format(x) for x in range(len(self.all))]
         data = dict(zip(index, partidas))
         return json.dumps(data)
