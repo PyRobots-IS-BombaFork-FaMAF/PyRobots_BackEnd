@@ -1,8 +1,4 @@
 from datetime import date, datetime
-<<<<<<< HEAD
-<<<<<<< HEAD
-=======
->>>>>>> 3bba74a (PYR-44 se añade funcionalidad para guardar datos en bd en caso de caida del server)
 from app.core.models.base import Partida, db 
 from pony.orm import *
 import json
