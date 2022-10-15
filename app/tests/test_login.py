@@ -6,20 +6,22 @@ from pony.orm import *
 
 client = TestClient(app_test)
 
+
 def test_register_valid_user_with_avatar():
     with open('app/avatars/default.jpg', 'rb') as f:
         avatar_img = f.read()
         f.close()
-    avatar = {"avatar" : ("image_file", avatar_img, "image/jpeg")}
+    avatar = {"avatar": ("image_file", avatar_img, "image/jpeg")}
     response = client.post("users/register",
-                            data={
-                                "username": "tiffbri",
-                                "email": "tiffanybricett1281996@gmail.com",
-                                "password": "Tiffanyb19!"
-                            },
-                            files = avatar
-                            )
+                           data={
+                               "username": "tiffbri",
+                               "email": "tiffanybricett1281996@gmail.com",
+                               "password": "Tiffanyb19!"
+                           },
+                           files=avatar
+                           )
     assert response.status_code == 201
+
 
 def test_login_and_get_non_validated_user():
     response_login = client.post(
@@ -43,6 +45,7 @@ def test_login_and_get_non_validated_user():
     )
     assert response_get.status_code == 400
 
+
 @db_session
 def test_validate_user_wrong_code():
     email = "tiffanybricett1281996@gmail.com"
@@ -51,14 +54,17 @@ def test_validate_user_wrong_code():
     response = client.get(url)
     assert response.status_code == 409
 
+
 @db_session
 def test_validate_user():
     email = "tiffanybricett1281996@gmail.com"
-    validation_tuple = db.get("select * from validation_data where email = $email")
+    validation_tuple = db.get(
+        "select * from validation_data where email = $email")
     code = validation_tuple[1]
     url = "/validate?email="+quote(email)+"&code="+code
     response = client.get(url)
     assert response.status_code == 200
+
 
 def test_validate_non_registered_user():
     email = "user@gmail.com"
@@ -66,6 +72,7 @@ def test_validate_non_registered_user():
     url = "/validate?email="+quote(email)+"&code="+code
     response = client.get(url)
     assert response.status_code == 404
+
 
 def test_login_user_valid():
     response = client.post(
@@ -190,6 +197,7 @@ def test_login_and_get():
         "/users/me", headers={"accept": "test_application/json", "Authorization": head}
     )
     assert response_get.status_code == 200
+
 
 def test_logout():
     response = client.get("/logout")

@@ -10,12 +10,14 @@ from app.core.models.base import define_database_and_entities
 define_database_and_entities(
     provider=settings.DB_PROVIDER, filename=settings.DB_TEST_NAME, create_db=True)
 
+
 def get_application():
     _app = FastAPI(title=settings.PROJECT_NAME)
 
     _app.add_middleware(
         CORSMiddleware,
-        allow_origins=[str(origin) for origin in settings.BACKEND_CORS_ORIGINS],
+        allow_origins=[str(origin)
+                       for origin in settings.BACKEND_CORS_ORIGINS],
         allow_credentials=True,
         allow_methods=["*"],
         allow_headers=["*"],
@@ -26,7 +28,9 @@ def get_application():
 
     return _app
 
+
 app_test = get_application()
+
 
 @app_test.exception_handler(RequestValidationError)
 @app_test.exception_handler(ValidationError)

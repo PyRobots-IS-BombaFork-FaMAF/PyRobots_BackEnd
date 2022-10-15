@@ -7,16 +7,20 @@ from app.core.handlers.password_handlers import verify_password, hash_password
 
 client = TestClient(app_test)
 
+
 @db_session
 def test_create_and_read_user():
-    User(username="tiffb", email="tiff@gmail.com", password=hash_password("12345"))
+    User(username="tiffb", email="tiff@gmail.com",
+         password=hash_password("12345"))
     tiff = User["tiffb"]
     assert tiff.email == "tiff@gmail.com"
+
 
 @db_session
 def test_verify_password():
     tiff = User["tiffb"]
     assert verify_password(tiff.password, "12345") == True
+
 
 @db_session
 def test_update_password():
@@ -24,7 +28,8 @@ def test_update_password():
     tiff.password = hash_password("54321")
     flush()
     tiff = User["tiffb"]
-    assert verify_password(tiff.password, "54321")  == True
+    assert verify_password(tiff.password, "54321") == True
+
 
 @db_session
 def test_create_and_read_robot():
@@ -34,6 +39,7 @@ def test_create_and_read_robot():
     maximus = Robot[1]
     assert maximus.name == "Maximus"
 
+
 @db_session
 def test_update_code():
     maximus = Robot[1]
@@ -41,6 +47,7 @@ def test_update_code():
     flush()
     maximus = Robot[1]
     assert maximus.code == "prueba.py"
+
 
 @db_session
 def test_delete_robot():
@@ -50,7 +57,8 @@ def test_delete_robot():
     except ObjectNotFound:
         maximus = None
     assert maximus == None
-    
+
+
 @db_session
 def test_delete_user():
     User["tiffb"].delete()

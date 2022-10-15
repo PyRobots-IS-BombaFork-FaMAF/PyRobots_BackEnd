@@ -9,12 +9,14 @@ from app.core.router import users, robots
 define_database_and_entities(
     provider=settings.DB_PROVIDER, filename=settings.DB_NAME, create_db=True)
 
+
 def get_application():
     _app = FastAPI(title=settings.PROJECT_NAME)
 
     _app.add_middleware(
         CORSMiddleware,
-        allow_origins=[str(origin) for origin in settings.BACKEND_CORS_ORIGINS],
+        allow_origins=[str(origin)
+                       for origin in settings.BACKEND_CORS_ORIGINS],
         allow_credentials=True,
         allow_methods=["*"],
         allow_headers=["*"],
@@ -25,7 +27,9 @@ def get_application():
 
     return _app
 
+
 app = get_application()
+
 
 @app.exception_handler(RequestValidationError)
 @app.exception_handler(ValidationError)
