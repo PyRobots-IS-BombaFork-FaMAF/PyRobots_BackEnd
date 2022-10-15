@@ -1,5 +1,4 @@
 from datetime import date, datetime
-from pickletools import TAKEN_FROM_ARGUMENT1
 from app.core.models.base import Partida, db 
 from app.core.handlers.password_handlers import *
 from pony.orm import *
@@ -34,9 +33,6 @@ class PartidaObject():
                 creation_date = self._creation_date,
                 password = self._password
             )
-
-    def partida_json(self):
-        return self.__dict__
 
     @db_session
     def init_from_db(self):

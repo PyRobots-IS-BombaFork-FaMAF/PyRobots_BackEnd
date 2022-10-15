@@ -3,14 +3,14 @@ from fastapi.testclient import TestClient
 from app.tests.test_main import app_test
 from app.core.models.base import User, Validation_data, db, Robot
 from pony.orm import *
-
+import json
 from urllib.parse import quote
 from pony.orm import *
 
 client = TestClient(app_test)
 
 
-def test_create_valid_partida():
+def test_create_valid_partida_sin_pass():
     response_login = client.post(
         "/token",
         data={
@@ -33,6 +33,38 @@ def test_create_valid_partida():
             "name": "string",
             "max_players": 4,
             "min_players": 2
+        }
+    response = client.post(
+        "/game/create",
+        headers={"accept": "test_application/json", "Authorization": head},
+        json=body
+    )
+    assert response.status_code == 201
+
+def test_create_valid_partida_con_pass():
+    response_login = client.post(
+        "/token",
+        data={
+            "grant_type": "",
+            "username": "tiffbri",
+            "password": "Tiffanyb19!",
+            "scope": "",
+            "client_id": "",
+            "client_secret": "",
+        },
+    )
+    assert response_login.status_code == 200
+    rta: dict = response_login.json()
+    token: str = rta["access_token"]
+    token_type: str = "Bearer "
+    head: str = token_type + token
+    body = {
+            "rounds": 10000,
+            "games": 200,
+            "name": "string",
+            "max_players": 4,
+            "min_players": 2,
+            "password": "Tiffany123"
         }
     response = client.post(
         "/game/create",
@@ -362,3 +394,147 @@ def test_create_partida_without_login():
         json=body
     )
     assert response.status_code == 401
+
+def test_listar_todas_partidas():
+    response_login = client.post(
+        "/token",
+        data={
+            "grant_type": "",
+            "username": "tiffbri",
+            "password": "Tiffanyb19!",
+            "scope": "",
+            "client_id": "",
+            "client_secret": "",
+        },
+    )
+    assert response_login.status_code == 200
+    rta: dict = response_login.json()
+    token: str = rta["access_token"]
+    token_type: str = "Bearer "
+    head: str = token_type + token
+    body = {
+        }
+    response = client.post(
+        "/game/list",
+        headers={"accept": "test_application/json", "Authorization": head},
+        json=body
+    )
+    tmp_dict = json.loads(response.json())
+    print(len(tmp_dict))
+    assert response.status_code == 200 and len(tmp_dict) == 6
+
+def test_listar_partidas_por_fecha():
+    response_login = client.post(
+        "/token",
+        data={
+            "grant_type": "",
+            "username": "tiffbri",
+            "password": "Tiffanyb19!",
+            "scope": "",
+            "client_id": "",
+            "client_secret": "",
+        },
+    )
+    assert response_login.status_code == 200
+    rta: dict = response_login.json()
+    token: str = rta["access_token"]
+    token_type: str = "Bearer "
+    head: str = token_type + token
+    body = {
+        "game_creation_date": "2022-10-15T20:51:54.590Z"
+        }
+    response = client.post(
+        "/game/list",
+        headers={"accept": "test_application/json", "Authorization": head},
+        json=body
+    )
+    tmp_dict = json.loads(response.json())
+    print(len(tmp_dict))
+    assert response.status_code == 200 and len(tmp_dict) == 6
+
+def test_listar_solo_partidas_publicas():
+    response_login = client.post(
+        "/token",
+        data={
+            "grant_type": "",
+            "username": "tiffbri",
+            "password": "Tiffanyb19!",
+            "scope": "",
+            "client_id": "",
+            "client_secret": "",
+        },
+    )
+    assert response_login.status_code == 200
+    rta: dict = response_login.json()
+    token: str = rta["access_token"]
+    token_type: str = "Bearer "
+    head: str = token_type + token
+    body = {
+        "only_private": False
+        }
+    response = client.post(
+        "/game/list",
+        headers={"accept": "test_application/json", "Authorization": head},
+        json=body
+    )
+    tmp_dict = json.loads(response.json())
+    print(len(tmp_dict))
+    assert response.status_code == 200 and len(tmp_dict) == 5
+
+def test_listar_solo_partidas_privadas():
+    response_login = client.post(
+        "/token",
+        data={
+            "grant_type": "",
+            "username": "tiffbri",
+            "password": "Tiffanyb19!",
+            "scope": "",
+            "client_id": "",
+            "client_secret": "",
+        },
+    )
+    assert response_login.status_code == 200
+    rta: dict = response_login.json()
+    token: str = rta["access_token"]
+    token_type: str = "Bearer "
+    head: str = token_type + token
+    body = {
+        "only_private": True
+        }
+    response = client.post(
+        "/game/list",
+        headers={"accept": "test_application/json", "Authorization": head},
+        json=body
+    )
+    tmp_dict = json.loads(response.json())
+    print(len(tmp_dict))
+    assert response.status_code == 200 and len(tmp_dict) == 1
+
+def test_listar_solo_partidas_de_user():
+    response_login = client.post(
+        "/token",
+        data={
+            "grant_type": "",
+            "username": "tiffbri",
+            "password": "Tiffanyb19!",
+            "scope": "",
+            "client_id": "",
+            "client_secret": "",
+        },
+    )
+    assert response_login.status_code == 200
+    rta: dict = response_login.json()
+    token: str = rta["access_token"]
+    token_type: str = "Bearer "
+    head: str = token_type + token
+    body = {
+        "created_by_user": True
+        }
+    response = client.post(
+        "/game/list",
+        headers={"accept": "test_application/json", "Authorization": head},
+        json=body
+    )
+    tmp_dict = json.loads(response.json())
+    print(len(tmp_dict))
+    assert response.status_code == 200 and len(tmp_dict) == 6
