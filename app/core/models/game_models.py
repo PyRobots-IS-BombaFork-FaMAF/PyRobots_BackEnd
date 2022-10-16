@@ -18,6 +18,7 @@ class PartidaIn(BaseModel):
     name: str = Field(..., min_length=3, max_length=12)
     max_players: Optional[int] = Field(4, ge=2, le=4)
     min_players: Optional[int] = Field(2, ge=2, le=4)
+    password: str = Field(None, min_length=8, max_length=16)
 
     @validator("min_players")
     def check_range(cls, v, values):
@@ -30,7 +31,11 @@ class Filters(BaseModel):
     """
     BaseModel for the games filters, determines the game data
     that is returned to the user
+    if only_private = None shows all games
+    if only_private = True shows only private games
+    if only_private = False shows only public games
     """
     game_name: Optional[str] = Field(None, min_length=3, max_length=12)
     game_creation_date: Optional[datetime] = None
     created_by_user: Optional[bool] = None
+    only_private: Optional[bool] = None

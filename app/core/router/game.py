@@ -27,7 +27,8 @@ async def create_game(
         partida.games,
         partida.max_players,
         partida.min_players,
-        current_user["username"]
+        current_user["username"],
+        password=partida.password
     )
     msg = {"msg" : "Se creo la partida con éxito!"}
     return msg
@@ -40,6 +41,13 @@ async def list_games(
     """
     Returns a json with the data of the games created
     The filters are optional
+    if only_private is set to true it will only show
+    private games, if it's set to false it will show
+    only public games, and if it's not set it will
+    show all games.
+    if created_by_user is set to true then it will only
+    show games created by the current user
+    the game_creation_date filters by day
     """
     if filtros.created_by_user:
         username = current_user["username"]
@@ -49,6 +57,7 @@ async def list_games(
         PartidaObject,
         filtros.game_creation_date, 
         username, 
-        filtros.game_name
+        filtros.game_name,
+        filtros.only_private
     )
     return games
