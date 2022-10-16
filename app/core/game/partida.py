@@ -62,5 +62,5 @@ class PartidaObject():
                 and (x._private == private if private!=None else not private)]
         index = ['{}'.format(x) for x in range(len(self.all))]
         data = dict(zip(index, partidas))
-        return json.dumps(data)
+        return data
 
