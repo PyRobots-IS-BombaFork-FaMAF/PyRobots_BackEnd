@@ -60,7 +60,5 @@ class PartidaObject():
                 and (not creator or x._creator.lower() == creator.lower()) 
                 and (not name or x._name.lower() == name.lower())
                 and (x._private == private if private!=None else not private)]
-        index = ['{}'.format(x) for x in range(len(self.all))]
-        data = dict(zip(index, partidas))
-        return data
+        return partidas
 
