@@ -36,8 +36,8 @@ class Robot(object):
         else:
             self.actual_velocity += -30
 
-        x = self.actual_velocity * math.cos(math.radians(self.direction)) / 100
-        y = self.actual_velocity * math.sin(math.radians(self.direction)) / 100
+        x = self.actual_velocity * math.cos(math.radians(self.actual_direction)) / 100
+        y = self.actual_velocity * math.sin(math.radians(self.actual_direction)) / 100
         self.position = (self.position[0] + x, self.position[1] + y)
 
 #Status
@@ -60,15 +60,3 @@ class Robot(object):
         else:
             self.velocity = 100
         self.direction = direction
-
-"""
-metodos que hacen falta implementar:
-
-  Cañon
-    is_cannon_ready():
-    cannon(degree, distance):
-
-  Escaneo
-    point_scanner(direction, resolution_in_degrees):
-    scanned():
-"""

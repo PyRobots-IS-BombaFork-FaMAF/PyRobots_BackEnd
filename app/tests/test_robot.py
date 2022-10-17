@@ -32,3 +32,13 @@ def test_drive_speedlimit():
     r = Robot()
     r.drive(220, 99999999)
     assert r.velocity == 100
+
+
+def test_meve_robot():
+    r = Robot()
+    r.actual_velocity = 100
+    r.actual_direction = 90
+    r.drive(45,100)
+    r.move_robot()
+
+    assert (round(r.position[0]) ,r.position[1]) == (0,1)
