@@ -1,4 +1,5 @@
 from calendar import c
+from datetime import datetime
 from fastapi.testclient import TestClient
 from app.tests.test_main import app_test
 from app.core.models.base import User, Validation_data, db, Robot
@@ -419,9 +420,8 @@ def test_listar_todas_partidas():
         headers={"accept": "test_application/json", "Authorization": head},
         json=body
     )
-    tmp_dict = json.loads(response.json())
-    print(len(tmp_dict))
-    assert response.status_code == 200 and len(tmp_dict) == 6
+    tmp_list = response.json()
+    assert response.status_code == 200 and len(tmp_list) == 6
 
 def test_listar_partidas_por_fecha():
     response_login = client.post(
@@ -441,16 +441,15 @@ def test_listar_partidas_por_fecha():
     token_type: str = "Bearer "
     head: str = token_type + token
     body = {
-        "game_creation_date": "2022-10-15T20:51:54.590Z"
+        "game_creation_date": str(datetime.now().strftime("%Y-%m-%d %H:%M:%S.%f"))
         }
     response = client.post(
         "/game/list",
         headers={"accept": "test_application/json", "Authorization": head},
         json=body
     )
-    tmp_dict = json.loads(response.json())
-    print(len(tmp_dict))
-    assert response.status_code == 200 and len(tmp_dict) == 6
+    tmp_list = response.json()
+    assert response.status_code == 200 and len(tmp_list) == 6
 
 def test_listar_solo_partidas_publicas():
     response_login = client.post(
@@ -477,9 +476,8 @@ def test_listar_solo_partidas_publicas():
         headers={"accept": "test_application/json", "Authorization": head},
         json=body
     )
-    tmp_dict = json.loads(response.json())
-    print(len(tmp_dict))
-    assert response.status_code == 200 and len(tmp_dict) == 5
+    tmp_list = response.json()
+    assert response.status_code == 200 and len(tmp_list) == 5
 
 def test_listar_solo_partidas_privadas():
     response_login = client.post(
@@ -506,9 +504,8 @@ def test_listar_solo_partidas_privadas():
         headers={"accept": "test_application/json", "Authorization": head},
         json=body
     )
-    tmp_dict = json.loads(response.json())
-    print(len(tmp_dict))
-    assert response.status_code == 200 and len(tmp_dict) == 1
+    tmp_list = response.json()
+    assert response.status_code == 200 and len(tmp_list) == 1
 
 def test_listar_solo_partidas_de_user():
     response_login = client.post(
@@ -535,6 +532,5 @@ def test_listar_solo_partidas_de_user():
         headers={"accept": "test_application/json", "Authorization": head},
         json=body
     )
-    tmp_dict = json.loads(response.json())
-    print(len(tmp_dict))
-    assert response.status_code == 200 and len(tmp_dict) == 6
+    tmp_list = response.json()
+    assert response.status_code == 200 and len(tmp_list) == 6

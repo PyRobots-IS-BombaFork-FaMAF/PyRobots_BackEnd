@@ -26,6 +26,15 @@ class PartidaIn(BaseModel):
             raise ValidationError('La cantidad máxima de jugadores no puede ser menor a la mínima')
         return v
 
+    @validator('*', pre=True)
+    def remove_blank_strings(cls, v):
+        """Removes whitespace characters and return None if empty"""
+        if isinstance(v, str):
+            v = v.strip()
+        if v == "":
+            return None
+        return v
+
 
 class Filters(BaseModel):
     """

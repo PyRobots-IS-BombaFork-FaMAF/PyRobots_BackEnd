@@ -1,7 +1,7 @@
 from typing import Optional
 from typing_extensions import Required
 from unicodedata import name
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, validator
 from fastapi import *
 
 
@@ -12,6 +12,15 @@ class RobotIn(BaseModel):
     """
     name: str = Field(..., min_length=3, max_length=12)
 
+    @validator('*', pre=True)
+    def remove_blank_strings(cls, v):
+        """Removes whitespace characters and return None if empty"""
+        if isinstance(v, str):
+            v = v.strip()
+        if v == "":
+            return None
+        return v
+    
     @classmethod
     def form(cls, name: str = Form(...)) -> 'RobotIn':
         return cls(name=name)

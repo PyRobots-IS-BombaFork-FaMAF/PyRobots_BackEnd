@@ -1,5 +1,5 @@
 from tokenize import String
-from pydantic import BaseModel, Field, HttpUrl
+from pydantic import BaseModel, Field, HttpUrl, validator
 from typing import Optional, Union
 from pydantic.networks import EmailStr
 from fastapi import *
@@ -14,6 +14,15 @@ class UserIn(BaseModel):
     email: EmailStr
     password: str = Field(..., min_length=8, max_length=16,
                           regex=r"^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)[a-zA-Z\d\w\W]{8,}$")
+
+    @validator('*', pre=True)
+    def remove_blank_strings(cls, v):
+        """Removes whitespace characters and return None if empty"""
+        if isinstance(v, str):
+            v = v.strip()
+        if v == "":
+            return None
+        return v
 
     @classmethod
     def as_form(cls, username: str = Form(...), email: EmailStr = Form(...), password: str = Form(...)) -> 'UserIn':
