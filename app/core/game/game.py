@@ -1,4 +1,5 @@
-from app.core.game.robot import *
+#from app.core.game.robot import *
+from robot import *
 
 class game():
 
@@ -19,7 +20,7 @@ class game():
         if(self.round <= self.quantityRound):
             for robot in self.listRobot:
                 robot.respond()
-                #robot.__mover_robot()
+                robot.move_robot()
                 cause_of_death = False
                 self.robotPosition = {
                                         'name': robot.name,
@@ -38,5 +39,3 @@ class game():
         while(self.round <= self.quantityRound):
             self.advance_round()
         
-
-
