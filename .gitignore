@@ -1,5 +1,6 @@
 # Byte-compiled / optimized / DLL files
 __pycache__/
+.pytest_cache
 *.py[cod]
 *$py.class
 
@@ -29,6 +30,8 @@ MANIFEST
 # Database
 pyrobots-db.sqlite
 app/core/models/pyrobots-db.sqlite
+app/core/models/test.sqlite
+test.sqlite
 
 # PyInstaller
 #  Usually these files are written by a python script from a template

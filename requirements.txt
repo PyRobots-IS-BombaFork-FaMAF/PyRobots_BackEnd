@@ -9,3 +9,7 @@ pydantic[email]
 pydantic[dotenv]
 python-multipart
 yagmail
+jose
+coverage
+pycryptodome
+social-auth-core[openidconnect]
