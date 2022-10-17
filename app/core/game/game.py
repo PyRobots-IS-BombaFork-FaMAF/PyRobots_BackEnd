@@ -1,5 +1,4 @@
-#from app.core.game.robot import *
-from robot import *
+from app.core.game.robot import *
 
 class game():
 
