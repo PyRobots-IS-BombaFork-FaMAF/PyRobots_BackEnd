@@ -1,4 +1,5 @@
 from app.core.game.robot import *
+from types import ModuleType
 
 class game():
 
@@ -37,4 +38,30 @@ class game():
     def execute_simulacion(self):
         while(self.round <= self.quantityRound):
             self.advance_round()
-        
+
+
+
+
+
+def runSimulation(pathsToRobots: 'list[str]') -> 'list[dict[str, any]]':
+    """
+    Run a simulation with the robots on the given paths
+    Paths are in python format (e.g. 'app.robot_code.robot1')
+    """
+
+    robotsModules: 'list[ModuleType]' = list(map((lambda path: __import__(path, fromlist='.'.join(path.split('.')[1:]))), pathsToRobots))
+    robotsNames: 'list[str]' = list(map((lambda path: path.split('.')[-1]), pathsToRobots))
+
+    robotsClasses: 'list[type]' = []
+    for i in range(len(robotsModules)):
+        robotsClasses.append(getattr(robotsModules[i], robotsNames[i]))
+
+    robots: 'list[Robot]' = list(map(lambda robotClass: robotClass(), robotsClasses))
+
+
+    pass
+
+
+
+
+
