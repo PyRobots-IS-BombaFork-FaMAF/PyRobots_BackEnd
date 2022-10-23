@@ -1,6 +1,6 @@
 from abc import abstractmethod
 import math
-#import numpy as np
+from typing import Tuple
 
 
 
@@ -8,14 +8,20 @@ class Robot(object):
     """
     Class from which the users robots will inherit
     """
+    _actual_velocity: float
+    _actual_direction: float
+    _velocity: float
+    _direction: float
+    _position: 'Tuple[float, float]'
+    _damage: float
 
     def __init__(self):
-        self.actual_velocity = 0
-        self.actual_direction = 0
-        self.velocity = 0
-        self.direction = 0
-        self.position = (0,0)
-        self.damage = 0
+        self._actual_velocity = 0
+        self._actual_direction = 0
+        self._velocity = 0
+        self._direction = 0
+        self._position = (0,0)
+        self._damage = 0
 
     @abstractmethod
     def initialize(self):
@@ -26,37 +32,37 @@ class Robot(object):
         pass
 
     def move_robot(self):
-        if self.actual_velocity < 50:
-            self.actual_direction = self.direction
+        if self._actual_velocity < 50:
+            self._actual_direction = self._direction
 
-        if abs(self.actual_velocity - self.velocity) < 30:
-            self.actual_velocity = self.velocity
-        elif (self.actual_velocity - self.velocity) < 0:
-            self.actual_velocity += 30
+        if abs(self._actual_velocity - self._velocity) < 30:
+            self._actual_velocity = self._velocity
+        elif (self._actual_velocity - self._velocity) < 0:
+            self._actual_velocity += 30
         else:
-            self.actual_velocity += -30
+            self._actual_velocity += -30
 
-        x = self.actual_velocity * math.cos(math.radians(self.actual_direction)) / 100
-        y = self.actual_velocity * math.sin(math.radians(self.actual_direction)) / 100
-        self.position = (self.position[0] + x, self.position[1] + y)
+        x = self._actual_velocity * math.cos(math.radians(self._actual_direction)) / 100
+        y = self._actual_velocity * math.sin(math.radians(self._actual_direction)) / 100
+        self._position = (self._position[0] + x, self._position[1] + y)
 
-#Status
+    #Status
     def get_direction(self):
-        return self.direction
+        return self._direction
 
     def get_velocity(self):
-        return self.velocity
+        return self._velocity
 
     def get_position(self):
-        return self.position
+        return self._position
 
     def get_damage(self):
-        return self.damage
+        return self._damage
 
-#Motor
+    #Motor
     def drive(self, direction, velocity):
         if velocity < 100:
-            self.velocity = velocity
+            self._velocity = velocity
         else:
-            self.velocity = 100
-        self.direction = direction
+            self._velocity = 100
+        self._direction = direction
