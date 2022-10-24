@@ -4,6 +4,9 @@ from typing import Optional
 from app.core.game.robot import Robot
 from types import ModuleType
 from typing import NamedTuple
+from pathlib import PurePath
+import pathlib
+
 
 
 class RobotResult_round(NamedTuple):
@@ -103,23 +106,28 @@ class GameState():
 def getRobots(pathsToRobots: list[str]) -> list[type]:
     """
     Get the robots classes from the given paths
+    Paths are in python format (e.g. `'app.robot_code.robot1'`)
     """
-    robotsModules: list[ModuleType] = list(map((lambda path: __import__(path, fromlist='.'.join(path.split('.')[1:]))), pathsToRobots))
-    robotsNames: list[str] = list(map((lambda path: path.split('.')[-1]), pathsToRobots))
+    def getRobot(pathToRobot: str) -> type:
+        robatClassName: str = pathToRobot.split('.')[-1]
+        robotModule: ModuleType = __import__(pathToRobot, fromlist=[robatClassName])
+        robotClass: type = getattr(robotModule, robatClassName)
+        return robotClass
+    
+    return list(map(getRobot, pathsToRobots))
 
-    robotsClasses: list[type] = []
-    for i in range(len(robotsModules)):
-        robotsClasses.append(getattr(robotsModules[i], robotsNames[i]))
 
-    return robotsClasses
+class RobotInput(NamedTuple):
+    pathToCode: str # In python format (e.g. 'app.robot_code.robot1')
+    name: str # For JSON output
 
-
-def runSimulation(robots: list[robot_models.Robot], rounds: int) -> SimulationResult:
+def runSimulation(robots: list[RobotInput], rounds: int) -> SimulationResult:
     """
     Run a simulation with the robots on the given paths
+    Paths are in python format (e.g. `'app.robot_code.robot1'`)
     """
 
-    robotsFiles: list[str] = list(map((lambda robot: robot.code), robots))
+    robotsFiles: list[str] = list(map((lambda robot: robot.pathToCode), robots))
 
     robotsClasses: list[type] = getRobots(robotsFiles)
 
