@@ -41,7 +41,7 @@ class RobotInGame():
                 self.damage = 1
                 self.cause_of_death = "robot execution error"
 
-    def updateOurRobot(self, velocity: float, direction: float):
+    def updateOurRobot_movement(self, velocity: float, direction: float):
         if velocity < 0:
             velocity = 0
         if velocity > max_velocity:
@@ -68,10 +68,10 @@ class GameState():
         for robotInGame in self.ourRobots:
 
             # If robot is alive:
-                # TODO: Execute `robotInGame` code if it is alive
-                # TODO: Extract new velocity and direction from `robotInGame`
-                # TODO: Update `RobotInGame` with `updateOurRobot`
-                # TODO: Update `robotInGame` fields
+                # TODO: Execute `robotInGame.robot` code if it is alive
+                # TODO: Extract new velocity and direction from `robotInGame.robot`
+                # TODO: Update `RobotInGame` with `updateOurRobot_movement`
+                # TODO: Update `robotInGame.robot` fields
 
             pass
 
