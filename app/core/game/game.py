@@ -3,6 +3,29 @@ import app.core.models.robot_models as robot_models
 from typing import Optional
 from app.core.game.robot import Robot
 from types import ModuleType
+from typing import NamedTuple
+
+
+class RobotResult_round(NamedTuple):
+    coords: 'tuple[float, float]'
+    direction: float
+    speed: float
+
+class RobotResult(NamedTuple):
+            
+    name: str
+    rounds: 'list[RobotResult_round]'
+    cause_of_death: 'Optional[str]'
+
+class SimulationResult(NamedTuple):
+    """
+    The result of the simulation fot being converted to a JSON for the animation
+    """
+
+    robots: 'list[RobotResult]'
+
+
+
 
 
 max_velocity: float = 10   # m/round
@@ -90,7 +113,7 @@ def getRobots(pathsToRobots: 'list[str]') -> 'list[type]':
     return robotsClasses
 
 
-def runSimulation(robots: 'list[robot_models.Robot]', rounds: int) -> 'list[dict[str, any]]':
+def runSimulation(robots: 'list[robot_models.Robot]', rounds: int) -> SimulationResult:
     """
     Run a simulation with the robots on the given paths
     Paths are in python format (e.g. 'app.robot_code.robot1')
