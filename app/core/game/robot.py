@@ -8,18 +8,18 @@ class Robot(object):
     """
     Class from which the users robots will inherit
     """
-    _actual_velocity: float
-    _actual_direction: float
-    _velocity: float
-    _direction: float
+    _actual_velocity: float        # Velocity at witch the robot is actually moving
+    _actual_direction: float       # Direction in witch the robot is actually moving
+    _desired_velocity: float       # Velocity that was set by the robot
+    _desired_direction: float      # Direction that was set by the robot
     _position: Tuple[float, float]
     _damage: float
 
     def __init__(self):
         self._actual_velocity = 0
         self._actual_direction = 0
-        self._velocity = 0
-        self._direction = 0
+        self._desired_velocity = 0
+        self._desired_direction = 0
         self._position = (0,0)
         self._damage = 0
 
@@ -33,11 +33,11 @@ class Robot(object):
 
     def move_robot(self):
         if self._actual_velocity < 50:
-            self._actual_direction = self._direction
+            self._actual_direction = self._desired_direction
 
-        if abs(self._actual_velocity - self._velocity) < 30:
-            self._actual_velocity = self._velocity
-        elif (self._actual_velocity - self._velocity) < 0:
+        if abs(self._actual_velocity - self._desired_velocity) < 30:
+            self._actual_velocity = self._desired_velocity
+        elif (self._actual_velocity - self._desired_velocity) < 0:
             self._actual_velocity += 30
         else:
             self._actual_velocity += -30
@@ -48,10 +48,10 @@ class Robot(object):
 
     #Status
     def get_direction(self):
-        return self._direction
+        return self._actual_direction
 
     def get_velocity(self):
-        return self._velocity
+        return self._actual_velocity
 
     def get_position(self):
         return self._position
@@ -62,7 +62,7 @@ class Robot(object):
     #Motor
     def drive(self, direction, velocity):
         if velocity < 100:
-            self._velocity = velocity
+            self._desired_velocity = velocity
         else:
-            self._velocity = 100
-        self._direction = direction
+            self._desired_velocity = 100
+        self._desired_direction = direction

@@ -37,7 +37,8 @@ class RobotInGame():
     name: str  # Only for generating the `json`
     robot: Robot
     position: tuple[float, float]
-    velocity: float   # m/round
+    actual_velocity: float   # m/round # Velocity at witch the robot is actually moving
+    desired_velocity: float  # m/round # Velocity that was set by the robot
     direction: float  # degrees (so it is modulo 360)
     damage: float     # with damage ∈ [0;1) robot is alive
     cause_of_death: Optional[str]
