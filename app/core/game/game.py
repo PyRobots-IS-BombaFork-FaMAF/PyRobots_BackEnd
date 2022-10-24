@@ -96,6 +96,7 @@ class GameState():
                 # TODO: Update `RobotInGame` with `updateOurRobot_movement`
                 # TODO: Update `robotInGame.robot` fields
 
+            # NOTE: When adding scanning and cannon, multiple `for`s will be needed
             pass
 
 
@@ -116,7 +117,6 @@ def getRobots(pathsToRobots: list[str]) -> list[type]:
 def runSimulation(robots: list[robot_models.Robot], rounds: int) -> SimulationResult:
     """
     Run a simulation with the robots on the given paths
-    Paths are in python format (e.g. 'app.robot_code.robot1')
     """
 
     robotsFiles: list[str] = list(map((lambda robot: robot.code), robots))
