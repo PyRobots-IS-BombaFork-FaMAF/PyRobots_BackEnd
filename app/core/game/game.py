@@ -65,18 +65,27 @@ class RobotInGame():
                 self.damage = 1
                 self.cause_of_death = "robot execution error"
 
-    def updateOurRobot_movement(self, velocity: float, direction: float):
+    def updateOurRobot_movement(self,
+                velocity: Optional[float] = None, direction: Optional[float] = None
+            ):
+        if velocity == None:
+            velocity = self.desired_velocity
         if velocity < 0:
             velocity = 0
         if velocity > max_velocity:
             velocity = max_velocity
 
-        direction = direction % 360
+        if direction == None or self.actual_velocity > max_velocity/2:
+            direction = self.direction
+        else:
+            direction = direction % 360
+
+        # TODO: Update direction
+
+        # TODO: Update position
 
         # TODO: Update velocity
 
-
-        # TODO: Update direction
 
 
 class GameState():
