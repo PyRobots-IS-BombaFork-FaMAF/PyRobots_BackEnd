@@ -12,7 +12,7 @@ class Robot(object):
     _actual_direction: float
     _velocity: float
     _direction: float
-    _position: 'Tuple[float, float]'
+    _position: Tuple[float, float]
     _damage: float
 
     def __init__(self):

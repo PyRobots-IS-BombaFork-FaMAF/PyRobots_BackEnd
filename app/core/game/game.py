@@ -7,22 +7,22 @@ from typing import NamedTuple
 
 
 class RobotResult_round(NamedTuple):
-    coords: 'tuple[float, float]'
+    coords: tuple[float, float]
     direction: float
     speed: float
 
 class RobotResult(NamedTuple):
             
     name: str
-    rounds: 'list[RobotResult_round]'
-    cause_of_death: 'Optional[str]'
+    rounds: list[RobotResult_round]
+    cause_of_death: Optional[str]
 
 class SimulationResult(NamedTuple):
     """
-    The result of the simulation fot being converted to a JSON for the animation
+    The result of the simulation for being converted to a JSON for the animation
     """
 
-    robots: 'list[RobotResult]'
+    robots: list[RobotResult]
 
 
 
@@ -36,11 +36,11 @@ board_size: int = 1000     # m
 class RobotInGame():
     name: str  # Only for generating the `json`
     robot: Robot
-    position: 'tuple[float, float]'
+    position: tuple[float, float]
     velocity: float   # m/round
     direction: float  # degrees (so it is modulo 360)
     damage: float     # with damage ∈ [0;1) robot is alive
-    cause_of_death: 'Optional[str]'
+    cause_of_death: Optional[str]
 
     def __init__(self, robotClass: type, name: str):
         self.name = name
@@ -80,9 +80,9 @@ class RobotInGame():
 
 class GameState():
     round: int
-    ourRobots: 'list[RobotInGame]'
+    ourRobots: list[RobotInGame]
 
-    def __init__(self, robotClasses: 'list[type]'):
+    def __init__(self, robotClasses: list[type]):
         self.round = 0
         self.ourRobots = list(map((lambda robotClass: RobotInGame(robotClass)), robotClasses))
 
@@ -99,29 +99,29 @@ class GameState():
             pass
 
 
-def getRobots(pathsToRobots: 'list[str]') -> 'list[type]':
+def getRobots(pathsToRobots: list[str]) -> list[type]:
     """
     Get the robots classes from the given paths
     """
-    robotsModules: 'list[ModuleType]' = list(map((lambda path: __import__(path, fromlist='.'.join(path.split('.')[1:]))), pathsToRobots))
-    robotsNames: 'list[str]' = list(map((lambda path: path.split('.')[-1]), pathsToRobots))
+    robotsModules: list[ModuleType] = list(map((lambda path: __import__(path, fromlist='.'.join(path.split('.')[1:]))), pathsToRobots))
+    robotsNames: list[str] = list(map((lambda path: path.split('.')[-1]), pathsToRobots))
 
-    robotsClasses: 'list[type]' = []
+    robotsClasses: list[type] = []
     for i in range(len(robotsModules)):
         robotsClasses.append(getattr(robotsModules[i], robotsNames[i]))
 
     return robotsClasses
 
 
-def runSimulation(robots: 'list[robot_models.Robot]', rounds: int) -> SimulationResult:
+def runSimulation(robots: list[robot_models.Robot], rounds: int) -> SimulationResult:
     """
     Run a simulation with the robots on the given paths
     Paths are in python format (e.g. 'app.robot_code.robot1')
     """
 
-    robotsFiles: 'list[str]' = list(map((lambda robot: robot.code), robots))
+    robotsFiles: list[str] = list(map((lambda robot: robot.code), robots))
 
-    robotsClasses: 'list[type]' = getRobots(robotsFiles)
+    robotsClasses: list[type] = getRobots(robotsFiles)
 
     # TODO: Create a `GameState`
     # TODO: Advance all rounds
