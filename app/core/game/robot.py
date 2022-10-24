@@ -1,6 +1,5 @@
 from abc import abstractmethod
-import math
-from typing import Tuple
+from typing import Tuple, Optional
 
 
 
@@ -8,18 +7,18 @@ class Robot(object):
     """
     Class from which the users robots will inherit
     """
-    _actual_velocity: float        # Velocity at witch the robot is actually moving
-    _actual_direction: float       # Direction in witch the robot is actually moving
-    _desired_velocity: float       # Velocity that was set by the robot
-    _desired_direction: float      # Direction that was set by the robot
+    _actual_velocity: float              # Velocity at witch the robot is actually moving
+    _actual_direction: float             # Direction in witch the robot is actually moving
+    _set_velocity: Optional[float]       # Velocity that was set by the robot
+    _set_direction: Optional[float]      # Direction that was set by the robot
     _position: Tuple[float, float]
     _damage: float
 
     def __init__(self):
         self._actual_velocity = 0
         self._actual_direction = 0
-        self._desired_velocity = 0
-        self._desired_direction = 0
+        self._set_velocity = 0
+        self._set_direction = 0
         self._position = (0,0)
         self._damage = 0
 
@@ -47,7 +46,7 @@ class Robot(object):
     #Motor
     def drive(self, direction, velocity):
         if velocity < 100:
-            self._desired_velocity = velocity
+            self._set_velocity = velocity
         else:
-            self._desired_velocity = 100
-        self._desired_direction = direction
+            self._set_velocity = 100
+        self._set_direction = direction
