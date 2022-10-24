@@ -1,4 +1,4 @@
-from app.core.game.game import *
+""" from app.core.game.game import *
 from app.core.game.robot import *
 
 r1 = Robot('robot_1')
@@ -31,4 +31,4 @@ def test_add_robot():
     juego.add(r2)
     robotListLen1 = len(juego.listRobot)
 
-    assert robotListLen + 1 == robotListLen1
+    assert robotListLen + 1 == robotListLen1 """

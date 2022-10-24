@@ -31,21 +31,6 @@ class Robot(object):
     def respond(self):
         pass
 
-    def move_robot(self):
-        if self._actual_velocity < 50:
-            self._actual_direction = self._desired_direction
-
-        if abs(self._actual_velocity - self._desired_velocity) < 30:
-            self._actual_velocity = self._desired_velocity
-        elif (self._actual_velocity - self._desired_velocity) < 0:
-            self._actual_velocity += 30
-        else:
-            self._actual_velocity += -30
-
-        x = self._actual_velocity * math.cos(math.radians(self._actual_direction)) / 100
-        y = self._actual_velocity * math.sin(math.radians(self._actual_direction)) / 100
-        self._position = (self._position[0] + x, self._position[1] + y)
-
     #Status
     def get_direction(self):
         return self._actual_direction

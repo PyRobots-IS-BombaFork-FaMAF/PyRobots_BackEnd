@@ -3,6 +3,7 @@ from typing import Optional
 from app.core.game.robot import Robot
 from types import ModuleType
 from typing import NamedTuple
+import math
 
 
 
@@ -29,8 +30,7 @@ class SimulationResult(NamedTuple):
 
 
 max_velocity: float = 10   # m/round
-acceleration: float = 2    # m/round²
-deceleration: float = -2   # m/round²
+acceleration: float = 2    # m/round²  # also limit of deceleration
 board_size: int = 1000     # m
 
 class RobotInGame():
@@ -68,6 +68,7 @@ class RobotInGame():
     def updateOurRobot_movement(self,
                 velocity: Optional[float] = None, direction: Optional[float] = None
             ):
+        # Validate velocity
         if velocity == None:
             velocity = self.desired_velocity
         if velocity < 0:
@@ -75,16 +76,34 @@ class RobotInGame():
         if velocity > max_velocity:
             velocity = max_velocity
 
-        if direction == None or self.actual_velocity > max_velocity/2:
-            direction = self.direction
-        else:
-            direction = direction % 360
+        # Update direction
+        if direction != None and self.actual_velocity <= max_velocity/2:
+            self.direction = direction % 360
+        
+        x_component_direction: float = abs(math.cos(math.radians(self.direction)))
+        y_component_direction: float = abs(math.sin(math.radians(self.direction)))
 
-        # TODO: Update direction
+        # Calculate velocity difference
+        velocity_difference: float = (
+                min(acceleration, velocity - self.actual_velocity)
+            if self.actual_velocity <= velocity else # for == the to formulas give the same
+                max(-acceleration, velocity - self.actual_velocity)
+        )
 
-        # TODO: Update position
+        x_velocity: float = self.actual_velocity * x_component_direction
+        y_velocity: float = self.actual_velocity * y_component_direction
 
-        # TODO: Update velocity
+        # We have to take into account that the robot may be accelerating or decelerating in part or all of the round
+        used_acceleration: float = abs(velocity_difference / acceleration)
+        x_movement: float = x_velocity + x_component_direction * used_acceleration / 2
+        y_movement: float = y_velocity + y_component_direction * used_acceleration / 2
+
+        # Update position
+        self.position[0] += x_movement
+        self.position[1] += y_movement
+
+        # Update velocity
+        self.actual_velocity += velocity_difference
 
 
 
