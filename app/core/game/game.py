@@ -51,6 +51,7 @@ class RobotInGame():
         self.direction = 0
         self.damage = 0
         try:
+            # There are no robots that do not inherit from Robot because that is checked in upload
             self.robot = robotClass()
             self.robot.initialize()
         except:
@@ -106,7 +107,6 @@ class RobotInGame():
         self.actual_velocity += velocity_difference
 
 
-
 class GameState():
     round: int
     ourRobots: list[RobotInGame]
@@ -118,15 +118,38 @@ class GameState():
     def advance_round(self):
         self.round += 1
         for robotInGame in self.ourRobots:
+            # Execute `robotInGame.robot` code if it is alive
+            if robotInGame.damage < 1:
+                robotInGame.executeRobotCode()
+        
+        for robotInGame in self.ourRobots:
+            if robotInGame.damage < 1:
+                # Extract new velocity and direction from `robotInGame.robot`
+                set_velocity: Optional[float] = robotInGame.robot._set_velocity
+                set_direction: Optional[float] = robotInGame.robot._set_direction
 
-            # If robot is alive:
-                # TODO: Execute `robotInGame.robot` code if it is alive
-                # TODO: Extract new velocity and direction from `robotInGame.robot`
-                # TODO: Update `RobotInGame` with `updateOurRobot_movement`
-                # TODO: Update `robotInGame.robot` fields
+                # Check types
+                if not isinstance(set_velocity, float):
+                    set_velocity = None
+                if not isinstance(set_direction, float):
+                    set_direction = None
 
-            # NOTE: When adding scanning and cannon, multiple `for`s will be needed
-            pass
+                # Update movement of `RobotInGame`
+                robotInGame.updateOurRobot_movement(set_velocity, set_direction)
+
+        # NOTE: When adding scanning and cannon, more `for`s will be needed
+
+        # Update `Robot` fields
+        for robotInGame in self.ourRobots:
+            if robotInGame.damage < 1:
+                robotInGame.robot._set_velocity = None
+                robotInGame.robot._set_direction = None
+                robotInGame.robot._position = robotInGame.position
+                robotInGame.robot._actual_velocity = robotInGame.actual_velocity
+                robotInGame.robot._actual_direction = robotInGame.direction
+                robotInGame.robot._damage = robotInGame.damage
+        
+        # TODO: Make something for the results for the animation
 
 
 def getRobots(pathsToRobots: list[str]) -> list[type]:
