@@ -1,5 +1,5 @@
 import random
-from typing import Any, Optional
+from typing import Any, Dict, Optional, Union
 from app.core.game.robot import Robot
 from types import ModuleType
 from typing import NamedTuple
@@ -7,23 +7,36 @@ import math
 
 
 
-class RobotResult_round(NamedTuple):
+class RobotResult_round():
     coords: tuple[float, float]
     direction: float
     speed: float
 
-class RobotResult(NamedTuple):
+    def __init__(self, coords: tuple[float, float], direction: float, speed: float):
+        self.coords = coords
+        self.direction = direction
+        self.speed = speed
+
+class RobotResult():
             
     name: str
     rounds: list[RobotResult_round]
     cause_of_death: Optional[str]
 
-class SimulationResult(NamedTuple):
+    def __init__(self, name: str, rounds: list[RobotResult_round], cause_of_death: Optional[str]):
+        self.name = name
+        self.rounds = rounds
+        self.cause_of_death = cause_of_death
+
+class SimulationResult():
     """
     The result of the simulation for being converted to a JSON for the animation
     """
 
     robots: list[RobotResult]
+
+    def __init__(self, robots: list[RobotResult]):
+        self.robots = robots
 
 
 
@@ -43,13 +56,20 @@ class RobotInGame():
     damage: float     # with damage ∈ [0;1) robot is alive
     cause_of_death: Optional[str]
 
-    def __init__(self, robotClass: type, name: str):
+    result_for_animation: Optional[RobotResult] # Only when animation is needed
+
+    def __init__(self, robotClass: type, name: str, for_animation: bool):
         self.name = name
         self.cause_of_death = None
         self.position = (random.random() * board_size, random.random() * board_size)
         self.velocity = 0
         self.direction = 0
         self.damage = 0
+
+        self.cause_of_death = None
+        if for_animation:
+            self.result_for_animation = RobotResult(name, [], None)
+
         try:
             # There are no robots that do not inherit from Robot because that is checked in upload
             self.robot = robotClass()
@@ -115,14 +135,35 @@ class RobotInGame():
         # Update velocity
         self.actual_velocity += velocity_difference
 
+        # If animation is needed add the round to the result
+        if self.result_for_animation != None:
+            self.result_for_animation.rounds.append(
+                RobotResult_round(self.position, self.direction, self.actual_velocity)
+            )
+    
+    def get_result_for_animation(self) -> Optional[RobotResult]:
+        if self.result_for_animation != None:
+            self.result_for_animation.cause_of_death = self.cause_of_death
+        return self.result_for_animation
+
 
 class GameState():
     round: int
     ourRobots: list[RobotInGame]
 
-    def __init__(self, robotClasses: list[type]):
+    for_animation: bool
+
+    def __init__(self, robotClasses: Dict[str, type], for_animation: bool = False):
+        """
+            `robotClasses` is a dictionary of robot names and their classes
+        """
         self.round = 0
-        self.ourRobots = list(map((lambda robotClass: RobotInGame(robotClass)), robotClasses))
+        self.ourRobots = [RobotInGame(robotClasses[name], name, for_animation) for name in robotClasses]
+
+        self.for_animation = for_animation
+
+    def amount_of_robots_alive(self) -> int:
+        return sum([1 for robot in self.ourRobots if robot.damage < 1])
 
     def advance_round(self):
         self.round += 1
@@ -158,8 +199,12 @@ class GameState():
                 robotInGame.robot._actual_velocity = robotInGame.actual_velocity
                 robotInGame.robot._actual_direction = robotInGame.direction
                 robotInGame.robot._damage = robotInGame.damage
-        
-        # TODO: Make something for the results for the animation
+    
+    def get_result_for_animation(self) -> Optional[SimulationResult]:
+        if self.for_animation:
+            return SimulationResult([robot.get_result_for_animation() for robot in self.ourRobots])
+        else:
+            return None
 
 
 class RobotInput(NamedTuple):
@@ -181,20 +226,29 @@ def getRobots(robots: list[RobotInput]) -> list[type]:
     return list(map(lambda robotInput: getRobot(robotInput.pathToCode, robotInput.robotClassName), robots))
 
 
-def runSimulation(robots: list[RobotInput], rounds: int) -> SimulationResult:
+def runSimulation(robots: list[RobotInput], rounds: int, for_animation: bool = False) -> Union[SimulationResult, Optional[int]]:
     """
-    Run a simulation with the robots on the given paths
-    Paths are in python format (e.g. `'app.robot_code.robot1'`)
+    Run a simulation with the robots on the given paths.
+    Paths are in python format (e.g. `'app.robot_code.robot1'`).
+
+    If `for_animation` is `True` the result will be a `SimulationResult` object,
+    otherwise will be, if there is a winner the position in `robots` of the winner and if there is no winner, `None`.
     """
 
-    robotsFiles: list[str] = list(map((lambda robot: robot.pathToCode), robots))
+    robotsClasses: list[type] = getRobots(robots)
+    robotsNames: list[str] = list(map((lambda robot: robot.name), robots))
 
-    robotsClasses: list[type] = getRobots(robotsFiles)
+    gameState: GameState = GameState(dict(zip(robotsNames, robotsClasses)), for_animation)
 
-    # TODO: Create a `GameState`
-    # TODO: Advance all rounds
-
-    pass
+    while gameState.amount_of_robots_alive() > 1 and gameState.round < rounds:
+        gameState.advance_round()
+    
+    if for_animation:
+        return gameState.get_result_for_animation()
+    elif gameState.amount_of_robots_alive() == 1:
+        return robotsNames.index([robot.name for robot in gameState.ourRobots if robot.damage < 1][0])
+    else:
+        return None
 
 
 
