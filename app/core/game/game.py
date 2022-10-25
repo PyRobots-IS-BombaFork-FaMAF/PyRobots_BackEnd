@@ -1,5 +1,5 @@
 import random
-from typing import Optional
+from typing import Any, Optional
 from app.core.game.robot import Robot
 from types import ModuleType
 from typing import NamedTuple
@@ -125,8 +125,9 @@ class GameState():
         for robotInGame in self.ourRobots:
             if robotInGame.damage < 1:
                 # Extract new velocity and direction from `robotInGame.robot`
-                set_velocity: Optional[float] = robotInGame.robot._set_velocity
-                set_direction: Optional[float] = robotInGame.robot._set_direction
+                set_velocity: Any = robotInGame.robot._set_velocity
+                set_direction: Any = robotInGame.robot._set_direction
+                # They are of type `Any` because the robot code may have set anything
 
                 # Check types
                 if not isinstance(set_velocity, float):
