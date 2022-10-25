@@ -62,7 +62,8 @@ class RobotInGame():
         self.name = name
         self.cause_of_death = None
         self.position = (random.random() * board_size, random.random() * board_size)
-        self.velocity = 0
+        self.actual_velocity = 0
+        self.desired_velocity = 0
         self.direction = 0
         self.damage = 0
 
@@ -99,6 +100,8 @@ class RobotInGame():
         if velocity > max_velocity:
             velocity = max_velocity
 
+        self.desired_velocity = velocity
+
         # Update direction
         if direction != None and self.actual_velocity <= max_velocity/2:
             self.direction = direction % 360
@@ -120,17 +123,16 @@ class RobotInGame():
         used_acceleration: float = abs(velocity_difference / acceleration)
         unused_acceleration: float = 1 - used_acceleration
         x_movement: float = (
-            x_velocity + x_component_direction * used_acceleration / 2
+            x_velocity + x_component_direction * acceleration * used_acceleration**2 / 2
             + x_component_direction * unused_acceleration * velocity_difference
         )
         y_movement: float = (
-            y_velocity + y_component_direction * used_acceleration / 2
+            y_velocity + y_component_direction * acceleration * used_acceleration**2 / 2
             + y_component_direction * unused_acceleration * velocity_difference
         )
 
         # Update position
-        self.position[0] += x_movement
-        self.position[1] += y_movement
+        self.position = (self.position[0] + x_movement, self.position[1] + y_movement)
 
         # Update velocity
         self.actual_velocity += velocity_difference
