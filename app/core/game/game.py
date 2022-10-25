@@ -160,23 +160,24 @@ class GameState():
         # TODO: Make something for the results for the animation
 
 
-def getRobots(pathsToRobots: list[str]) -> list[type]:
+class RobotInput(NamedTuple):
+    pathToCode: str # In python format (e.g. 'app.robot_code.robot1')
+    robotClassName: str
+    name: str # For JSON output
+
+
+def getRobots(robots: list[RobotInput]) -> list[type]:
     """
     Get the robots classes from the given paths
     Paths are in python format (e.g. `'app.robot_code.robot1'`)
     """
-    def getRobot(pathToRobot: str) -> type:
-        robatClassName: str = pathToRobot.split('.')[-1]
-        robotModule: ModuleType = __import__(pathToRobot, fromlist=[robatClassName])
-        robotClass: type = getattr(robotModule, robatClassName)
+    def getRobot(pathToRobot: str, robotClassName: str) -> type:
+        robotModule: ModuleType = __import__(pathToRobot, fromlist=[robotClassName])
+        robotClass: type = getattr(robotModule, robotClassName)
         return robotClass
     
-    return list(map(getRobot, pathsToRobots))
+    return list(map(lambda robotInput: getRobot(robotInput.pathToCode, robotInput.robotClassName), robots))
 
-
-class RobotInput(NamedTuple):
-    pathToCode: str # In python format (e.g. 'app.robot_code.robot1')
-    name: str # For JSON output
 
 def runSimulation(robots: list[RobotInput], rounds: int) -> SimulationResult:
     """
