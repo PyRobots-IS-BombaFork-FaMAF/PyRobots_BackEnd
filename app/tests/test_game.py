@@ -32,7 +32,10 @@ def test_RobotInGame():
     # `RobotInGame.result_for_animation` fields
     assert robot.result_for_animation.name == 'empty'
     assert robot.result_for_animation.cause_of_death == None
-    assert robot.result_for_animation.rounds == []
+    assert len(robot.result_for_animation.rounds) == 1
+    assert robot.result_for_animation.rounds[0].coords == robot.position
+    assert robot.result_for_animation.rounds[0].direction == 0
+    assert robot.result_for_animation.rounds[0].speed == 0
 
     # Execute robot code
     robot.executeRobotCode()
@@ -50,10 +53,13 @@ def test_RobotInGame():
     # Result should have 1 round
     assert robot.result_for_animation.name == 'empty'
     assert robot.result_for_animation.cause_of_death == None
-    assert len(robot.result_for_animation.rounds) == 1
-    assert robot.result_for_animation.rounds[0].coords == robot.position
+    assert len(robot.result_for_animation.rounds) == 2
+    assert robot.result_for_animation.rounds[0].coords == position
     assert robot.result_for_animation.rounds[0].direction == 0
     assert robot.result_for_animation.rounds[0].speed == 0
+    assert robot.result_for_animation.rounds[1].coords == position
+    assert robot.result_for_animation.rounds[1].direction == 0
+    assert robot.result_for_animation.rounds[1].speed == 0
 
     # Now wi will make the robot move
     robot.updateOurRobot_movement(velocity=0.1, direction=0)
@@ -69,15 +75,18 @@ def test_RobotInGame():
     # Result should have 2 rounds
     assert robot.result_for_animation.name == 'empty'
     assert robot.result_for_animation.cause_of_death == None
-    assert len(robot.result_for_animation.rounds) == 2
+    assert len(robot.result_for_animation.rounds) == 3
     assert robot.result_for_animation.rounds[0].coords == position
     assert robot.result_for_animation.rounds[0].direction == 0
     assert robot.result_for_animation.rounds[0].speed == 0
-    assert robot.result_for_animation.rounds[1].coords == robot.position
+    assert robot.result_for_animation.rounds[1].coords == position
     assert robot.result_for_animation.rounds[1].direction == 0
-    assert robot.result_for_animation.rounds[1].speed == 0.1
+    assert robot.result_for_animation.rounds[1].speed == 0
+    assert robot.result_for_animation.rounds[2].coords == robot.position
+    assert robot.result_for_animation.rounds[2].direction == 0
+    assert robot.result_for_animation.rounds[2].speed == 0.1
 
-test_RobotInGame()
+
 
 
 """ r1 = Robot('robot_1')

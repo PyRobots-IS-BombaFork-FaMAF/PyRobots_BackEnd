@@ -69,7 +69,11 @@ class RobotInGame():
 
         self.cause_of_death = None
         if for_animation:
-            self.result_for_animation = RobotResult(name, [], None)
+            self.result_for_animation = RobotResult(
+                name,
+                [RobotResult_round(self.position, self.direction, self. actual_velocity)],
+                None
+            )
 
         try:
             # There are no robots that do not inherit from Robot because that is checked in upload
