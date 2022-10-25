@@ -1,4 +1,5 @@
 from enum import unique
+import json
 from pony.orm import *
 from datetime import date, datetime
 from passlib.context import CryptContext
@@ -54,6 +55,7 @@ class Partida(db.Entity):
     creation_date = Required(datetime)
     game_over = Required(bool, default=0)
     password = Optional(str)
+    players = Required(Json)
 
 def define_database_and_entities(**db_params):
     global db

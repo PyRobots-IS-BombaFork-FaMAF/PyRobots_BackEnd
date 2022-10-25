@@ -22,12 +22,13 @@ async def create_game(
     be started later by the user who created it
     """
     PartidaObject(
-        partida.name,
-        partida.rounds,
-        partida.games,
-        partida.max_players,
-        partida.min_players,
-        current_user["username"],
+        name=partida.name,
+        rounds=partida.rounds,
+        games=partida.games,
+        max_players=partida.max_players,
+        min_players=partida.min_players,
+        creator=current_user["username"],
+        player_robot={current_user["username"]: partida.robot},
         password=partida.password
     )
     msg = {"msg" : "Se creo la partida con éxito!"}
@@ -55,9 +56,9 @@ async def list_games(
         username = None
     games = PartidaObject.filter_by(
         PartidaObject,
-        filtros.game_creation_date, 
-        username, 
-        filtros.game_name,
-        filtros.only_private
+        datec=filtros.game_creation_date, 
+        creator=username, 
+        name=filtros.game_name,
+        private=filtros.only_private
     )
     return games

@@ -3,27 +3,37 @@ from app.core.models.base import Partida, db
 from app.core.handlers.password_handlers import *
 from pony.orm import *
 import json
+from enum import Enum
+
+class Status(Enum):
+     PREGAME = 0
+     GAME = 1
+     GAMEOVER = 2
 
 class PartidaObject():
 
     all = []
 
     @db_session
-    def __init__(self, name, rounds, games, max_players, min_players, 
-                 creator, creation_date=None, fromdb=None, password=None):
+    def __init__(self, name, rounds, games, max_players, min_players, creator, player_robot, 
+                current_players=None, id=None, creation_date=None, fromdb=None, password=None):
+        self._id = id
         self._name = name
         self._rounds = rounds
         self._games = games 
         self._max_players = max_players
         self._min_players = min_players
+        self._current_players = 1
         self._creator = creator
+        self._players = player_robot
         self._creation_date = (datetime.now().strftime("%Y-%m-%d %H:%M:%S.%f") 
             if not creation_date else creation_date)
         self._password = "" if not password else (hash_password(password) if not fromdb else password)
         self._private = False if not password else True
         self.all.append(self)
+        self._gameStatus = Status.PREGAME
         if not fromdb:
-            Partida(
+            PartidaDB = Partida(
                 rounds = rounds,
                 games = games,
                 name = name,
@@ -31,8 +41,12 @@ class PartidaObject():
                 min_players = min_players,
                 created_by = creator,
                 creation_date = self._creation_date,
-                password = self._password
+                password = self._password,
+                players = self._players
             )
+            PartidaDB.flush()
+            self._id = PartidaDB.id
+
 
     @db_session
     def init_from_db(self):
@@ -42,13 +56,16 @@ class PartidaObject():
             partidas = []
         for partida in partidas:
             game = PartidaObject(
-                partida.name,
-                partida.rounds,
-                partida.games,
-                partida.max_players,
-                partida.min_players,
-                partida.created_by,
-                partida.creation_date,
+                id=partida.id,
+                name=partida.name,
+                rounds=partida.rounds,
+                games=partida.games,
+                max_players=partida.max_players,
+                min_players=partida.min_players,
+                player_robot=json.loads(partida.players),
+                current_players=len(json.loads(partida.players)),
+                creator=partida.created_by,
+                creation_date=partida.creation_date,
                 fromdb=True,
                 password=partida.password)
 
@@ -62,3 +79,10 @@ class PartidaObject():
                 and (x._private == private if private!=None else not private)]
         return partidas
 
+    def get_game_by_id(self, id):
+        for x in self.all:
+            if x._id == id:
+                partida = x 
+        else:
+            partida = None
+        return partida

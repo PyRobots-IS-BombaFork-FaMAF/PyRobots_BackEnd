@@ -19,6 +19,7 @@ class PartidaIn(BaseModel):
     max_players: Optional[int] = Field(4, ge=2, le=4)
     min_players: Optional[int] = Field(2, ge=2, le=4)
     password: str = Field(None, min_length=8, max_length=16)
+    robot: str
 
     @validator("min_players")
     def check_range(cls, v, values):
