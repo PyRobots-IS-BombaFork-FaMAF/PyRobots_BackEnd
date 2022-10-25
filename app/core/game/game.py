@@ -29,8 +29,8 @@ class SimulationResult(NamedTuple):
 
 
 
-max_velocity: float = 10   # m/round
-acceleration: float = 2    # m/round²  # also limit of deceleration
+max_velocity: float = 1   # m/round
+acceleration: float = 0.2    # m/round²  # also limit of deceleration
 board_size: int = 1000     # m
 
 class RobotInGame():
@@ -121,7 +121,7 @@ class GameState():
             # Execute `robotInGame.robot` code if it is alive
             if robotInGame.damage < 1:
                 robotInGame.executeRobotCode()
-        
+
         for robotInGame in self.ourRobots:
             if robotInGame.damage < 1:
                 # Extract new velocity and direction from `robotInGame.robot`
