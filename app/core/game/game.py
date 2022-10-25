@@ -81,8 +81,8 @@ class RobotInGame():
         if direction != None and self.actual_velocity <= max_velocity/2:
             self.direction = direction % 360
         
-        x_component_direction: float = abs(math.cos(math.radians(self.direction)))
-        y_component_direction: float = abs(math.sin(math.radians(self.direction)))
+        x_component_direction: float = math.cos(math.radians(self.direction))
+        y_component_direction: float = math.sin(math.radians(self.direction))
 
         # Calculate velocity difference
         velocity_difference: float = (
@@ -96,8 +96,15 @@ class RobotInGame():
 
         # We have to take into account that the robot may be accelerating or decelerating in part or all of the round
         used_acceleration: float = abs(velocity_difference / acceleration)
-        x_movement: float = x_velocity + x_component_direction * used_acceleration / 2
-        y_movement: float = y_velocity + y_component_direction * used_acceleration / 2
+        unused_acceleration: float = 1 - used_acceleration
+        x_movement: float = (
+            x_velocity + x_component_direction * used_acceleration / 2
+            + x_component_direction * unused_acceleration * velocity_difference
+        )
+        y_movement: float = (
+            y_velocity + y_component_direction * used_acceleration / 2
+            + y_component_direction * unused_acceleration * velocity_difference
+        )
 
         # Update position
         self.position[0] += x_movement
