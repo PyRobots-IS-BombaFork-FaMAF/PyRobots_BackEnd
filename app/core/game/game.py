@@ -54,6 +54,8 @@ class RobotInGame():
             # There are no robots that do not inherit from Robot because that is checked in upload
             self.robot = robotClass()
             self.robot.initialize()
+            # Update position of `robot`
+            self.robot._position = self.position
         except:
             self.damage = 1
             self.cause_of_death = "robot execution error"
