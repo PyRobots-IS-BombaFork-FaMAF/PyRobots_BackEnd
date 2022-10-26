@@ -4,7 +4,7 @@ from app.core.game.robot import *
 
 
 
-def test_RobotInGame():
+def test_empty_RobotInGame():
     import app.tests.robots_for_testing.empty as empty
 
     robot: RobotInGame = RobotInGame(empty.empty, 'empty', True)
@@ -119,11 +119,11 @@ def test_RobotInGame():
 
 
 def test2_RobotInGame():
-    import app.tests.robots_for_testing.empty as empty
+    import app.tests.robots_for_testing.simple as simple
 
-    robot: RobotInGame = RobotInGame(empty.empty, 'empty', False)
+    robot: RobotInGame = RobotInGame(simple.simple, 'simple', False)
 
-    assert robot.name == 'empty'
+    assert robot.name == 'simple'
     assert robot.cause_of_death == None
     assert robot.damage == 0
     assert robot.direction == 0
@@ -136,31 +136,68 @@ def test2_RobotInGame():
 
     # NOTE: When we add collisions, the robot may day in the following tests
 
-    robot.updateOurRobot_movement(0.2, 45)
+    robot.executeRobotCode()
+    robot.updateOurRobot_movement(robot.robot._set_velocity, robot.robot._set_direction)
     position2 = robot.position
     assert abs(position2[0] - (position[0] + 0.1 * math.cos(math.pi/4))) < 0.00001
     assert abs(position2[1] - (position[1] + 0.1 * math.sin(math.pi/4))) < 0.00001
 
-    robot.updateOurRobot_movement(None, None)
+    robot.executeRobotCode()
+    robot.updateOurRobot_movement(robot.robot._set_velocity, robot.robot._set_direction)
     position3 = robot.position
     assert abs(position3[0] - (position2[0] + 0.2 * math.cos(math.pi/4))) < 0.00001
     assert abs(position3[1] - (position2[1] + 0.2 * math.sin(math.pi/4))) < 0.00001
 
-    robot.updateOurRobot_movement(0.2, 135)
+    robot.executeRobotCode()
+    robot.updateOurRobot_movement(robot.robot._set_velocity, robot.robot._set_direction)
     position4 = robot.position
     assert abs(position4[0] - (position3[0] - 0.2 * math.cos(math.pi/4))) < 0.00001
     assert abs(position4[1] - (position3[1] + 0.2 * math.sin(math.pi/4))) < 0.00001
 
-    robot.updateOurRobot_movement(0.4, 45)
+    robot.executeRobotCode()
+    robot.updateOurRobot_movement(robot.robot._set_velocity, robot.robot._set_direction)
     position5 = robot.position
     assert abs(position5[0] - (position4[0] + 0.3 * math.cos(math.pi/4))) < 0.00001
     assert abs(position5[1] - (position4[1] + 0.3 * math.sin(math.pi/4))) < 0.00001
 
-    robot.updateOurRobot_movement(0.6, 60)
+    robot.executeRobotCode()
+    robot.updateOurRobot_movement(robot.robot._set_velocity, robot.robot._set_direction)
     position6 = robot.position
     assert abs(position6[0] - (position5[0] + 0.5 * math.cos(math.pi/3))) < 0.00001
     assert abs(position6[1] - (position5[1] + 0.5 * math.sin(math.pi/3))) < 0.00001
 
+def testExceptions_RobotInGame():
+    import app.tests.robots_for_testing.exception_init as exception_init
+
+    robot: RobotInGame = RobotInGame(exception_init.exception_init, 'exception_init', False)
+
+    assert robot.name == 'exception_init'
+    assert robot.cause_of_death == "robot execution error"
+    assert robot.damage == 1
+
+def testExceptions2_RobotInGame():
+    import app.tests.robots_for_testing.exception_initialize as exception_initialize
+
+    robot: RobotInGame = RobotInGame(exception_initialize.exception_initialize, 'exception_initialize', False)
+
+    assert robot.name == 'exception_initialize'
+    assert robot.cause_of_death == "robot execution error"
+    assert robot.damage == 1
+
+def testExceptions3_RobotInGame():
+    import app.tests.robots_for_testing.exception_respond as exception_respond
+
+    robot: RobotInGame = RobotInGame(exception_respond.exception_respond, 'exception_respond', False)
+
+    assert robot.name == 'exception_respond'
+
+    assert robot.cause_of_death == None
+    assert robot.damage == 0
+
+    robot.executeRobotCode()
+
+    assert robot.cause_of_death == "robot execution error"
+    assert robot.damage == 1
 
 """ r1 = Robot('robot_1')
 

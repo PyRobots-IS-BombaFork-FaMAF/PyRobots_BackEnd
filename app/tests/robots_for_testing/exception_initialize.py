@@ -1,8 +1,8 @@
 from app.core.game.robot import Robot
 
-class empty(Robot):
+class exception_initialize(Robot):
     def initialize(self):
-        pass
+        raise Exception('exception_initialize')
 
     def respond(self):
         pass
