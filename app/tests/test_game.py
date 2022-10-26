@@ -1,4 +1,3 @@
-from turtle import speed
 from app.core.game.game import *
 from app.core.game.robot import *
 
