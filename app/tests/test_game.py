@@ -5,6 +5,7 @@ from app.core.game.robot import *
 
 
 def test_RobotInGame():
+    return
     import app.tests.robots_for_testing.empty as empty
 
     robot: RobotInGame = RobotInGame(empty.empty, 'empty', True)
@@ -87,6 +88,37 @@ def test_RobotInGame():
     assert robot.result_for_animation.rounds[2].speed == 0.1
 
 
+def test2_RobotInGame():
+    import app.tests.robots_for_testing.empty as empty
+
+    robot: RobotInGame = RobotInGame(empty.empty, 'empty', False)
+
+    assert robot.name == 'empty'
+    assert robot.cause_of_death == None
+    assert robot.damage == 0
+    assert robot.direction == 0
+    assert robot.actual_velocity == 0
+    assert robot.desired_velocity == 0
+
+    position = robot.position
+    assert 0 <= position[0] and position[0] <= 1000
+    assert 0 <= position[1] and position[1] <= 1000
+
+    robot.updateOurRobot_movement(0.2, 45)
+
+    position2 = robot.position
+    assert abs(position2[0] - (position[0] + 0.1 * math.cos(math.pi/4))) < 0.00001
+    assert abs(position2[1] - (position[1] + 0.1 * math.sin(math.pi/4))) < 0.00001
+
+    robot.updateOurRobot_movement(None, None)
+    position3 = robot.position
+    assert abs(position3[0] - (position2[0] + 0.2 * math.cos(math.pi/4))) < 0.00001
+    assert abs(position3[1] - (position2[1] + 0.2 * math.sin(math.pi/4))) < 0.00001
+
+    robot.updateOurRobot_movement(0.2, 135)
+    position4 = robot.position
+    assert abs(position4[0] - (position3[0] - 0.2 * math.cos(math.pi/4))) < 0.00001
+    assert abs(position4[1] - (position3[1] + 0.2 * math.sin(math.pi/4))) < 0.00001
 
 
 """ r1 = Robot('robot_1')
