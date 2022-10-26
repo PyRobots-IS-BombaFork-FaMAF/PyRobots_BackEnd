@@ -317,3 +317,52 @@ def testGameState():
     assert len(result_for_animation.robots[1].rounds) == 3
     assert len(result_for_animation.robots[2].rounds) == 1
     assert len(result_for_animation.robots[3].rounds) == 1
+
+
+def testRunSimulation():
+    robotsForSimulation: list[RobotInput] = [
+        RobotInput('app.tests.robots_for_testing.empty', 'empty', 'Empty robot'),
+        RobotInput('app.tests.robots_for_testing.exception_init', 'exception_init', 'Throws exception')
+    ]
+
+    simulationResult = runSimulation(robotsForSimulation, 5, False)
+
+    assert simulationResult == 0
+
+def testRunSimulation2():
+    robotsForSimulation: list[RobotInput] = [
+        RobotInput('app.tests.robots_for_testing.empty', 'empty', 'Empty robot'),
+        RobotInput('app.tests.robots_for_testing.simple', 'simple', 'Simple robot')
+    ]
+
+    simulationResult = runSimulation(robotsForSimulation, 5, False)
+
+    assert simulationResult == None
+
+def testRunSimulation_forAnimation():
+    robotsForSimulation: list[RobotInput] = [
+        RobotInput('app.tests.robots_for_testing.empty', 'empty', 'Empty robot'),
+        RobotInput('app.tests.robots_for_testing.simple', 'simple', 'Simple robot'),
+        RobotInput('app.tests.robots_for_testing.exception_initialize', 'exception_initialize', 'Throws exception'),
+        RobotInput('app.tests.robots_for_testing.invalid_drives', 'invalid_drives', 'Drives bad')
+    ]
+
+    simulationResult = runSimulation(robotsForSimulation, 5, True)
+
+    assert isinstance(simulationResult, SimulationResult)
+
+    assert len(simulationResult.robots) == 4
+    assert len(simulationResult.robots[0].rounds) == 6
+    assert len(simulationResult.robots[1].rounds) == 6
+    assert len(simulationResult.robots[2].rounds) == 1
+    assert len(simulationResult.robots[3].rounds) == 6
+
+    assert simulationResult.robots[0].name == 'Empty robot'
+    assert simulationResult.robots[1].name == 'Simple robot'
+    assert simulationResult.robots[2].name == 'Throws exception'
+    assert simulationResult.robots[3].name == 'Drives bad'
+
+    assert simulationResult.robots[0].cause_of_death == None
+    assert simulationResult.robots[1].cause_of_death == None # NOTE: when adding collisions these may change
+    assert simulationResult.robots[2].cause_of_death == "robot execution error"
+    assert simulationResult.robots[3].cause_of_death == None
