@@ -67,11 +67,10 @@ class RobotInGame():
         self.direction = 0
         self.damage = 0
 
-        self.cause_of_death = None
         if for_animation:
             self.result_for_animation = RobotResult(
                 name,
-                [RobotResult_round(self.position, self.direction, self. actual_velocity)],
+                [RobotResult_round(self.position, self.direction, self.actual_velocity)],
                 None
             )
         else:
@@ -80,9 +79,11 @@ class RobotInGame():
         try:
             # There are no robots that do not inherit from Robot because that is checked in upload
             self.robot = robotClass()
-            self.robot.initialize()
+
             # Update position of `robot`
             self.robot._position = self.position
+
+            self.robot.initialize()
         except:
             self.damage = 1
             self.cause_of_death = "robot execution error"
