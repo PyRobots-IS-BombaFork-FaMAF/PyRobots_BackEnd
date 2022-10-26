@@ -74,6 +74,8 @@ class RobotInGame():
                 [RobotResult_round(self.position, self.direction, self. actual_velocity)],
                 None
             )
+        else:
+            self.result_for_animation = None
 
         try:
             # There are no robots that do not inherit from Robot because that is checked in upload
