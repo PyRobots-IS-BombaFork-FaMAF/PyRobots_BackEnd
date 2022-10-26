@@ -9,6 +9,7 @@ from app.core.models.base import db
 from app.core.handlers.auth_handlers import *
 from app.core.models.game_models import *
 from app.core.game.partida import *
+from fastapi_websocket_pubsub import PubSubEndpoint
 
 router = APIRouter()
 
@@ -21,7 +22,7 @@ async def create_game(
     Creates a game with the parameters passed, the game can
     be started later by the user who created it
     """
-    PartidaObject(
+    partida = PartidaObject(
         name=partida.name,
         rounds=partida.rounds,
         games=partida.games,
@@ -31,7 +32,8 @@ async def create_game(
         player_robot={current_user["username"]: partida.robot},
         password=partida.password
     )
-    msg = {"msg" : "Se creo la partida con éxito!"}
+    websocket = "/game/" + str(partida._id)
+    msg = {"msg" : "Se creo la partida con éxito!", "WebSocket" : websocket}
     return msg
 
 @router.post("/game/list", status_code=200, tags=["Game"])
@@ -62,3 +64,36 @@ async def list_games(
         private=filtros.only_private
     )
     return games
+
+@router.post("/game/{game_id}/join", status_code=200, tags=["Game"])
+async def join_game(
+    game_id: int,
+    robot: str,
+    current_user: User = Depends(get_current_active_user)
+):
+    """
+    Adds a user to an existing game
+    """
+    try:
+        partida = PartidaObject.get_game_by_id(PartidaObject, game_id)
+        print(game_id)
+    except:
+        raise HTTPException(status_code=404, detail= "Partida inexistente")
+    
+    if not partida.is_available():
+        raise HTTPException(status_code=403, detail= "La partida ya está ejecutandose")
+    elif not partida.can_join():
+         raise HTTPException(status_code=403, detail= "Se alcanzó la cantidad máxima de jugadores")
+    else:
+        partida.join_game(current_user["username"], robot)
+    msg = {"msg" : "Te uniste a la partida con éxito!"}
+    return msg
+
+
+@router.websocket("/game/{game_id}")
+async def websocket_endpoint(websocket: WebSocket, game_id: int):
+    try:
+        partida = PartidaObject.get_game_by_id(PartidaObject, game_id)
+    except:
+        raise HTTPException(status_code=404, detail= "Partida inexistente")
+    await partida._connections.connect(websocket)

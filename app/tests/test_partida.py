@@ -6,12 +6,15 @@ from app.core.models.base import User, Validation_data, db, Robot
 from pony.orm import *
 import json
 from urllib.parse import quote
+from app.core.game.partida import *
+from httpx import AsyncClient
 from pony.orm import *
+import pytest
 
 client = TestClient(app_test)
 
 
-def test_create_valid_partida_sin_pass():
+def test_create_valid_partida_sin_pass1():
     response_login = client.post(
         "/token",
         data={
@@ -31,9 +34,10 @@ def test_create_valid_partida_sin_pass():
     body = {
             "rounds": 10000,
             "games": 200,
-            "name": "string",
+            "name": "Exacto",
             "max_players": 4,
-            "min_players": 2
+            "min_players": 2,
+            "robot": "Maximus"
         }
     response = client.post(
         "/game/create",
@@ -65,7 +69,8 @@ def test_create_valid_partida_con_pass():
             "name": "string",
             "max_players": 4,
             "min_players": 2,
-            "password": "Tiffany123"
+            "password": "Tiffany123",
+            "robot": "Maximus"
         }
     response = client.post(
         "/game/create",
@@ -96,7 +101,8 @@ def test_create_valid_partida_default_rounds():
             "games": 200,
             "name": "Prueba1",
             "max_players": 4,
-            "min_players": 2
+            "min_players": 2,
+            "robot": "Maximus"
         }
     response = client.post(
         "/game/create",
@@ -126,7 +132,8 @@ def test_create_valid_partida_default_games():
     body = {
             "name": "Prueba1",
             "max_players": 4,
-            "min_players": 2
+            "min_players": 2,
+            "robot": "Maximus"
         }
     response = client.post(
         "/game/create",
@@ -155,7 +162,8 @@ def test_create_valid_partida_default_max_players():
     head: str = token_type + token
     body = {
             "name": "Prueba1",
-            "min_players": 2
+            "min_players": 2,
+            "robot": "Maximus"
         }
     response = client.post(
         "/game/create",
@@ -183,7 +191,8 @@ def test_create_valid_partida_default_min_players():
     token_type: str = "Bearer "
     head: str = token_type + token
     body = {
-            "name": "Prueba1"
+            "name": "Prueba1",
+            "robot": "Maximus"
         }
     response = client.post(
         "/game/create",
@@ -215,7 +224,8 @@ def test_create_valid_partida_invalid_rounds1():
             "games": 10000,
             "name": "Prueba1",
             "max_players": 4,
-            "min_players": 2
+            "min_players": 2,
+            "robot": "Maximus"
         }
     response = client.post(
         "/game/create",
@@ -247,7 +257,8 @@ def test_create_valid_partida_invalid_rounds2():
             "games": 10000,
             "name": "Prueba1",
             "max_players": 4,
-            "min_players": 2
+            "min_players": 2,
+            "robot": "Maximus"
         }
     response = client.post(
         "/game/create",
@@ -279,7 +290,8 @@ def test_create_valid_partida_invalid_games1():
             "games": 0, # games < 1
             "name": "Prueba1",
             "max_players": 4,
-            "min_players": 2
+            "min_players": 2,
+            "robot": "Maximus"
         }
     response = client.post(
         "/game/create",
@@ -310,7 +322,8 @@ def test_create_valid_partida_invalid_games2():
             "games": 1000, # games > 200
             "name": "Prueba1",
             "max_players": 4,
-            "min_players": 2
+            "min_players": 2,
+            "robot": "Maximus"
         }
     response = client.post(
         "/game/create",
@@ -341,7 +354,8 @@ def test_create_valid_partida_invalid_max_players1():
             "games": 200, 
             "name": "Prueba1",
             "max_players": 1, # max_player < 2
-            "min_players": 2
+            "min_players": 2,
+            "robot": "Maximus"
         }
     response = client.post(
         "/game/create",
@@ -372,7 +386,8 @@ def test_create_invalid_players():
             "games": 200, 
             "name": "Prueba1",
             "max_players": 3, # min_player > max_player
-            "min_players": 4
+            "min_players": 4,
+            "robot": "Maximus"
         }
     response = client.post(
         "/game/create",
@@ -387,7 +402,8 @@ def test_create_partida_without_login():
             "games": 200, 
             "name": "Prueba1",
             "max_players": 4, # min_player > max_player
-            "min_players": 2
+            "min_players": 2,
+            "robot": "Maximus"
         }
     response = client.post(
         "/game/create",
@@ -534,3 +550,53 @@ def test_listar_solo_partidas_de_user():
     )
     tmp_list = response.json()
     assert response.status_code == 200 and len(tmp_list) == 6
+
+def test_register_valid_user_without_avatar():
+    response = client.post("users/register",
+                           data={
+                               "username": "tiffbr19",
+                               "email": "tiffanybricett199625@hotmail.com",
+                               "password": "Tiffanyb19!"
+                           }
+                           )
+    assert response.status_code == 201
+
+@db_session
+def test_validate_user():
+    email = "tiffanybricett199625@hotmail.com"
+    validation_tuple = db.get(
+        "select * from validation_data where email = $email")
+    code = validation_tuple[1]
+    url = "/validate?email="+quote(email)+"&code="+code
+    response = client.get(url)
+    assert response.status_code == 200
+
+
+def test_unirse_a_partida():
+    response_login = client.post(
+        "/token",
+        data={
+            "grant_type": "",
+            "username": "tiffbr19",
+            "password": "Tiffanyb19!",
+            "scope": "",
+            "client_id": "",
+            "client_secret": "",
+        },
+    )
+    assert response_login.status_code == 200
+    rta: dict = response_login.json()
+    token: str = rta["access_token"]
+    token_type: str = "Bearer "
+    head: str = token_type + token
+    body = {
+        "game_id": 1,
+        "robot": "Felipe"
+        }
+    response = client.post(
+        "/game/1/join?robot=Joseph",
+        headers={"accept": "test_application/json", "Authorization": head},
+        json=body
+    )
+    assert response.status_code == 200 
+

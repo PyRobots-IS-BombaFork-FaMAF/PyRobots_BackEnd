@@ -13,3 +13,5 @@ jose
 coverage
 pycryptodome
 social-auth-core[openidconnect]
+fastapi_websocket_pubsub
+pip install pytest-asyncio

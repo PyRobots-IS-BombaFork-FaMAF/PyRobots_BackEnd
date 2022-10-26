@@ -4,6 +4,8 @@ from app.core.handlers.password_handlers import *
 from pony.orm import *
 import json
 from enum import Enum
+from fastapi import WebSocket
+from typing import List
 
 class Status(Enum):
      PREGAME = 0
@@ -32,6 +34,7 @@ class PartidaObject():
         self._private = False if not password else True
         self.all.append(self)
         self._gameStatus = Status.PREGAME
+        self._connections = ConnectionManager()
         if not fromdb:
             PartidaDB = Partida(
                 rounds = rounds,
@@ -80,9 +83,33 @@ class PartidaObject():
         return partidas
 
     def get_game_by_id(self, id):
+        partida = None
         for x in self.all:
             if x._id == id:
                 partida = x 
-        else:
-            partida = None
         return partida
+
+    def join_game(self, username, robot):
+        self._players[username] = robot
+        self._current_players = len(self._players[username])
+        self._connections.broadcast("¡El jugador {username} se ha unido a la partida!")
+
+    def is_available(self):
+        return self._gameStatus==Status.PREGAME
+
+    def can_join(self):
+        return self._current_players < self._max_players
+
+
+class ConnectionManager:
+    def __init__(self):
+        self.connections: List[WebSocket] = []
+
+    async def connect(self, websocket: WebSocket):
+        await websocket.accept()
+        websocket.send_text("Bienvenido a la partida")
+        self.connections.append(websocket)
+
+    def broadcast(self, data: str):
+        for connection in self.connections:
+            connection.send_text(data)
