@@ -50,7 +50,7 @@ def test_RobotInGame():
     assert robot.desired_velocity == 0
     assert robot.position == position
 
-    # Result should have 1 round
+    # Result should have 2 round
     assert robot.result_for_animation.name == 'empty'
     assert robot.result_for_animation.cause_of_death == None
     assert len(robot.result_for_animation.rounds) == 2
@@ -72,7 +72,7 @@ def test_RobotInGame():
     assert abs(robot.position[0] - (position[0] + 0.075)) < 0.00001 # There may be rounding errors
     assert robot.position[1] == position[1]
 
-    # Result should have 2 rounds
+    # Result should have 3 rounds
     assert robot.result_for_animation.name == 'empty'
     assert robot.result_for_animation.cause_of_death == None
     assert len(robot.result_for_animation.rounds) == 3
@@ -85,6 +85,37 @@ def test_RobotInGame():
     assert robot.result_for_animation.rounds[2].coords == robot.position
     assert robot.result_for_animation.rounds[2].direction == 0
     assert robot.result_for_animation.rounds[2].speed == 0.1
+
+    position2 = robot.position # for later
+
+    # Make a more complex movement
+    robot.updateOurRobot_movement(velocity=0.3, direction=135)
+
+    assert robot.name == 'empty'
+    assert robot.cause_of_death == None
+    assert robot.damage == 0     # When collisions are implemented, this may change
+    assert robot.direction == 135
+    assert robot.actual_velocity == 0.3
+    assert robot.desired_velocity == 0.3
+    assert abs(robot.position[0] - (position2[0] - math.cos(math.pi/4) * 0.2)) < 0.00001 # There may be rounding errors
+    assert abs(robot.position[1] - (position2[1] + math.sin(math.pi/4) * 0.2)) < 0.00001 # There may be rounding errors
+
+    # Result should have 4 rounds
+    assert robot.result_for_animation.name == 'empty'
+    assert robot.result_for_animation.cause_of_death == None
+    assert len(robot.result_for_animation.rounds) == 4
+    assert robot.result_for_animation.rounds[0].coords == position
+    assert robot.result_for_animation.rounds[0].direction == 0
+    assert robot.result_for_animation.rounds[0].speed == 0
+    assert robot.result_for_animation.rounds[1].coords == position
+    assert robot.result_for_animation.rounds[1].direction == 0
+    assert robot.result_for_animation.rounds[1].speed == 0
+    assert robot.result_for_animation.rounds[2].coords == position2
+    assert robot.result_for_animation.rounds[2].direction == 0
+    assert robot.result_for_animation.rounds[2].speed == 0.1
+    assert robot.result_for_animation.rounds[3].coords == robot.position
+    assert robot.result_for_animation.rounds[3].direction == 135
+    assert robot.result_for_animation.rounds[3].speed == 0.3
 
 
 def test2_RobotInGame():
@@ -103,8 +134,9 @@ def test2_RobotInGame():
     assert 0 <= position[0] and position[0] <= 1000
     assert 0 <= position[1] and position[1] <= 1000
 
-    robot.updateOurRobot_movement(0.2, 45)
+    # NOTE: When we add collisions, the robot may day in the following tests
 
+    robot.updateOurRobot_movement(0.2, 45)
     position2 = robot.position
     assert abs(position2[0] - (position[0] + 0.1 * math.cos(math.pi/4))) < 0.00001
     assert abs(position2[1] - (position[1] + 0.1 * math.sin(math.pi/4))) < 0.00001
