@@ -6,6 +6,7 @@ from app.core.models.robot_models import *
 from app.core.models.user_models import *
 from app.core.handlers.robot_handlers import *
 from app.core.handlers.auth_handlers import *
+from fastapi.responses import JSONResponse
 import uuid
 
 IMAGEDIR = "app/robot_avatars/"
@@ -89,3 +90,25 @@ def register(
             )
 
     return {msg}
+
+@router.get("/robot/list", status_code=200, tags=["robots"])
+@db_session
+def list_robots( 
+    current_user: User = Depends(get_current_active_user)
+):
+    """
+    returns a list of all created robots that the user has
+    """
+    uname = current_user["username"]
+    robots = db.select("select * from Robot where user = $uname")[:]
+    listRobots = dict()
+    listRobotsUser = []
+    for robot in robots:
+        listRobots = {
+            'name': robot.name,
+            'code': get_original_filename(current_user, robot.name, robot.code),
+            'avatar': robot.avatar
+        }
+        listRobotsUser.append(listRobots)
+    
+    return JSONResponse(listRobotsUser)
