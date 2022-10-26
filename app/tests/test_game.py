@@ -5,7 +5,6 @@ from app.core.game.robot import *
 
 
 def test_RobotInGame():
-    return
     import app.tests.robots_for_testing.empty as empty
 
     robot: RobotInGame = RobotInGame(empty.empty, 'empty', True)
@@ -119,6 +118,16 @@ def test2_RobotInGame():
     position4 = robot.position
     assert abs(position4[0] - (position3[0] - 0.2 * math.cos(math.pi/4))) < 0.00001
     assert abs(position4[1] - (position3[1] + 0.2 * math.sin(math.pi/4))) < 0.00001
+
+    robot.updateOurRobot_movement(0.4, 45)
+    position5 = robot.position
+    assert abs(position5[0] - (position4[0] + 0.3 * math.cos(math.pi/4))) < 0.00001
+    assert abs(position5[1] - (position4[1] + 0.3 * math.sin(math.pi/4))) < 0.00001
+
+    robot.updateOurRobot_movement(0.6, 60)
+    position6 = robot.position
+    assert abs(position6[0] - (position5[0] + 0.5 * math.cos(math.pi/3))) < 0.00001
+    assert abs(position6[1] - (position5[1] + 0.5 * math.sin(math.pi/3))) < 0.00001
 
 
 """ r1 = Robot('robot_1')
