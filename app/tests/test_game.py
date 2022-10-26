@@ -119,7 +119,7 @@ def test_empty_RobotInGame():
 
 
     # Test result for animation
-    result_for_animation = robot.get_result_for_animation()
+    result_for_animation: RobotResult = robot.get_result_for_animation()
     assert result_for_animation.name == 'empty'
     assert result_for_animation.cause_of_death == None
     assert len(result_for_animation.rounds) == 4
@@ -218,34 +218,102 @@ def testExceptions3_RobotInGame():
     assert robot.cause_of_death == "robot execution error"
     assert robot.damage == 1
 
-""" r1 = Robot('robot_1')
+def testInvalidDrives_RobotInGame():
+    import app.tests.robots_for_testing.invalid_drives as invalid_drives
 
-juego = game(4)
+    robot: RobotInGame = RobotInGame(invalid_drives.invalid_drives, 'invalid_drives', False)
 
-juego.add(r1)
+    assert robot.name == 'invalid_drives'
+    assert robot.cause_of_death == None
+    assert robot.damage == 0
 
-def test_add_list():
+    robot.executeRobotCode()
+    robot.executeRobotCode()
+    robot.executeRobotCode()
+    robot.executeRobotCode()
 
-    round = len(juego.listMove)
-    juego.advance_round()
-    round1 = len(juego.listMove)
+    assert robot.name == 'invalid_drives'
+    assert robot.cause_of_death == None
+    assert robot.damage == 0
 
-    assert round + 1 == round1
+    robot.updateOurRobot_movement(-3, 365)
+    robot.updateOurRobot_movement(100, 365)
 
-def test_same_quantity_round():
-    juego.execute_simulacion()
+def testGameState():
+    import app.tests.robots_for_testing.empty as empty
+    import app.tests.robots_for_testing.simple as simple
+    import app.tests.robots_for_testing.exception_init as exception_init
+    import app.tests.robots_for_testing.exception_respond as exception_respond
 
-    assert len(juego.listMove) == juego.quantityRound
+    game: GameState = GameState(
+        { 
+            'empty': empty.empty,
+            'simple': simple.simple,
+            'exception_init': exception_init.exception_init,
+            'exception_respond': exception_respond.exception_respond
+        },
+        for_animation=True
+    )
 
-def test_quantity_round():
-    game1 = game(100012314)
+    assert game.round == 0
+    assert len(game.ourRobots) == 4
+    assert game.ourRobots[0].name == 'empty'
+    assert game.ourRobots[1].name == 'simple'
+    assert game.ourRobots[2].name == 'exception_init'
+    assert game.ourRobots[3].name == 'exception_respond'
 
-    assert game1.quantityRound == 10000
+    assert game.ourRobots[0].cause_of_death == None
+    assert game.ourRobots[1].cause_of_death == None
+    assert game.ourRobots[2].cause_of_death == "robot execution error"
+    assert game.ourRobots[3].cause_of_death == None
 
-def test_add_robot():
-    robotListLen = len(juego.listRobot)
-    r2 = Robot('robot_2')
-    juego.add(r2)
-    robotListLen1 = len(juego.listRobot)
+    assert game.ourRobots[0].damage == 0
+    assert game.ourRobots[1].damage == 0
+    assert game.ourRobots[2].damage == 1
+    assert game.ourRobots[3].damage == 0
 
-    assert robotListLen + 1 == robotListLen1 """
+    assert game.ourRobots[0].direction == 0
+    assert game.ourRobots[1].direction == 0
+    assert game.ourRobots[2].direction == 0
+    assert game.ourRobots[3].direction == 0
+
+    assert game.ourRobots[0].actual_velocity == 0
+    assert game.ourRobots[1].actual_velocity == 0
+    assert game.ourRobots[2].actual_velocity == 0
+    assert game.ourRobots[3].actual_velocity == 0
+
+    assert game.ourRobots[0].desired_velocity == 0
+    assert game.ourRobots[1].desired_velocity == 0
+    assert game.ourRobots[2].desired_velocity == 0
+    assert game.ourRobots[3].desired_velocity == 0
+
+    assert 0 <= game.ourRobots[0].position[0] <= 1000 and 0 <= game.ourRobots[0].position[1] <= 1000
+    assert 0 <= game.ourRobots[1].position[0] <= 1000 and 0 <= game.ourRobots[1].position[1] <= 1000
+    assert 0 <= game.ourRobots[2].position[0] <= 1000 and 0 <= game.ourRobots[2].position[1] <= 1000
+    assert 0 <= game.ourRobots[3].position[0] <= 1000 and 0 <= game.ourRobots[3].position[1] <= 1000
+
+    game.advance_round()
+
+    assert game.round == 1
+
+    assert game.ourRobots[0].cause_of_death == None
+    assert game.ourRobots[1].cause_of_death == None # NOTE: when adding collisions these may change
+    assert game.ourRobots[2].cause_of_death == "robot execution error"
+    assert game.ourRobots[3].cause_of_death == "robot execution error"
+
+    assert game.ourRobots[0].damage == 0
+    assert game.ourRobots[1].damage == 0
+    assert game.ourRobots[2].damage == 1
+    assert game.ourRobots[3].damage == 1
+
+    game.advance_round()
+
+    assert game.round == 2
+
+    result_for_animation: SimulationResult = game.get_result_for_animation()
+
+    assert len(result_for_animation.robots) == 4
+    assert len(result_for_animation.robots[0].rounds) == 3
+    assert len(result_for_animation.robots[1].rounds) == 3
+    assert len(result_for_animation.robots[2].rounds) == 1
+    assert len(result_for_animation.robots[3].rounds) == 1
