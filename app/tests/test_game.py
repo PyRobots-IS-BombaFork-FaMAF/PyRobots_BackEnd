@@ -118,6 +118,25 @@ def test_empty_RobotInGame():
     assert robot.result_for_animation.rounds[3].speed == 0.3
 
 
+    # Test result for animation
+    result_for_animation = robot.get_result_for_animation()
+    assert result_for_animation.name == 'empty'
+    assert result_for_animation.cause_of_death == None
+    assert len(result_for_animation.rounds) == 4
+    assert result_for_animation.rounds[0].coords == position
+    assert result_for_animation.rounds[0].direction == 0
+    assert result_for_animation.rounds[0].speed == 0
+    assert result_for_animation.rounds[1].coords == position
+    assert result_for_animation.rounds[1].direction == 0
+    assert result_for_animation.rounds[1].speed == 0
+    assert result_for_animation.rounds[2].coords == position2
+    assert result_for_animation.rounds[2].direction == 0
+    assert result_for_animation.rounds[2].speed == 0.1
+    assert result_for_animation.rounds[3].coords == robot.position
+    assert result_for_animation.rounds[3].direction == 135
+    assert result_for_animation.rounds[3].speed == 0.3
+
+
 def test2_RobotInGame():
     import app.tests.robots_for_testing.simple as simple
 
