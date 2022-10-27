@@ -135,6 +135,19 @@ def test_empty_RobotInGame():
     assert result_for_animation.rounds[3].direction == 135
     assert result_for_animation.rounds[3].speed == 0.3
 
+    position3 = robot.position # for later
+
+    robot.updateOurRobot_movement(velocity=0.1, direction=135)
+
+    assert robot.name == 'empty'
+    assert robot.cause_of_death == None
+    assert robot.damage == 0     # When collisions are implemented, this may change
+    assert robot.direction == 135
+    assert robot.actual_velocity == 0.1
+    assert robot.desired_velocity == 0.1
+    assert abs(robot.position[0] - (position3[0] - math.cos(math.pi/4) * 0.2)) < 0.00001 # There may be rounding errors
+    assert abs(robot.position[1] - (position3[1] + math.sin(math.pi/4) * 0.2)) < 0.00001 # There may be rounding errors
+
     json_output = result_for_animation.json_output()
 
     assert json_output == {
@@ -143,7 +156,8 @@ def test_empty_RobotInGame():
             { 'coords': {'x': position[0], 'y': position[1] }, 'direction': 0, 'speed': 0 },
             { 'coords': {'x': position[0], 'y': position[1] }, 'direction': 0, 'speed': 0 },
             { 'coords': {'x': position2[0], 'y': position2[1] }, 'direction': 0, 'speed': 0.1 },
-            { 'coords': {'x': robot.position[0], 'y': robot.position[1] }, 'direction': 135, 'speed': 0.3 }
+            { 'coords': {'x': position3[0], 'y': position3[1] }, 'direction': 135, 'speed': 0.3 },
+            { 'coords': {'x': robot.position[0], 'y': robot.position[1] }, 'direction': 135, 'speed': 0.1 }
         ]
     }
 

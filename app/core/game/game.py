@@ -149,11 +149,15 @@ class RobotInGame():
         used_acceleration: float = abs(velocity_difference / acceleration)
         unused_acceleration: float = 1 - used_acceleration
         x_movement: float = (
-            x_velocity + x_component_direction * acceleration * used_acceleration**2 / 2
+            x_velocity
+            + x_component_direction * acceleration * used_acceleration**2 / 2
+                * math.copysign(1, velocity_difference)
             + x_component_direction * unused_acceleration * velocity_difference
         )
         y_movement: float = (
-            y_velocity + y_component_direction * acceleration * used_acceleration**2 / 2
+            y_velocity
+            + y_component_direction * acceleration * used_acceleration**2 / 2
+                * math.copysign(1, velocity_difference)
             + y_component_direction * unused_acceleration * velocity_difference
         )
 
