@@ -6,7 +6,6 @@ from typing import NamedTuple
 import math
 
 
-
 class RobotResult_round():
     coords: tuple[float, float]
     direction: float
@@ -16,6 +15,13 @@ class RobotResult_round():
         self.coords = coords
         self.direction = direction
         self.speed = speed
+    
+    def json_output(self) -> dict:
+        return {
+            "coords": {"x": self.coords[0], "y": self.coords[1]},
+            "direction": self.direction,
+            "speed": self.speed
+        }
 
 class RobotResult():
             
@@ -27,6 +33,16 @@ class RobotResult():
         self.name = name
         self.rounds = rounds
         self.cause_of_death = cause_of_death
+    
+    def json_output(self) -> dict:
+        res = {
+            "name": self.name,
+            "rounds": [round.json_output() for round in self.rounds]
+        }
+        if self.cause_of_death != None:
+            res["cause_of_death"] = self.cause_of_death
+        return res
+
 
 class SimulationResult():
     """
@@ -37,6 +53,9 @@ class SimulationResult():
 
     def __init__(self, robots: list[RobotResult]):
         self.robots = robots
+
+    def json_output(self) -> list[dict]:
+        return [robot.json_output() for robot in self.robots]
 
 
 
