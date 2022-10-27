@@ -135,6 +135,18 @@ def test_empty_RobotInGame():
     assert result_for_animation.rounds[3].direction == 135
     assert result_for_animation.rounds[3].speed == 0.3
 
+    json_output = result_for_animation.json_output()
+
+    assert json_output == {
+        'name': 'empty',
+        'rounds': [
+            { 'coords': {'x': position[0], 'y': position[1] }, 'direction': 0, 'speed': 0 },
+            { 'coords': {'x': position[0], 'y': position[1] }, 'direction': 0, 'speed': 0 },
+            { 'coords': {'x': position2[0], 'y': position2[1] }, 'direction': 0, 'speed': 0.1 },
+            { 'coords': {'x': robot.position[0], 'y': robot.position[1] }, 'direction': 135, 'speed': 0.3 }
+        ]
+    }
+
 
 def test2_RobotInGame():
     import app.tests.robots_for_testing.simple as simple
@@ -184,6 +196,9 @@ def test2_RobotInGame():
     assert abs(position6[0] - (position5[0] + 0.5 * math.cos(math.pi/3))) < 0.00001
     assert abs(position6[1] - (position5[1] + 0.5 * math.sin(math.pi/3))) < 0.00001
 
+    assert robot.get_result_for_animation() == None
+
+
 def testExceptions_RobotInGame():
     import app.tests.robots_for_testing.exception_init as exception_init
 
@@ -193,6 +208,8 @@ def testExceptions_RobotInGame():
     assert robot.cause_of_death == "robot execution error"
     assert robot.damage == 1
 
+    assert robot.get_result_for_animation() == None
+
 def testExceptions2_RobotInGame():
     import app.tests.robots_for_testing.exception_initialize as exception_initialize
 
@@ -201,6 +218,8 @@ def testExceptions2_RobotInGame():
     assert robot.name == 'exception_initialize'
     assert robot.cause_of_death == "robot execution error"
     assert robot.damage == 1
+
+    assert robot.get_result_for_animation() == None
 
 def testExceptions3_RobotInGame():
     import app.tests.robots_for_testing.exception_respond as exception_respond
@@ -216,6 +235,8 @@ def testExceptions3_RobotInGame():
 
     assert robot.cause_of_death == "robot execution error"
     assert robot.damage == 1
+
+    assert robot.get_result_for_animation() == None
 
 def testInvalidDrives_RobotInGame():
     import app.tests.robots_for_testing.invalid_drives as invalid_drives
@@ -237,6 +258,8 @@ def testInvalidDrives_RobotInGame():
 
     robot.updateOurRobot_movement(-3, 365)
     robot.updateOurRobot_movement(100, 365)
+
+    assert robot.get_result_for_animation() == None
 
 def testGameState():
     import app.tests.robots_for_testing.empty as empty
@@ -317,6 +340,13 @@ def testGameState():
     assert len(result_for_animation.robots[2].rounds) == 1
     assert len(result_for_animation.robots[3].rounds) == 1
 
+    json_output = result_for_animation.json_output()
+
+    assert len(json_output) == 4
+    assert len(json_output[0]['rounds']) == 3
+    assert len(json_output[1]['rounds']) == 3
+    assert len(json_output[2]['rounds']) == 1
+    assert len(json_output[3]['rounds']) == 1
 
 def testRunSimulation():
     robotsForSimulation: list[RobotInput] = [
