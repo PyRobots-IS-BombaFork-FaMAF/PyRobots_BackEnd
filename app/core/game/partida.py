@@ -35,6 +35,7 @@ class PartidaObject():
         self.all.append(self)
         self._gameStatus = Status.PREGAME
         self._connections = ConnectionManager()
+        self._websocketurl = f"/game/{self._id}"
         if not fromdb:
             PartidaDB = Partida(
                 rounds = rounds,
@@ -49,6 +50,7 @@ class PartidaObject():
             )
             PartidaDB.flush()
             self._id = PartidaDB.id
+            self._websocketurl = f"/game/{self._id}"
 
 
     @db_session
@@ -58,19 +60,20 @@ class PartidaObject():
         except Exception as err:
             partidas = []
         for partida in partidas:
-            game = PartidaObject(
-                id=partida.id,
-                name=partida.name,
-                rounds=partida.rounds,
-                games=partida.games,
-                max_players=partida.max_players,
-                min_players=partida.min_players,
-                player_robot=json.loads(partida.players),
-                current_players=len(json.loads(partida.players)),
-                creator=partida.created_by,
-                creation_date=partida.creation_date,
-                fromdb=True,
-                password=partida.password)
+            if partida.game_over != 1:
+                game = PartidaObject(
+                    id=partida.id,
+                    name=partida.name,
+                    rounds=partida.rounds,
+                    games=partida.games,
+                    max_players=partida.max_players,
+                    min_players=partida.min_players,
+                    player_robot=json.loads(partida.players),
+                    current_players=len(json.loads(partida.players)),
+                    creator=partida.created_by,
+                    creation_date=partida.creation_date,
+                    fromdb=True,
+                    password=partida.password)
 
     def filter_by(self, datec=None, creator=None, name=None, private=None):
         partidas = [
@@ -92,9 +95,9 @@ class PartidaObject():
     @db_session
     async def join_game(self, username, robot):
         self._players[username] = robot
-        self._current_players = len(self._players[username])
+        self._current_players = len(self._players)
         Partida[self._id].players = self._players 
-        await self._connections.broadcast("¡El jugador {username} se ha unido a la partida!")
+        await self._connections.broadcast(f"\n¡El jugador {username} se ha unido a la partida!")
 
     def is_available(self):
         return self._gameStatus==Status.PREGAME
@@ -113,9 +116,12 @@ class ConnectionManager:
 
     async def connect(self, websocket: WebSocket):
         await websocket.accept()
-        websocket.send_text("Bienvenido a la partida")
+        await websocket.send_text("Bienvenido a la partida")
         self.connections.append(websocket)
 
     async def broadcast(self, data: str):
         for connection in self.connections:
-            await connection.send_text(data)
+            try:
+                await connection.send_text(data)
+            except:
+                self.connections.remove(connection)

@@ -2,6 +2,7 @@ from logging import Filter
 from tokenize import String
 from datetime import datetime, timedelta
 from fastapi import *
+from fastapi import WebSocket as ws
 from fastapi.responses import JSONResponse, HTMLResponse
 from pony.orm import *
 from typing import Union, Optional
@@ -10,7 +11,6 @@ from app.core.handlers.auth_handlers import *
 from app.core.handlers.password_handlers import *
 from app.core.models.game_models import *
 from app.core.game.partida import *
-from fastapi_websocket_pubsub import PubSubEndpoint
 
 router = APIRouter()
 
@@ -33,8 +33,7 @@ async def create_game(
         player_robot={current_user["username"]: partida.robot},
         password=partida.password
     )
-    websocket = "/game/" + str(partida._id)
-    msg = {"msg" : "Se creo la partida con éxito!", "WebSocket" : websocket}
+    msg = {"msg" : "Se creo la partida con éxito!", "WebSocket" : partida._websocketurl}
     return msg
 
 @router.post("/game/list", status_code=200, tags=["Game"])
@@ -85,13 +84,12 @@ async def join_game(
         raise HTTPException(status_code=403, detail= "La partida ya está ejecutandose")
     elif not partida.can_join():
         raise HTTPException(status_code=403, detail= "Se alcanzó la cantidad máxima de jugadores")
-    elif partida._private:
+    else:
         if game.password == None or not verify_password(partida._password, game.password):
             raise HTTPException(status_code=403, detail= "La contraseña es incorrecta")
-    else:
-        partida.join_game(current_user["username"], game.robot)
-    websocket = "/game/" + str(partida._id)
-    msg = {"msg" : "Te uniste a la partida con éxito!", "WebSocket": websocket}
+        else:
+            await partida.join_game(current_user["username"], game.robot)
+    msg = {"msg" : "Te uniste a la partida con éxito!", "WebSocket": partida._websocketurl}
     return msg
 
 
@@ -103,5 +101,10 @@ async def websocket_endpoint(websocket: WebSocket, game_id: int):
         raise HTTPException(status_code=404, detail= "Partida inexistente")
     try:
         await partida._connections.connect(websocket)
-    except WebSocketDisconnect:
-        await websocket.close()
+    except RuntimeError:
+        raise HTTPException(status_code=404, detail= "Error estableciendo conexión")
+    while True:
+        try:
+            await websocket.receive()
+        except RuntimeError:
+            break

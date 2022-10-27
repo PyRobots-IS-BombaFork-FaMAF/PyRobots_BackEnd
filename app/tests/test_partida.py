@@ -592,7 +592,7 @@ def test_unirse_a_partida():
         "robot": "Felipe"
         }
     response = client.post(
-        "/game/1/join?robot=Felipe",
+        "/game/1/join",
         headers={"accept": "test_application/json", "Authorization": head},
         json=body
     )
