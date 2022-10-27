@@ -101,4 +101,7 @@ async def websocket_endpoint(websocket: WebSocket, game_id: int):
         partida = PartidaObject.get_game_by_id(PartidaObject, game_id)
     except:
         raise HTTPException(status_code=404, detail= "Partida inexistente")
-    await partida._connections.connect(websocket)
+    try:
+        await partida._connections.connect(websocket)
+    except WebSocketDisconnect:
+        await websocket.close()
