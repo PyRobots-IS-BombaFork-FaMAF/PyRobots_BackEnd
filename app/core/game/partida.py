@@ -105,11 +105,15 @@ class ConnectionManager:
     def __init__(self):
         self.connections: List[WebSocket] = []
 
+    async def desconnect(self, websocket: WebSocket):
+        await websocket.close()
+        self.connections.remove(websocket)
+
     async def connect(self, websocket: WebSocket):
         await websocket.accept()
         websocket.send_text("Bienvenido a la partida")
         self.connections.append(websocket)
 
-    def broadcast(self, data: str):
+    async def broadcast(self, data: str):
         for connection in self.connections:
-            connection.send_text(data)
+            await connection.send_text(data)
