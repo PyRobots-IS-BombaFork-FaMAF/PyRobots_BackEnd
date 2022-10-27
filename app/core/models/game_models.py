@@ -49,3 +49,13 @@ class Filters(BaseModel):
     game_creation_date: Optional[datetime] = None
     created_by_user: Optional[bool] = None
     only_private: Optional[bool] = None
+
+
+class PartidaJoin(BaseModel):
+    """
+    BaseModel for the data received when an user is trying to join
+    a game
+    """
+    game_id: int
+    robot: str
+    password: Optional[str] = Field(None)

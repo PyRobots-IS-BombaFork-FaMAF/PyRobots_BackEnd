@@ -7,6 +7,7 @@ from pony.orm import *
 from typing import Union, Optional
 from app.core.models.base import db 
 from app.core.handlers.auth_handlers import *
+from app.core.handlers.password_handlers import *
 from app.core.models.game_models import *
 from app.core.game.partida import *
 from fastapi_websocket_pubsub import PubSubEndpoint
@@ -67,25 +68,26 @@ async def list_games(
 
 @router.post("/game/{game_id}/join", status_code=200, tags=["Game"])
 async def join_game(
-    game_id: int,
-    robot: str,
+    game: PartidaJoin,
     current_user: User = Depends(get_current_active_user)
 ):
     """
     Adds a user to an existing game
     """
     try:
-        partida = PartidaObject.get_game_by_id(PartidaObject, game_id)
-        print(game_id)
+        partida = PartidaObject.get_game_by_id(PartidaObject, game.game_id)
     except:
         raise HTTPException(status_code=404, detail= "Partida inexistente")
     
     if not partida.is_available():
         raise HTTPException(status_code=403, detail= "La partida ya está ejecutandose")
     elif not partida.can_join():
-         raise HTTPException(status_code=403, detail= "Se alcanzó la cantidad máxima de jugadores")
+        raise HTTPException(status_code=403, detail= "Se alcanzó la cantidad máxima de jugadores")
+    elif partida._private:
+        if game.password == None or not verify_password(partida._password, game.password):
+            raise HTTPException(status_code=403, detail= "La contraseña es incorrecta")
     else:
-        partida.join_game(current_user["username"], robot)
+        partida.join_game(current_user["username"], game.robot)
     msg = {"msg" : "Te uniste a la partida con éxito!"}
     return msg
 

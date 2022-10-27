@@ -7,12 +7,10 @@ from pony.orm import *
 import json
 from urllib.parse import quote
 from app.core.game.partida import *
-from httpx import AsyncClient
 from pony.orm import *
 import pytest
 
 client = TestClient(app_test)
-
 
 def test_create_valid_partida_sin_pass1():
     response_login = client.post(
@@ -590,11 +588,11 @@ def test_unirse_a_partida():
     token_type: str = "Bearer "
     head: str = token_type + token
     body = {
-        "game_id": 1,
+        "game_id": 2,
         "robot": "Felipe"
         }
     response = client.post(
-        "/game/1/join?robot=Joseph",
+        "/game/2/join?robot=Joseph",
         headers={"accept": "test_application/json", "Authorization": head},
         json=body
     )
