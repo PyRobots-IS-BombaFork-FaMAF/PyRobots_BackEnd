@@ -88,7 +88,8 @@ async def join_game(
             raise HTTPException(status_code=403, detail= "La contraseña es incorrecta")
     else:
         partida.join_game(current_user["username"], game.robot)
-    msg = {"msg" : "Te uniste a la partida con éxito!"}
+    websocket = "/game/" + str(partida._id)
+    msg = {"msg" : "Te uniste a la partida con éxito!", "WebSocket": websocket}
     return msg
 
 
