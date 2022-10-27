@@ -79,7 +79,9 @@ async def join_game(
     except:
         raise HTTPException(status_code=404, detail= "Partida inexistente")
     
-    if not partida.is_available():
+    if partida == None:
+        raise HTTPException(status_code=404, detail= "Partida inexistente")
+    elif not partida.is_available():
         raise HTTPException(status_code=403, detail= "La partida ya está ejecutandose")
     elif not partida.can_join():
         raise HTTPException(status_code=403, detail= "Se alcanzó la cantidad máxima de jugadores")
