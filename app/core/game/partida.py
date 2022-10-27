@@ -89,10 +89,12 @@ class PartidaObject():
                 partida = x 
         return partida
 
-    def join_game(self, username, robot):
+    @db_session
+    async def join_game(self, username, robot):
         self._players[username] = robot
         self._current_players = len(self._players[username])
-        self._connections.broadcast("¡El jugador {username} se ha unido a la partida!")
+        Partida[self._id].players = self._players 
+        await self._connections.broadcast("¡El jugador {username} se ha unido a la partida!")
 
     def is_available(self):
         return self._gameStatus==Status.PREGAME
