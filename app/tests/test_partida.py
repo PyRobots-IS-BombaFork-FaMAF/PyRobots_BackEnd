@@ -588,11 +588,11 @@ def test_unirse_a_partida():
     token_type: str = "Bearer "
     head: str = token_type + token
     body = {
-        "game_id": 2,
+        "game_id": 1,
         "robot": "Felipe"
         }
     response = client.post(
-        "/game/2/join?robot=Joseph",
+        "/game/1/join?robot=Felipe",
         headers={"accept": "test_application/json", "Authorization": head},
         json=body
     )
