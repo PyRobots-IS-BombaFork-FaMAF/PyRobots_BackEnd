@@ -4,6 +4,7 @@ from app.core.game.robot import Robot
 from types import ModuleType
 from typing import NamedTuple
 import math
+from app.core.game.constants import *
 
 
 class RobotResult_round():
@@ -59,11 +60,6 @@ class SimulationResult():
 
 
 
-
-
-max_velocity: float = 1   # m/round
-acceleration: float = 0.2    # m/round²  # also limit of deceleration
-board_size: int = 1000     # m
 
 class RobotInGame():
     name: str  # Only for generating the `json`

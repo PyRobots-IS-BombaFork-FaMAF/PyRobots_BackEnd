@@ -1,5 +1,6 @@
 from abc import abstractmethod
 from typing import Tuple, Optional
+import app.core.game.constants as _constants
 
 
 
@@ -35,7 +36,7 @@ class Robot(object):
         return self._actual_direction
 
     def get_velocity(self):
-        return self._actual_velocity
+        return self._actual_velocity / _constants.max_velocity * 100
 
     def get_position(self):
         return self._position
@@ -45,8 +46,5 @@ class Robot(object):
 
     #Motor
     def drive(self, direction, velocity):
-        if velocity < 100:
-            self._set_velocity = velocity
-        else:
-            self._set_velocity = 100
+        self._set_velocity = velocity / 100 * _constants.max_velocity
         self._set_direction = direction
