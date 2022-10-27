@@ -42,7 +42,7 @@ class Robot(object):
         return self._position
 
     def get_damage(self):
-        return self._damage
+        return self._damage * 100
 
     #Motor
     def drive(self, direction, velocity):
