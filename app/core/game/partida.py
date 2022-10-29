@@ -7,11 +7,6 @@ from enum import Enum
 from fastapi import WebSocket
 from typing import List
 
-class Status(Enum):
-     PREGAME = 0
-     GAME = 1
-     GAMEOVER = 2
-
 class PartidaObject():
 
     all = []
@@ -33,7 +28,7 @@ class PartidaObject():
         self._password = "" if not password else (hash_password(password) if not fromdb else password)
         self._private = False if not password else True
         self.all.append(self)
-        self._gameStatus = Status.PREGAME
+        self._gameStatus = 0
         self._connections = ConnectionManager()
         self._websocketurl = f"/game/{self._id}"
         if not fromdb:
@@ -83,7 +78,10 @@ class PartidaObject():
                 and (not creator or x._creator.lower() == creator.lower()) 
                 and (not name or x._name.lower() == name.lower())
                 and (x._private == private if private!=None else not private)]
-        return partidas
+        result = json.dumps(partidas, default=lambda o: '<not serializable>', indent=4)
+        print(result)
+        return json.dumps(partidas, default=lambda o: '<not serializable>', 
+            sort_keys=True)
 
     def get_game_by_id(self, id):
         partida = None
@@ -100,7 +98,7 @@ class PartidaObject():
         await self._connections.broadcast(f"\n¡El jugador {username} se ha unido a la partida!")
 
     def is_available(self):
-        return self._gameStatus==Status.PREGAME
+        return self._gameStatus==0
 
     def can_join(self):
         return self._current_players < self._max_players

@@ -1,0 +1,3 @@
+omit =
+    app/tests/robots_for_testing/*
+    app/core/config.py

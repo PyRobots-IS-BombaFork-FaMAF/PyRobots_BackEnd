@@ -93,7 +93,7 @@ async def join_game(
     return msg
 
 
-@router.websocket("/game/{game_id}")
+@router.websocket("/game/lobby/{game_id}")
 async def websocket_endpoint(websocket: WebSocket, game_id: int):
     try:
         partida = PartidaObject.get_game_by_id(PartidaObject, game_id)
