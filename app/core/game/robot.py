@@ -14,7 +14,7 @@ class Robot(object):
     _set_direction: Optional[float]      # Direction that was set by the robot
     _position: Tuple[float, float]
     _damage: float
-    _scan_desired: Tuple [float, float]
+    _desired_scan: Tuple [float, float]
     _last_scaned: float
 
     def __init__(self):
@@ -54,7 +54,7 @@ class Robot(object):
         self._set_direction = direction
 
     def point_scanner(self, direction, resolution_in_degrees):
-        self._scan_desired = (direction, resolution_in_degrees)
+        self._desired_scan = (direction, resolution_in_degrees)
     
     def scanned(self):
         return self._last_scaned_in_degrees
