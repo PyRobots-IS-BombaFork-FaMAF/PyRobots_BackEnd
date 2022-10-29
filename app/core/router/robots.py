@@ -105,6 +105,7 @@ def list_robots(
     listRobotsUser = []
     for robot in robots:
         listRobots = {
+            'id': robot.id,
             'name': robot.name,
             'code': get_original_filename(current_user, robot.name, robot.code),
             'avatar': robot.avatar
