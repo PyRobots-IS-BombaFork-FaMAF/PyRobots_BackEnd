@@ -61,3 +61,14 @@ async def list_games(
         filtros.only_private
     )
     return games
+
+@router.post("/simulation", status_code=200, tags=["Game"])
+@db_session
+def simulation( 
+    current_user: User = Depends(get_current_active_user),
+    robots: json
+):
+    """
+    run the simulation and return the results of the simulation
+    """
+    
