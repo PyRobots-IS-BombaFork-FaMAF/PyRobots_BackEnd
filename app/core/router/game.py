@@ -57,7 +57,6 @@ async def list_games(
     else:
         username = None
     games = PartidaObject.filter_by(
-        PartidaObject,
         datec=filtros.game_creation_date, 
         creator=username, 
         name=filtros.game_name,
@@ -74,7 +73,7 @@ async def join_game(
     Adds a user to an existing game
     """
     try:
-        partida = PartidaObject.get_game_by_id(PartidaObject, game.game_id)
+        partida = PartidaObject.get_game_by_id(game.game_id)
     except:
         raise HTTPException(status_code=404, detail= "Partida inexistente")
     
@@ -85,7 +84,8 @@ async def join_game(
     elif not partida.can_join():
         raise HTTPException(status_code=403, detail= "Se alcanzó la cantidad máxima de jugadores")
     else:
-        if game.password == None or not verify_password(partida._password, game.password):
+        if partida._private and (game.password == None or not 
+        verify_password(partida._password, game.password)):
             raise HTTPException(status_code=403, detail= "La contraseña es incorrecta")
         else:
             await partida.join_game(current_user["username"], game.robot)
@@ -96,7 +96,7 @@ async def join_game(
 @router.websocket("/game/lobby/{game_id}")
 async def websocket_endpoint(websocket: WebSocket, game_id: int):
     try:
-        partida = PartidaObject.get_game_by_id(PartidaObject, game_id)
+        partida = PartidaObject.get_game_by_id(game_id)
     except:
         raise HTTPException(status_code=404, detail= "Partida inexistente")
     try:

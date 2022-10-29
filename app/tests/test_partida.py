@@ -435,7 +435,8 @@ def test_listar_todas_partidas():
         json=body
     )
     tmp_list = response.json()
-    assert response.status_code == 200 and len(tmp_list) == 6
+    data = json.loads(tmp_list)
+    assert response.status_code == 200 and len(data) == 6
 
 def test_listar_partidas_por_fecha():
     response_login = client.post(
@@ -463,7 +464,8 @@ def test_listar_partidas_por_fecha():
         json=body
     )
     tmp_list = response.json()
-    assert response.status_code == 200 and len(tmp_list) == 6
+    data = json.loads(tmp_list)
+    assert response.status_code == 200 and len(data) == 6
 
 def test_listar_solo_partidas_publicas():
     response_login = client.post(
@@ -491,7 +493,8 @@ def test_listar_solo_partidas_publicas():
         json=body
     )
     tmp_list = response.json()
-    assert response.status_code == 200 and len(tmp_list) == 5
+    data = json.loads(tmp_list)
+    assert response.status_code == 200 and len(data) == 5
 
 def test_listar_solo_partidas_privadas():
     response_login = client.post(
@@ -519,7 +522,8 @@ def test_listar_solo_partidas_privadas():
         json=body
     )
     tmp_list = response.json()
-    assert response.status_code == 200 and len(tmp_list) == 1
+    data = json.loads(tmp_list)
+    assert response.status_code == 200 and len(data) == 1
 
 def test_listar_solo_partidas_de_user():
     response_login = client.post(
@@ -547,7 +551,8 @@ def test_listar_solo_partidas_de_user():
         json=body
     )
     tmp_list = response.json()
-    assert response.status_code == 200 and len(tmp_list) == 6
+    data = json.loads(tmp_list)
+    assert response.status_code == 200 and len(data) == 6
 
 def test_register_valid_user_without_avatar():
     response = client.post("users/register",
@@ -570,7 +575,7 @@ def test_validate_user():
     assert response.status_code == 200
 
 
-def test_unirse_a_partida():
+def test_unirse_a_partida_sin_pass():
     response_login = client.post(
         "/token",
         data={
@@ -596,5 +601,155 @@ def test_unirse_a_partida():
         headers={"accept": "test_application/json", "Authorization": head},
         json=body
     )
+    print(response.json())
     assert response.status_code == 200 
 
+def test_unirse_a_partida_con_pass():
+    response_login = client.post(
+        "/token",
+        data={
+            "grant_type": "",
+            "username": "tiffbr19",
+            "password": "Tiffanyb19!",
+            "scope": "",
+            "client_id": "",
+            "client_secret": "",
+        },
+    )
+    assert response_login.status_code == 200
+    rta: dict = response_login.json()
+    token: str = rta["access_token"]
+    token_type: str = "Bearer "
+    head: str = token_type + token
+    body = {
+        "game_id": 2,
+        "robot": "Felipe",
+        "password": "Tiffany123"
+        }
+    response = client.post(
+        "/game/2/join",
+        headers={"accept": "test_application/json", "Authorization": head},
+        json=body
+    )
+    assert response.status_code == 200 
+
+def test_unirse_a_partida_con_pass_invalido():
+    response_login = client.post(
+        "/token",
+        data={
+            "grant_type": "",
+            "username": "tiffbr19",
+            "password": "Tiffanyb19!",
+            "scope": "",
+            "client_id": "",
+            "client_secret": "",
+        },
+    )
+    assert response_login.status_code == 200
+    rta: dict = response_login.json()
+    token: str = rta["access_token"]
+    token_type: str = "Bearer "
+    head: str = token_type + token
+    body = {
+        "game_id": 2,
+        "robot": "Felipe",
+        "password": "12345678"
+        }
+    response = client.post(
+        "/game/2/join",
+        headers={"accept": "test_application/json", "Authorization": head},
+        json=body
+    )
+    assert response.status_code == 403
+
+def test_unirse_a_partida_sin_robot():
+    response_login = client.post(
+        "/token",
+        data={
+            "grant_type": "",
+            "username": "tiffbr19",
+            "password": "Tiffanyb19!",
+            "scope": "",
+            "client_id": "",
+            "client_secret": "",
+        },
+    )
+    assert response_login.status_code == 200
+    rta: dict = response_login.json()
+    token: str = rta["access_token"]
+    token_type: str = "Bearer "
+    head: str = token_type + token
+    body = {
+        "game_id": 2
+        }
+    response = client.post(
+        "/game/2/join",
+        headers={"accept": "test_application/json", "Authorization": head},
+        json=body
+    )
+    assert response.status_code == 422
+
+def test_unirse_a_partida_llena():
+    response_login = client.post(
+        "/token",
+        data={
+            "grant_type": "",
+            "username": "tiffbr19",
+            "password": "Tiffanyb19!",
+            "scope": "",
+            "client_id": "",
+            "client_secret": "",
+        },
+    )
+    assert response_login.status_code == 200
+    rta: dict = response_login.json()
+    token: str = rta["access_token"]
+    token_type: str = "Bearer "
+    head: str = token_type + token
+    partida = PartidaObject.get_game_by_id(1)
+    partida._current_players = 4
+    body = {
+        "game_id": 1,
+        "robot": "Felipe"
+        }
+    response = client.post(
+        "/game/2/join",
+        headers={"accept": "test_application/json", "Authorization": head},
+        json=body
+    )
+    assert response.status_code == 403
+
+def test_unirse_a_partida_en_curso():
+    response_login = client.post(
+        "/token",
+        data={
+            "grant_type": "",
+            "username": "tiffbr19",
+            "password": "Tiffanyb19!",
+            "scope": "",
+            "client_id": "",
+            "client_secret": "",
+        },
+    )
+    assert response_login.status_code == 200
+    rta: dict = response_login.json()
+    token: str = rta["access_token"]
+    token_type: str = "Bearer "
+    head: str = token_type + token
+    partida = PartidaObject.get_game_by_id(1)
+    partida._gameStatus = 1
+    body = {
+        "game_id": 1,
+        "robot": "Felipe"
+        }
+    response = client.post(
+        "/game/2/join",
+        headers={"accept": "test_application/json", "Authorization": head},
+        json=body
+    )
+    assert response.status_code == 403
+
+def test_websocket():
+    with client.websocket_connect("/game/lobby/1") as websocket:
+        data = websocket.receive_text()
+        assert data == "Bienvenido a la partida"

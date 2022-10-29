@@ -3,7 +3,6 @@ from app.core.models.base import Partida, db
 from app.core.handlers.password_handlers import *
 from pony.orm import *
 import json
-from enum import Enum
 from fastapi import WebSocket
 from typing import List
 
@@ -27,7 +26,7 @@ class PartidaObject():
             if not creation_date else creation_date)
         self._password = "" if not password else (hash_password(password) if not fromdb else password)
         self._private = False if not password else True
-        self.all.append(self)
+        PartidaObject.all.append(self)
         self._gameStatus = 0
         self._connections = ConnectionManager()
         self._websocketurl = f"/game/{self._id}"
@@ -47,9 +46,9 @@ class PartidaObject():
             self._id = PartidaDB.id
             self._websocketurl = f"/game/{self._id}"
 
-
+    @classmethod
     @db_session
-    def init_from_db(self):
+    def init_from_db(cls):
         try:
             partidas = db.select("select * from Partida where game_over=0")[:]
         except Exception as err:
@@ -70,22 +69,23 @@ class PartidaObject():
                     fromdb=True,
                     password=partida.password)
 
-    def filter_by(self, datec=None, creator=None, name=None, private=None):
+    @classmethod
+    def filter_by(cls, datec=None, creator=None, name=None, private=None):
         partidas = [
-            vars(x) for x in self.all if 
+            vars(x) for x in cls.all if 
                 (not datec 
                 or datetime.strptime(x._creation_date,"%Y-%m-%d %H:%M:%S.%f").date() == datec.date()) 
                 and (not creator or x._creator.lower() == creator.lower()) 
                 and (not name or x._name.lower() == name.lower())
                 and (x._private == private if private!=None else not private)]
         result = json.dumps(partidas, default=lambda o: '<not serializable>', indent=4)
-        print(result)
         return json.dumps(partidas, default=lambda o: '<not serializable>', 
             sort_keys=True)
 
-    def get_game_by_id(self, id):
+    @classmethod
+    def get_game_by_id(cls, id):
         partida = None
-        for x in self.all:
+        for x in cls.all:
             if x._id == id:
                 partida = x 
         return partida
