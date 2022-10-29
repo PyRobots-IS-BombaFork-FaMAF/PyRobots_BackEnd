@@ -254,13 +254,15 @@ def getRobots(robots: list[RobotInput]) -> list[type]:
     return list(map(lambda robotInput: getRobot(robotInput.pathToCode, robotInput.robotClassName), robots))
 
 
-def runSimulation(robots: list[RobotInput], rounds: int, for_animation: bool = False) -> Union[SimulationResult, Optional[int]]:
+def runSimulation(robots: list[RobotInput], rounds: int, for_animation: bool = False) -> Union[SimulationResult, list[int]]:
     """
     Run a simulation with the robots on the given paths.
     Paths are in python format (e.g. `'app.robot_code.robot1'`).
 
-    If `for_animation` is `True` the result will be a `SimulationResult` object,
-    otherwise will be, if there is a winner the position in `robots` of the winner and if there is no winner, `None`.
+    If `for_animation` is `True` the result will be a `SimulationResult` object.
+    Otherwise will be, the index of surviving robots. So if it is a list of one element, the element
+    will be the index of the winner. If it has no element it is because all robots died. And if it has
+    more than one element, it is because there was a tie.
     """
 
     robotsClasses: list[type] = getRobots(robots)
@@ -273,10 +275,9 @@ def runSimulation(robots: list[RobotInput], rounds: int, for_animation: bool = F
     
     if for_animation:
         return gameState.get_result_for_animation()
-    elif gameState.amount_of_robots_alive() == 1:
-        return robotsNames.index([robot.name for robot in gameState.ourRobots if robot.damage < 1][0])
     else:
-        return None
+        return [robotsNames.index(robot.name) for robot in gameState.ourRobots if robot.damage < 1]
+
 
 
 

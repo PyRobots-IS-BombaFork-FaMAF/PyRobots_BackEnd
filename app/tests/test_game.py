@@ -370,7 +370,7 @@ def testRunSimulation():
 
     simulationResult = runSimulation(robotsForSimulation, 5, False)
 
-    assert simulationResult == 0
+    assert simulationResult == [0]
 
 def testRunSimulation2():
     robotsForSimulation: list[RobotInput] = [
@@ -380,7 +380,7 @@ def testRunSimulation2():
 
     simulationResult = runSimulation(robotsForSimulation, 5, False)
 
-    assert simulationResult == None
+    assert simulationResult == [0, 1]
 
 def testRunSimulation_forAnimation():
     robotsForSimulation: list[RobotInput] = [
