@@ -63,7 +63,6 @@ def register(
         try:
             code.file.seek(0)
             contents = code.file.read()  # Important to wait
-            print(code.filename)
             code_name = CODEDIR + code.filename
 
             with open(f"{code_name}", "wb") as f:
@@ -107,7 +106,7 @@ def list_robots(
         listRobots = {
             'id': robot.id,
             'name': robot.name,
-            'code': get_original_filename(current_user, robot.name, robot.code),
+            'code': get_original_filename(current_user, robot.name, robot.code.rsplit('/', 1)[1]),
             'avatar': robot.avatar
         }
         listRobotsUser.append(listRobots)
