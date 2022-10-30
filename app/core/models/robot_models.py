@@ -34,3 +34,12 @@ class Robot(BaseModel):
     name: str
     code: str
     avatar: Optional[str] = None
+
+
+class RobotSimulation(BaseModel):
+    """
+    BaseModel for the robot, determines the data collected 
+    to access the robot endpoints
+    """
+    id: int
+    

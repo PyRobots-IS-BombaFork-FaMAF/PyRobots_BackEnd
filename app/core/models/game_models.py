@@ -48,3 +48,11 @@ class Filters(BaseModel):
     game_creation_date: Optional[datetime] = None
     created_by_user: Optional[bool] = None
     only_private: Optional[bool] = None
+
+
+class SimulationIn(BaseModel):
+    """
+    BaseModel for the simulation, determines the data collected 
+    to access the simulation endpoints
+    """
+    rounds: Optional[int] = Field(10000, ge=1, le=10000)

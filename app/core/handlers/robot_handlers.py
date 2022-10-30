@@ -16,6 +16,6 @@ def generate_file_name(filename: str, u: User, r: RobotIn):
     return f"{uname + r.name + filename}"
 
 
-def get_original_filename(u: User, r: Robot, filename: str):
+def get_original_filename(u: User, r: str, filename: str):
     uname = u["username"]
-    return filename[len(uname) + len(r.name):]
+    return filename[len(uname) + len(r):]
