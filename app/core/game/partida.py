@@ -1,8 +1,14 @@
 from datetime import date, datetime
-from app.core.models.base import Partida, db 
+from app.core.models.base import *
+from app.core.models.base import User as UserDB
+from app.core.models.base import Robot as RobotDB
 from app.core.handlers.password_handlers import *
+from app.core.handlers.robot_handlers import *
+from app.core.handlers.userdb_handlers import *
+from app.core.game.game import *
 from pony.orm import *
 import json
+import time
 from fastapi import WebSocket
 from typing import List
 
@@ -103,13 +109,62 @@ class PartidaObject():
         db.flush()
         await self._connections.broadcast(f"\n¡El jugador {username} se ha unido a la partida!")
 
+    async def execute_game(self):
+        await self._connections.broadcast(f"\n¡La partida se esta iniciando! Esperando resultados..")
+        self._gameStatus = 1
+        robots_ingame = get_robot_inputs(self)
+        list_of_inputs = [dict_player["input"] for dict_player in robots_ingame]
+        start = time.time()
+        for i in range(self._games):
+            result = runSimulation(list_of_inputs, self._rounds)
+            for index in result:
+                dict_player = robots_ingame[index] 
+                dict_player["wins"] += 1
+        self._gameStatus = 2
+        duration = (time.time() - start) #duracion de la partida en segundos
+        Partida[self._id].game_over = 1
+        db.flush()
+        await self._connections.broadcast(f"\n¡La partida ha finalizado!")
+        save_results(robots_ingame, duration, self._id)
+
     def is_available(self):
         return self._gameStatus==0
 
     def can_join(self):
         return self._current_players < self._max_players
 
+@db_session
+def save_results(results, duration: int, id_game: int):
+    sorted_winners = sorted(results, key=lambda x: x['wins'], reverse=True)
+    max_winner = sorted_winners[0]
+    max_wins = max_winner["wins"]
+    winners = [dict_player for dict_player 
+        in sorted_winners if dict_player["wins"] == max_wins]
+    Results(
+        partida=id_game,
+        winners= set(UserDB[dict_player["username"]] for dict_player in winners),
+        robot_winners=set(
+            RobotDB[get_robot_id(dict_player["username"], dict_player["input"].name)] 
+            for dict_player in winners),
+        duration=duration,
+        rounds_won=max_wins
+    )
 
+@db_session
+def get_robot_inputs(partida: PartidaObject):
+    robots_ingame = []
+    for player in partida._players:
+            robot_db = db.get("""select * from Robot 
+            where user LIKE $player['player'].lower() and name LIKE $player['robot'].lower()""")
+            input = RobotInput(
+                pathToCode= robot_db.code.replace('/', '.')[:-3],
+                robotClassName=get_original_filename(player['player'], 
+                    robot_db.name, robot_db.code.rsplit('/', 1)[1])[:-3],
+                name=robot_db.name
+            )
+            dict_player = {"input": input, "username": player["player"], "wins": 0}
+            robots_ingame.append(dict_player)
+    return robots_ingame
 class ConnectionManager:
     def __init__(self):
         self.connections: List[WebSocket] = []

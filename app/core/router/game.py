@@ -70,7 +70,7 @@ async def join_game(
     current_user: User = Depends(get_current_active_user)
 ):
     """
-    Adds a user to an existing game
+    Adds an user to an existing game
     """
     try:
         partida = PartidaObject.get_game_by_id(game.game_id)
@@ -80,7 +80,10 @@ async def join_game(
     if partida == None:
         raise HTTPException(status_code=404, detail= "Partida inexistente")
     elif not partida.is_available():
-        raise HTTPException(status_code=403, detail= "La partida ya está ejecutandose")
+        if partida._gameStatus == 1:
+            raise HTTPException(status_code=403, detail= "La partida ya está ejecutandose")
+        else:
+            raise HTTPException(status_code=403, detail= "La partida ya ha finalizado")
     elif not partida.can_join():
         raise HTTPException(status_code=403, detail= "Se alcanzó la cantidad máxima de jugadores")
     else:
