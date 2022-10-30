@@ -7,8 +7,11 @@ from pony.orm import *
 from typing import Union, Optional
 from app.core.models.base import db 
 from app.core.handlers.auth_handlers import *
+from app.core.handlers.robot_handlers import *
 from app.core.models.game_models import *
+from app.core.models.robot_models import *
 from app.core.game.partida import *
+from app.core.game.game import *
 
 router = APIRouter()
 
@@ -65,10 +68,23 @@ async def list_games(
 @router.post("/simulation", status_code=200, tags=["Game"])
 @db_session
 def simulation( 
-    current_user: User = Depends(get_current_active_user),
-    robots: json
+    robots: list[RobotSimulation],
+    rounds: SimulationIn,
+    current_user: User = Depends(get_current_active_user)
 ):
     """
     run the simulation and return the results of the simulation
     """
+    uname = current_user["username"]
+    listRobots = []
+    robotInputs = []
+    for robot in robots:
+        allRobotsUser = db.select("select * from Robots where user = $uname and id = $robot.id")[:]
+        listRobots.append(allRobotsUser)
+    for bot in listRobots:
+        robotInputs.append(RobotInput(bot.code, get_original_filename(current_user, bot.name, bot.code), bot.name))
+    resultSimulation = runSimulation(robotInputs, rounds, True).json_output()
+
+    return JSONResponse(resultSimulation)
     
+
