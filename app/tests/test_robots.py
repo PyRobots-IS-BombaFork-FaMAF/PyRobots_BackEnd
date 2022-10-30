@@ -286,3 +286,31 @@ def test_create_nonexistent_avatar():
 
 def test_create_nonexistent_code():
     pass
+
+
+def test_list_all_robots():
+    response_login = client.post(
+        "/token",
+        data={
+            "grant_type": "",
+            "username": "tiffbri",
+            "password": "Tiffanyb19!",
+            "scope": "",
+            "client_id": "",
+            "client_secret": "",
+        },
+    )
+    assert response_login.status_code == 200
+    rta: dict = response_login.json()
+    token: str = rta["access_token"]
+    token_type: str = "Bearer "
+    head: str = token_type + token
+    body = {
+        }
+    response = client.get(
+        "/robot/list",
+        headers={"accept": "test_application/json", "Authorization": head},
+        json=body
+    )
+    tmp_list = response.json()
+    assert response.status_code == 200 and len(tmp_list) == 2
