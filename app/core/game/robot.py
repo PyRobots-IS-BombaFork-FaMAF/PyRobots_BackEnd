@@ -14,6 +14,9 @@ class Robot(object):
     _set_direction: Optional[float]      # Direction that was set by the robot
     _position: Tuple[float, float]
     _damage: float
+    _is_cannon_ready: bool
+    _is_shooting: bool
+    _shot: Tuple[float,float]
 
     def __init__(self):
         self._actual_velocity = 0
@@ -22,6 +25,8 @@ class Robot(object):
         self._set_direction = 0
         self._position = (0,0)
         self._damage = 0
+        self._is_cannon_ready = True
+        self._is_shooting = False
 
     @abstractmethod
     def initialize(self):
@@ -48,3 +53,11 @@ class Robot(object):
     def drive(self, direction, velocity):
         self._set_velocity = velocity / 100 * _constants.max_velocity
         self._set_direction = direction
+
+    #Cannon
+    def is_cannon_ready(self):
+        return sel._is_cannon_ready
+
+    def cannon(self, degree, distance):
+        self._shot = (degree, distance)
+        self._is_shooting = True
