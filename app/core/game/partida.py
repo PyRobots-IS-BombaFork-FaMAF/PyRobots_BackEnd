@@ -21,7 +21,7 @@ class PartidaObject():
         self._min_players = min_players
         self._current_players = 1
         self._creator = creator
-        self._players = player_robot
+        self._players = [player_robot] if not fromdb else player_robot
         self._creation_date = (datetime.now().strftime("%Y-%m-%d %H:%M:%S.%f") 
             if not creation_date else creation_date)
         self._password = "" if not password else (hash_password(password) if not fromdb else password)
@@ -92,9 +92,15 @@ class PartidaObject():
 
     @db_session
     async def join_game(self, username, robot):
-        self._players[username] = robot
+        if not any(d['player'] == username for d in self._players):
+            self._players.append({'player': username, 'robot': robot})
+        else:
+            for d in self._players:
+                if d['player'] == username:
+                    d['robot'] = robot
         self._current_players = len(self._players)
         Partida[self._id].players = self._players 
+        db.flush()
         await self._connections.broadcast(f"\n¡El jugador {username} se ha unido a la partida!")
 
     def is_available(self):

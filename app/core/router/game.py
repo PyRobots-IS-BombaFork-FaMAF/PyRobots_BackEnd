@@ -30,7 +30,7 @@ async def create_game(
         max_players=partida.max_players,
         min_players=partida.min_players,
         creator=current_user["username"],
-        player_robot={current_user["username"]: partida.robot},
+        player_robot={'player': current_user["username"], 'robot': partida.robot},
         password=partida.password
     )
     msg = {"msg" : "Se creo la partida con éxito!", "WebSocket" : partida._websocketurl}
