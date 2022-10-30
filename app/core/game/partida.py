@@ -29,7 +29,7 @@ class PartidaObject():
         PartidaObject.all.append(self)
         self._gameStatus = 0
         self._connections = ConnectionManager()
-        self._websocketurl = f"/game/{self._id}"
+        self._websocketurl = f"/game/lobby/{self._id}"
         if not fromdb:
             PartidaDB = Partida(
                 rounds = rounds,
@@ -44,7 +44,7 @@ class PartidaObject():
             )
             PartidaDB.flush()
             self._id = PartidaDB.id
-            self._websocketurl = f"/game/{self._id}"
+            self._websocketurl = f"/game/lobby/{self._id}"
 
     @classmethod
     @db_session
