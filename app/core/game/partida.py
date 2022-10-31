@@ -107,7 +107,10 @@ class PartidaObject():
         self._current_players = len(self._players)
         Partida[self._id].players = self._players 
         db.flush()
-        await self._connections.broadcast(f"\n¡El jugador {username} se ha unido a la partida!")
+        await self._connections.broadcast(
+            f"\n¡El jugador {username} se ha unido a la partida!",
+            self._players, 0
+            )
 
     async def execute_game(self):
         await self._connections.broadcast(f"\n¡La partida se esta iniciando! Esperando resultados..")
@@ -178,9 +181,19 @@ class ConnectionManager:
         await websocket.send_text("Bienvenido a la partida")
         self.connections.append(websocket)
 
-    async def broadcast(self, data: str):
+    async def broadcast(self, data: str, players, status):
+        """ 
+        status: 0 - Someone joined the game
+        status: 1 - Someone left the game
+        status: 2 - The game has started
+        status: 3 - The game has finished    
+        """
         for connection in self.connections:
             try:
-                await connection.send_text(data)
+                await connection.send_json(
+                    json.dumps({"status": status,
+                    "message": data,
+                    "players": players})
+                )
             except:
                 self.connections.remove(connection)
