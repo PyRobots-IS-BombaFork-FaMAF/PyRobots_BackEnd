@@ -15,8 +15,14 @@ class RobotResult_round():
     scanner_direction: Optional[float]
     resolution_in_degrees: Optional[float]
 
-    def __init__(self):
-        pass
+
+    def __init__(self, coords: tuple[float, float], direction: float, speed: float, 
+            scanner_direction: Optional[float] = None, resolution_in_degrees: Optional[float] = None):
+        self.coords = coords
+        self.direction = direction
+        self.speed = speed
+        self.scanner_direction = scanner_direction
+        self.resolution_in_degrees = resolution_in_degrees
 
     def set_movement(self, coords: tuple[float, float], direction: float, speed: float):
         self.coords = coords
@@ -101,11 +107,10 @@ class RobotInGame():
         self.damage = 0
 
         if for_animation:
-            self.round_result_for_animation = RobotResult_round()
-            self.round_result_for_animation.set_movement(self.position, self.direction, self.actual_velocity)
+            self.round_result_for_animation = RobotResult_round(self.position, self.direction, self.actual_velocity)
             self.result_for_animation = RobotResult(
                 name,
-                [self.round_result_for_animation],
+                [RobotResult_round(self.position, self.direction, self.actual_velocity)],
                 None
             )
         else:
@@ -184,11 +189,13 @@ class RobotInGame():
         # Update velocity
         self.actual_velocity += velocity_difference
 
-        # If animation is needed add the mevement to the round and the round to the result
         if self.result_for_animation != None:
-            self.round_result_for_animation.set_movement(self.position, self.direction, self.actual_velocity)
             self.result_for_animation.rounds.append(
-                self.round_result_for_animation
+                RobotResult_round(
+                    self.position, self.direction, self.actual_velocity,
+                    self.round_result_for_animation.scanner_direction,
+                    self.round_result_for_animation.resolution_in_degrees
+                )
             )
 
     def get_result_for_animation(self) -> Optional[RobotResult]:
