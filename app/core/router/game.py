@@ -1,11 +1,4 @@
-from logging import Filter
-from tokenize import String
-from datetime import datetime, timedelta
 from fastapi import *
-from fastapi import WebSocket as ws
-from fastapi.responses import JSONResponse, HTMLResponse
-from pony.orm import *
-from typing import Union, Optional
 from app.core.models.base import db 
 from app.core.handlers.auth_handlers import *
 from app.core.handlers.password_handlers import *

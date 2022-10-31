@@ -1,4 +1,3 @@
-from tokenize import String
 from datetime import datetime, timedelta
 from fastapi import *
 from fastapi.responses import JSONResponse, HTMLResponse
@@ -139,7 +138,7 @@ async def login_for_token(form_data: OAuth2PasswordRequestForm = Depends()):
         )
     access_token_expires = timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES)
     access_token = create_access_token(
-        data={"username": user["username"]},
+        data={"username": user["username"].lower()},
         expires_delta=access_token_expires,
     )
     return {"access_token": access_token, "token_type": "bearer"}
