@@ -221,30 +221,26 @@ class GameState():
         # For scanner
         direction = self.robot.direction
         menor: float = board_size
-        angle: float = self.robot.robot._resolution_in_degrees * 2
         x1_position: float = self.robot.position[0]
         y1_position: float = self.robot.position[1]
-
+        shortest_distance = float('inf')
         for robotInGame in self.ourRobots:
             
             if robotInGame is not self.robot:
+                # Distance formula
                 x2_position: float = robotInGame.position[0]
                 y2_position: float = robotInGame.position[1]
-                distance = math.sqrt((x2_position-x1_position)**2+(y2_position-y1_position)**2)        
+                distance = math.sqrt((x2_position-x1_position)**2+(y2_position-y1_position)**2)
                 
-                if  distance < menor:
+                # Angle formula 
+                x = x2_position - x1_position
+                y = y2_position - y1_position
+                angle = round(math.atan2(y, x) * (180.0 / math.pi), 1) #Restrict to a decimal
+
+                if angle >= direction - 10 and angle <= direction + 10 and distance < menor:
                     menor = distance
-                    if 
-                        menor_position = robotInGame.position  
-
-
-                    
-               
-               
-               # position = robotInGame.position
-               # positions = [robot.position for robot in self.ourRobots if robot.position is not position]
-                
-                
+                    shortest_distance = menor
+                                
 
         # NOTE: When adding scanning and cannon, more `for`s will be needed
 
