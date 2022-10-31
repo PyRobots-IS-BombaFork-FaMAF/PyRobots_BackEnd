@@ -1,4 +1,3 @@
-from lib2to3.pgen2.token import OP
 import random
 from typing import Any, Dict, Optional, Union
 from app.core.game.robot import Robot
