@@ -16,7 +16,7 @@ class Robot(object):
     _damage: float
     _is_cannon_ready: bool
     _is_shooting: bool
-    _shot: Tuple[float,float]
+    _shot: Tuple[float,float]            # [direction of the shot in degree, shooting distance]
 
     def __init__(self):
         self._actual_velocity = 0
