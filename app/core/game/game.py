@@ -1,3 +1,4 @@
+from lib2to3.pgen2.token import OP
 import random
 from typing import Any, Dict, Optional, Union
 from app.core.game.robot import Robot
@@ -11,18 +12,30 @@ class RobotResult_round():
     coords: tuple[float, float]
     direction: float
     speed: float
+    scanner_direction: Optional[float]
+    resolution_in_degrees: Optional[float]
 
-    def __init__(self, coords: tuple[float, float], direction: float, speed: float):
+    def __init__(self, coords: tuple[float, float], direction: float, speed: float, 
+            scanner_direction: Optional[float] = None, resolution_in_degrees: Optional[float] = None):
         self.coords = coords
         self.direction = direction
         self.speed = speed
-    
+        self.scanner_direction = scanner_direction
+        self.resolution_in_degrees = resolution_in_degrees
+
+
     def json_output(self) -> dict:
-        return {
+        res = {
             "coords": {"x": self.coords[0], "y": self.coords[1]},
             "direction": self.direction,
             "speed": self.speed
         }
+        if self.resolution_in_degrees != None and self.scanner_direction != None:
+            res["scanner"] = { 
+                "direction": self.scanner_direction, 
+                "resolution_in_degrees": self.resolution_in_degrees 
+                }
+        return res
 
 class RobotResult():
             
@@ -70,6 +83,7 @@ class RobotInGame():
     direction: float  # degrees (so it is modulo 360)
     damage: float     # with damage ∈ [0;1) robot is alive
     cause_of_death: Optional[str]
+    scanner_result: float
 
     result_for_animation: Optional[RobotResult] # Only when animation is needed
 
@@ -178,8 +192,6 @@ class RobotInGame():
 class GameState():
     round: int
     ourRobots: list[RobotInGame]
-    robot: RobotInGame
-    
 
     for_animation: bool
 
@@ -189,7 +201,6 @@ class GameState():
         """
         self.round = 0
         self.ourRobots = [RobotInGame(robotClasses[name], name, for_animation) for name in robotClasses]
-        self.robot = RobotInGame 
         self.for_animation = for_animation
 
     def amount_of_robots_alive(self) -> int:
@@ -219,28 +230,33 @@ class GameState():
                 robotInGame.updateOurRobot_movement(set_velocity, set_direction)
         
         # For scanner
-        direction = self.robot.direction
-        menor: float = board_size
-        x1_position: float = self.robot.position[0]
-        y1_position: float = self.robot.position[1]
-        shortest_distance = float('inf')
-        for robotInGame in self.ourRobots:
-            
-            if robotInGame is not self.robot:
-                # Distance formula
-                x2_position: float = robotInGame.position[0]
-                y2_position: float = robotInGame.position[1]
-                distance = math.sqrt((x2_position-x1_position)**2+(y2_position-y1_position)**2)
-                
-                # Angle formula 
-                x = x2_position - x1_position
-                y = y2_position - y1_position
-                angle = round(math.atan2(y, x) * (180.0 / math.pi), 1) #Restrict to a decimal
+        for robot in self.ourRobots:
+            direction = robot.robot._scan_direction % 360 
+            resolution = robot.robot._resolution_in_degrees
+            menor: float = board_size
+            x1_position: float = robot.position[0]
+            y1_position: float = robot.position[1]
+            shortest_distance = float('inf')         # >0 = robot distance, 'inf' = nothing 
 
-                if angle >= direction - 10 and angle <= direction + 10 and distance < menor:
-                    menor = distance
-                    shortest_distance = menor
-                                
+            if (isinstance(direction, float) and isinstance(resolution, float) 
+                and resolution <= 10 and resolution >= 0):    
+                for robotInGame in self.ourRobots:
+                    if robotInGame is not robot:
+                        # Distance formula
+                        x2_position: float = robotInGame.position[0]
+                        y2_position: float = robotInGame.position[1]
+                        distance = math.sqrt((x2_position-x1_position)**2+(y2_position-y1_position)**2)
+                        
+                        # Angle formula 
+                        x = x2_position - x1_position
+                        y = y2_position - y1_position
+                        angle = math.atan2(y, x) * (180.0 / math.pi)
+                        anglediff = (direction - angle + 180 + 360) % 360 - 180 
+                        if anglediff >= -resolution and anglediff <= resolution and distance < menor:
+                            menor = distance
+                            shortest_distance = menor
+                robot.scanner_result = shortest_distance                    
+            else: robot.scanner_result = None
 
         # NOTE: When adding scanning and cannon, more `for`s will be needed
 
@@ -253,7 +269,10 @@ class GameState():
                 robotInGame.robot._actual_velocity = robotInGame.actual_velocity
                 robotInGame.robot._actual_direction = robotInGame.direction
                 robotInGame.robot._damage = robotInGame.damage
-    
+                robotInGame.robot._last_scanned = robotInGame.scanner_result
+                robotInGame.robot._scan_direction = None
+                robotInGame.robot._resolution_in_degrees = None
+
     def get_result_for_animation(self) -> Optional[SimulationResult]:
         if self.for_animation:
             return SimulationResult([robot.get_result_for_animation() for robot in self.ourRobots])
