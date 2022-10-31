@@ -9,7 +9,7 @@ def is_username_registered(u: UserIn):
     return db.exists("select * from User where username = $uname")
 
 @db_session
-def get_user_instance(u: str):
+def get_user_id(u: str):
     user = None
     try:
         user = db.get("select * from User where username = $u")

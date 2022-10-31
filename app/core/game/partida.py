@@ -111,9 +111,12 @@ class PartidaObject():
             f"\n¡El jugador {username} se ha unido a la partida!",
             self._players, 0
             )
-
+            
+    @db_session
     async def execute_game(self):
-        await self._connections.broadcast(f"\n¡La partida se esta iniciando! Esperando resultados..")
+        await self._connections.broadcast(
+            f"\n¡La partida se esta iniciando! Esperando resultados..",
+            self._players, 2)
         self._gameStatus = 1
         robots_ingame = get_robot_inputs(self)
         list_of_inputs = [dict_player["input"] for dict_player in robots_ingame]
@@ -127,14 +130,25 @@ class PartidaObject():
         duration = (time.time() - start) #duracion de la partida en segundos
         Partida[self._id].game_over = 1
         db.flush()
-        await self._connections.broadcast(f"\n¡La partida ha finalizado!")
-        save_results(robots_ingame, duration, self._id)
+        winners = save_results(robots_ingame, duration, self._id)
+        msg = f"\n¡La partida ha finalizado!" 
+        if len(winners) != 1:
+            msg += f"\nLos ganadores son: " + str([d["username"] for d in winners])
+        else:
+            msg += f"\nEl ganador es: " + str(winners[0]["username"])
+        await self._connections.broadcast(
+            msg,
+            self._players, 3
+            )
 
     def is_available(self):
         return self._gameStatus==0
 
     def can_join(self):
         return self._current_players < self._max_players
+
+    def all_players(self):
+        return self._current_players >= self._min_players
 
 @db_session
 def save_results(results, duration: int, id_game: int):
@@ -152,6 +166,7 @@ def save_results(results, duration: int, id_game: int):
         duration=duration,
         rounds_won=max_wins
     )
+    return winners
 
 @db_session
 def get_robot_inputs(partida: PartidaObject):
@@ -172,7 +187,7 @@ class ConnectionManager:
     def __init__(self):
         self.connections: List[WebSocket] = []
 
-    async def desconnect(self, websocket: WebSocket):
+    async def disconnect(self, websocket: WebSocket):
         await websocket.close()
         self.connections.remove(websocket)
 

@@ -92,7 +92,40 @@ async def join_game(
             raise HTTPException(status_code=403, detail= "La contraseña es incorrecta")
         else:
             await partida.join_game(current_user["username"], game.robot)
+
     msg = {"msg" : "Te uniste a la partida con éxito!", "WebSocket": partida._websocketurl}
+    return msg
+
+@router.get("/game/{game_id}/start", status_code=200, tags=["Game"])
+async def start_game(
+    game_id: int,
+    current_user: User = Depends(get_current_active_user)
+):
+    """
+    Endpoint to start a game
+    """
+    try:
+        partida = PartidaObject.get_game_by_id(game_id)
+    except:
+        raise HTTPException(status_code=404, detail= "Partida inexistente")
+
+    if partida == None:
+        raise HTTPException(status_code=404, detail= "Partida inexistente")
+    elif (current_user["username"] != partida._creator):
+        raise HTTPException(status_code=403, 
+            detail= "La partida solopuede ser iniciada por el creador de la misma")
+    elif not partida.is_available():
+        if partida._gameStatus == 1:
+            raise HTTPException(status_code=403, detail= "La partida ya está ejecutandose")
+        else:
+            raise HTTPException(status_code=403, detail= "La partida ya ha finalizado")
+    elif not partida.all_players():
+        raise HTTPException(status_code=403, 
+            detail= f"Se necesitan mínimo {partida._min_players} para iniciar la partida")
+    else:
+        winners = await partida.execute_game()
+
+    msg = {"message": "La partida ha finalizado", "winners": winners}
     return msg
 
 
