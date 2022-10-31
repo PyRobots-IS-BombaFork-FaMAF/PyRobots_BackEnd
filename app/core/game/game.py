@@ -278,7 +278,7 @@ class GameState():
                 # Update movement of `RobotInGame`
                 robotInGame.updateOurRobot_movement(set_velocity, set_direction)
 
-        # NOTE: When adding scanning and cannon, more `for`s will be needed
+        # NOTE: When adding cannon, more `for`s will be needed
 
         # Update `Robot` fields
         for robotInGame in self.ourRobots:
