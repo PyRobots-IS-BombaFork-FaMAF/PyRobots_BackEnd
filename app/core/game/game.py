@@ -14,15 +14,15 @@ class RobotResult_round():
     speed: float
     missile: Optional[tuple[float, float]]
 
-    def __init__(self):
+    def __init__():
         pass
 
-    def set_movement(coords: tuple[float, float], direction: float, speed: float):
+    def set_movement(self, coords: tuple[float, float], direction: float, speed: float):
         self.coords = coords
         self.direction = direction
         self.speed = speed
 
-    def set_missile(missile: Optional[tuple[float, float]]):
+    def set_missile(self, missile: Optional[tuple[float, float]]):
         self.missile = missile
 
     def json_output(self) -> dict:
