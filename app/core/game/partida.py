@@ -127,6 +127,12 @@ class ConnectionManager:
         self.connections.append(websocket)
 
     async def broadcast(self, data: str, players, status):
+        """ 
+        status: 0 - Someone joined the game
+        status: 1 - Someone left the game
+        status: 2 - The game has started
+        status: 3 - The game has finished    
+        """
         for connection in self.connections:
             try:
                 await connection.send_json(
