@@ -1,0 +1,5 @@
+[coverage:run]
+omit =
+    app/tests/robots_for_testing/*
+    app/core/game/partida.py
+    app/core/config.py
