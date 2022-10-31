@@ -76,10 +76,12 @@ class SimulationResult():
     def __init__(self, robots: list[RobotResult]):
         self.robots = robots
 
-    def json_output(self) -> list[dict]:
-        return [robot.json_output() for robot in self.robots]
-
-
+    def json_output(self) -> dict:
+        return {
+            "board_size": board_size,
+            "missile_velocity": missile_velocity,
+            "robots": [robot.json_output() for robot in self.robots]
+        }
 
 
 class RobotInGame():
