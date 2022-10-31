@@ -22,7 +22,7 @@ class RobotResult_round():
         self.coords = coords
         self.direction = direction
         self.speed = speed
-    
+
     def set_scanner(self, direction: Optional[float], resolution: Optional[float]):
         self.scanner_direction = direction
         self.resolution_in_degrees = resolution
@@ -34,14 +34,14 @@ class RobotResult_round():
             "speed": self.speed
         }
         if self.resolution_in_degrees != None and self.scanner_direction != None:
-            res["scanner"] = { 
-                "direction": self.scanner_direction, 
-                "resolution_in_degrees": self.resolution_in_degrees 
+            res["scanner"] = {
+                "direction": self.scanner_direction,
+                "resolution_in_degrees": self.resolution_in_degrees
                 }
         return res
 
 class RobotResult():
-            
+
     name: str
     rounds: list[RobotResult_round]
     cause_of_death: Optional[str]
@@ -50,7 +50,7 @@ class RobotResult():
         self.name = name
         self.rounds = rounds
         self.cause_of_death = cause_of_death
-    
+
     def json_output(self) -> dict:
         res = {
             "name": self.name,
@@ -147,7 +147,7 @@ class RobotInGame():
         # Update direction
         if direction != None and self.actual_velocity <= max_velocity/2:
             self.direction = direction % 360
-        
+
         x_component_direction: float = math.cos(math.radians(self.direction))
         y_component_direction: float = math.sin(math.radians(self.direction))
 
@@ -189,7 +189,7 @@ class RobotInGame():
             self.result_for_animation.rounds.append(
                 self.round_result_for_animation
             )
-    
+
     def get_result_for_animation(self) -> Optional[RobotResult]:
         if self.result_for_animation != None:
             self.result_for_animation.cause_of_death = self.cause_of_death
@@ -223,23 +223,24 @@ class GameState():
         # For scanner
         for robot in self.ourRobots:
             if robot.damage < 1:
-                direction = robot.robot._scan_direction % 360 
-                resolution = robot.robot._resolution_in_degrees
+                direction: Any = robot.robot._scan_direction
+                resolution: Any = robot.robot._resolution_in_degrees
                 menor: float = board_size
                 x1_position: float = robot.position[0]
                 y1_position: float = robot.position[1]
-                shortest_distance = float('inf')         # >0 = robot distance, 'inf' = nothing 
-                
-                if (isinstance(direction, float) and isinstance(resolution, float) 
-                    and resolution <= 10 and resolution >= 0):    
+                shortest_distance = float('inf')         # >0 = robot distance, 'inf' = nothing
+
+                if (isinstance(direction, float) and isinstance(resolution, float)
+                    and resolution <= 10 and resolution >= 0):
+                    direction = direction % 360
                     for robotInGame in self.ourRobots:
                         if robotInGame is not robot and robotInGame.damage < 1:
                             # Distance formula
                             x2_position: float = robotInGame.position[0]
                             y2_position: float = robotInGame.position[1]
                             distance = math.sqrt((x2_position-x1_position)**2+(y2_position-y1_position)**2)
-                            
-                            # Angle formula 
+
+                            # Angle formula
                             x = x2_position - x1_position
                             y = y2_position - y1_position
                             angle = math.atan2(y, x) * (180.0 / math.pi)
@@ -247,7 +248,7 @@ class GameState():
                             if anglediff >= -resolution and anglediff <= resolution and distance < menor:
                                 menor = distance
                                 shortest_distance = menor
-                    robot.scanner_result = shortest_distance             
+                    robot.scanner_result = shortest_distance
                 else: robot.scanner_result = None
                 if robot.round_result_for_animation != None:
                     robot.round_result_for_animation.set_scanner(direction, resolution)
@@ -267,7 +268,7 @@ class GameState():
 
                 # Update movement of `RobotInGame`
                 robotInGame.updateOurRobot_movement(set_velocity, set_direction)
-        
+
         # NOTE: When adding scanning and cannon, more `for`s will be needed
 
         # Update `Robot` fields
@@ -305,7 +306,7 @@ def getRobots(robots: list[RobotInput]) -> list[type]:
         robotModule: ModuleType = __import__(pathToRobot, fromlist=[robotClassName])
         robotClass: type = getattr(robotModule, robotClassName)
         return robotClass
-    
+
     return list(map(lambda robotInput: getRobot(robotInput.pathToCode, robotInput.robotClassName), robots))
 
 
@@ -327,7 +328,7 @@ def runSimulation(robots: list[RobotInput], rounds: int, for_animation: bool = F
 
     while gameState.amount_of_robots_alive() > 1 and gameState.round < rounds:
         gameState.advance_round()
-    
+
     if for_animation:
         return gameState.get_result_for_animation()
     else:
