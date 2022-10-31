@@ -601,7 +601,6 @@ def test_unirse_a_partida_sin_pass():
         headers={"accept": "test_application/json", "Authorization": head},
         json=body
     )
-    print(response.json())
     assert response.status_code == 200 
 
 def test_unirse_a_partida_con_pass():
@@ -689,6 +688,44 @@ def test_unirse_a_partida_sin_robot():
     )
     assert response.status_code == 422
 
+def test_websocket():
+    with client.websocket_connect("/game/lobby/1") as websocket:
+        data = websocket.receive_text()
+        assert data == "Bienvenido a la partida"
+
+def test_websocket_join():
+    response_login = client.post(
+        "/token",
+        data={
+            "grant_type": "",
+            "username": "tiffbr19",
+            "password": "Tiffanyb19!",
+            "scope": "",
+            "client_id": "",
+            "client_secret": "",
+        },
+    )
+    assert response_login.status_code == 200
+    rta: dict = response_login.json()
+    token: str = rta["access_token"]
+    token_type: str = "Bearer "
+    head: str = token_type + token
+    body = {
+        "game_id": 1,
+        "robot": "Felipe"
+        }
+    with client.websocket_connect("/game/lobby/1") as websocket:
+        data = websocket.receive_text()
+        assert data == "Bienvenido a la partida"
+        response = client.post(
+        "/game/1/join",
+        headers={"accept": "test_application/json", "Authorization": head},
+        json=body
+        )
+        assert response.status_code == 200
+        data = websocket.receive_json()
+        assert json.loads(data)["message"] == "\n¡El jugador tiffbr19 se ha unido a la partida!"
+
 def test_unirse_a_partida_llena():
     response_login = client.post(
         "/token",
@@ -748,8 +785,3 @@ def test_unirse_a_partida_en_curso():
         json=body
     )
     assert response.status_code == 403
-
-def test_websocket():
-    with client.websocket_connect("/game/lobby/1") as websocket:
-        data = websocket.receive_text()
-        assert data == "Bienvenido a la partida"
