@@ -130,16 +130,18 @@ class PartidaObject():
         duration = (time.time() - start) #duracion de la partida en segundos
         Partida[self._id].game_over = 1
         db.flush()
-        winners = save_results(robots_ingame, duration, self._id)
+        results = save_results(robots_ingame, duration, self._id)
+        winners = [d["username"] for d in results]
         msg = f"\n¡La partida ha finalizado!" 
         if len(winners) != 1:
-            msg += f"\nLos ganadores son: " + str([d["username"] for d in winners])
+            msg += f"\nLos ganadores son: " + str(winners)
         else:
-            msg += f"\nEl ganador es: " + str(winners[0]["username"])
+            msg += f"\nEl ganador es: " + str(winners)
         await self._connections.broadcast(
             msg,
             self._players, 3
             )
+        return winners
 
     def is_available(self):
         return self._gameStatus==0
@@ -183,6 +185,7 @@ def get_robot_inputs(partida: PartidaObject):
             dict_player = {"input": input, "username": player["player"], "wins": 0}
             robots_ingame.append(dict_player)
     return robots_ingame
+    
 class ConnectionManager:
     def __init__(self):
         self.connections: List[WebSocket] = []

@@ -113,7 +113,7 @@ async def start_game(
         raise HTTPException(status_code=404, detail= "Partida inexistente")
     elif (current_user["username"] != partida._creator):
         raise HTTPException(status_code=403, 
-            detail= "La partida solopuede ser iniciada por el creador de la misma")
+            detail= "La partida solo puede ser iniciada por el creador de la misma")
     elif not partida.is_available():
         if partida._gameStatus == 1:
             raise HTTPException(status_code=403, detail= "La partida ya está ejecutandose")
@@ -125,7 +125,7 @@ async def start_game(
     else:
         winners = await partida.execute_game()
 
-    msg = {"message": "La partida ha finalizado", "winners": winners}
+    msg = {"message": "La partida ha finalizado", "winners": str(winners)}
     return msg
 
 
@@ -135,6 +135,8 @@ async def websocket_endpoint(websocket: WebSocket, game_id: int):
         partida = PartidaObject.get_game_by_id(game_id)
     except:
         raise HTTPException(status_code=404, detail= "Partida inexistente")
+    if partida == None:
+        raise HTTPException(status_code=404, detail= "Partida inexistente") 
     try:
         await partida._connections.connect(websocket)
     except RuntimeError:
