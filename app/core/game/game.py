@@ -32,7 +32,7 @@ class RobotResult_round():
             "speed": self.speed
         }
         if self.missile != None:
-            res["missile"]: { "direction": number, "distance": number }
+            res["missile"]: { "direction": self.missile[0], "distance": self.missile[1] }
         return res
 
 class RobotResult():
