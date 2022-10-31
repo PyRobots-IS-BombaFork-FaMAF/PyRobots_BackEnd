@@ -178,6 +178,8 @@ class RobotInGame():
 class GameState():
     round: int
     ourRobots: list[RobotInGame]
+    robot: RobotInGame
+    
 
     for_animation: bool
 
@@ -187,7 +189,7 @@ class GameState():
         """
         self.round = 0
         self.ourRobots = [RobotInGame(robotClasses[name], name, for_animation) for name in robotClasses]
-
+        self.robot = RobotInGame 
         self.for_animation = for_animation
 
     def amount_of_robots_alive(self) -> int:
@@ -215,6 +217,34 @@ class GameState():
 
                 # Update movement of `RobotInGame`
                 robotInGame.updateOurRobot_movement(set_velocity, set_direction)
+        
+        # For scanner
+        direction = self.robot.direction
+        menor: float = board_size
+        angle: float = self.robot.robot._resolution_in_degrees * 2
+        x1_position: float = self.robot.position[0]
+        y1_position: float = self.robot.position[1]
+
+        for robotInGame in self.ourRobots:
+            
+            if robotInGame is not self.robot:
+                x2_position: float = robotInGame.position[0]
+                y2_position: float = robotInGame.position[1]
+                distance = math.sqrt((x2_position-x1_position)**2+(y2_position-y1_position)**2)        
+                
+                if  distance < menor:
+                    menor = distance
+                    if 
+                        menor_position = robotInGame.position  
+
+
+                    
+               
+               
+               # position = robotInGame.position
+               # positions = [robot.position for robot in self.ourRobots if robot.position is not position]
+                
+                
 
         # NOTE: When adding scanning and cannon, more `for`s will be needed
 
