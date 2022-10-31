@@ -110,6 +110,7 @@ class RobotInGame():
             )
         else:
             self.result_for_animation = None
+            self.round_result_for_animation = None
 
         try:
             # There are no robots that do not inherit from Robot because that is checked in upload
@@ -249,9 +250,11 @@ class GameState():
                                 menor = distance
                                 shortest_distance = menor
                     robot.scanner_result = shortest_distance
-                else: robot.scanner_result = None
-                if robot.round_result_for_animation != None:
-                    robot.round_result_for_animation.set_scanner(direction, resolution)
+                    if robot.round_result_for_animation != None:
+                        robot.round_result_for_animation.set_scanner(direction, resolution)
+                else:
+                    robot.scanner_result = None
+
 
         for robotInGame in self.ourRobots:
             if robotInGame.damage < 1:
