@@ -25,9 +25,9 @@ class PartidaObject():
         self._games = games 
         self._max_players = max_players
         self._min_players = min_players
-        self._current_players = 1
         self._creator = creator
         self._players = [player_robot] if not fromdb else player_robot
+        self._current_players = len(self._players)
         self._creation_date = (datetime.now().strftime("%Y-%m-%d %H:%M:%S.%f") 
             if not creation_date else creation_date)
         self._password = "" if not password else (hash_password(password) if not fromdb else password)
