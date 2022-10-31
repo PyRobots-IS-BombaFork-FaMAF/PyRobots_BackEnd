@@ -213,6 +213,36 @@ class GameState():
             if robotInGame.damage < 1:
                 robotInGame.executeRobotCode()
 
+        # For scanner
+        for robot in self.ourRobots:
+            if robot.damage < 1:
+                direction = robot.robot._scan_direction % 360 
+                resolution = robot.robot._resolution_in_degrees
+                menor: float = board_size
+                x1_position: float = robot.position[0]
+                y1_position: float = robot.position[1]
+                shortest_distance = float('inf')         # >0 = robot distance, 'inf' = nothing 
+                
+                if (isinstance(direction, float) and isinstance(resolution, float) 
+                    and resolution <= 10 and resolution >= 0):    
+                    for robotInGame in self.ourRobots:
+                        if robotInGame is not robot and robotInGame.damage < 1:
+                            # Distance formula
+                            x2_position: float = robotInGame.position[0]
+                            y2_position: float = robotInGame.position[1]
+                            distance = math.sqrt((x2_position-x1_position)**2+(y2_position-y1_position)**2)
+                            
+                            # Angle formula 
+                            x = x2_position - x1_position
+                            y = y2_position - y1_position
+                            angle = math.atan2(y, x) * (180.0 / math.pi)
+                            anglediff = (direction - angle + 180 + 360) % 360 - 180 
+                            if anglediff >= -resolution and anglediff <= resolution and distance < menor:
+                                menor = distance
+                                shortest_distance = menor
+                    robot.scanner_result = shortest_distance                    
+                else: robot.scanner_result = None
+
         for robotInGame in self.ourRobots:
             if robotInGame.damage < 1:
                 # Extract new velocity and direction from `robotInGame.robot`
@@ -229,35 +259,6 @@ class GameState():
                 # Update movement of `RobotInGame`
                 robotInGame.updateOurRobot_movement(set_velocity, set_direction)
         
-        # For scanner
-        for robot in self.ourRobots:
-            direction = robot.robot._scan_direction % 360 
-            resolution = robot.robot._resolution_in_degrees
-            menor: float = board_size
-            x1_position: float = robot.position[0]
-            y1_position: float = robot.position[1]
-            shortest_distance = float('inf')         # >0 = robot distance, 'inf' = nothing 
-
-            if (isinstance(direction, float) and isinstance(resolution, float) 
-                and resolution <= 10 and resolution >= 0):    
-                for robotInGame in self.ourRobots:
-                    if robotInGame is not robot:
-                        # Distance formula
-                        x2_position: float = robotInGame.position[0]
-                        y2_position: float = robotInGame.position[1]
-                        distance = math.sqrt((x2_position-x1_position)**2+(y2_position-y1_position)**2)
-                        
-                        # Angle formula 
-                        x = x2_position - x1_position
-                        y = y2_position - y1_position
-                        angle = math.atan2(y, x) * (180.0 / math.pi)
-                        anglediff = (direction - angle + 180 + 360) % 360 - 180 
-                        if anglediff >= -resolution and anglediff <= resolution and distance < menor:
-                            menor = distance
-                            shortest_distance = menor
-                robot.scanner_result = shortest_distance                    
-            else: robot.scanner_result = None
-
         # NOTE: When adding scanning and cannon, more `for`s will be needed
 
         # Update `Robot` fields
