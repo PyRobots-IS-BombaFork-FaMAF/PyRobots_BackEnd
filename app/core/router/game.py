@@ -1,4 +1,5 @@
 from fastapi import *
+from fastapi.responses import JSONResponse
 from app.core.models.base import db 
 from app.core.handlers.auth_handlers import *
 from app.core.handlers.robot_handlers import *
