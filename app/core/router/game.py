@@ -12,6 +12,7 @@ from app.core.models.game_models import *
 from app.core.models.robot_models import *
 from app.core.game.partida import *
 from app.core.game.game import *
+import pathlib
 
 router = APIRouter()
 
@@ -65,7 +66,7 @@ async def list_games(
     )
     return games
 
-@router.post("/simulation", status_code=200, tags=["Game"])
+@router.post("/simulation", status_code=201, tags=["Game"])
 @db_session
 def simulation( 
     robots: list[RobotSimulation],
@@ -78,12 +79,24 @@ def simulation(
     uname = current_user["username"]
     listRobots = []
     robotInputs = []
-    for robot in robots:
-        allRobotsUser = db.select("select * from Robots where user = $uname and id = $robot.id")[:]
-        listRobots.append(allRobotsUser)
+    if(len(robots) >= 2 and len(robots) <= 4):
+        for robot in robots:
+            allRobotsUser = db.select("select * from Robot where user = $uname and id = $robot.id")
+            listRobots.append(allRobotsUser)
+    else: 
+        raise HTTPException(400, detail="Cantidad de robots invalida")
+    print(listRobots)
     for bot in listRobots:
-        robotInputs.append(RobotInput(bot.code, get_original_filename(current_user, bot.name, bot.code), bot.name))
-    resultSimulation = runSimulation(robotInputs, rounds, True).json_output()
+        path = pathlib.Path(bot[0].code)
+        print(path)
+        formatted_path = '.'.join(path.with_suffix('').parts)
+        robotInputs.append(RobotInput(formatted_path, 
+                                    get_original_filename(current_user, 
+                                                        bot[0].name, 
+                                                        bot[0].code.rsplit('/', 1)[1]
+                                                        ).rsplit('.', 1)[0], 
+                                    bot[0].name))
+    resultSimulation = runSimulation(robotInputs, rounds.rounds, True).json_output()
 
     return JSONResponse(resultSimulation)
     
