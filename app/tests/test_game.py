@@ -372,6 +372,27 @@ def testGameState():
     assert len(json_output['robots'][2]['rounds']) == 1
     assert len(json_output['robots'][3]['rounds']) == 1
 
+def testGameState_noAnimation():
+    import app.tests.robots_for_testing.empty as empty
+    import app.tests.robots_for_testing.simple as simple
+
+    game: GameState = GameState(
+        { 
+            'empty': empty.empty,
+            'simple': simple.simple
+        },
+        for_animation=False
+    )
+
+    assert game.round == 0
+
+    game.advance_round()
+
+    assert game.round == 1
+
+    assert game.get_result_for_animation() == None
+
+
 def testRunSimulation():
     robotsForSimulation: list[RobotInput] = [
         RobotInput('app.tests.robots_for_testing.empty', 'empty', 'Empty robot'),
