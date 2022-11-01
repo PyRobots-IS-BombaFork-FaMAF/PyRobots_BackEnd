@@ -84,8 +84,6 @@ def simulation(
     print(listRobots)
     for bot in listRobots:
         pathCodeRobot = bot[0].code.replace('/', '.')[:-3]
-        print(pathCodeRobot)
-        print(get_original_filename(uname, bot[0].name, bot[0].code.rsplit('/', 1)[1])[:-3])
         robotInputs.append(RobotInput(pathCodeRobot, 
                                     get_original_filename(uname, bot[0].name, bot[0].code.rsplit('/', 1)[1])[:-3], 
                                     bot[0].name))
