@@ -327,6 +327,9 @@ def testGameState():
     assert 0 <= game.ourRobots[2].position[0] <= 1000 and 0 <= game.ourRobots[2].position[1] <= 1000
     assert 0 <= game.ourRobots[3].position[0] <= 1000 and 0 <= game.ourRobots[3].position[1] <= 1000
 
+    robot0_position0 = (game.ourRobots[0].position[0], game.ourRobots[0].position[1])
+    robot1_position0 = (game.ourRobots[1].position[0], game.ourRobots[1].position[1])
+
     game.advance_round()
 
     assert game.round == 1
@@ -340,6 +343,11 @@ def testGameState():
     assert game.ourRobots[1].damage == 0
     assert game.ourRobots[2].damage == 1
     assert game.ourRobots[3].damage == 1
+
+    assert game.ourRobots[0].position[0] == robot0_position0[0]
+    assert game.ourRobots[0].position[1] == robot0_position0[1]
+    assert abs(game.ourRobots[1].position[0] - (robot1_position0[0] + 0.1 * math.cos(math.pi/4))) < 0.00001
+    assert abs(game.ourRobots[1].position[1] - (robot1_position0[1] + 0.1 * math.sin(math.pi/4))) < 0.00001
 
     game.advance_round()
 
