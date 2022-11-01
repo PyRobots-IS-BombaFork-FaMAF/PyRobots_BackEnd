@@ -197,7 +197,10 @@ class ConnectionManager:
 
     async def connect(self, websocket: WebSocket):
         await websocket.accept()
-        await websocket.send_text("Bienvenido a la partida")
+        await websocket.send_json(
+            {"status": 4,
+            "message": "Bienvenido a la partida"}
+            )
         self.connections.append(websocket)
 
     async def broadcast(self, data: str, players, status):
@@ -205,7 +208,8 @@ class ConnectionManager:
         status: 0 - Someone joined the game
         status: 1 - Someone left the game
         status: 2 - The game has started
-        status: 3 - The game has finished    
+        status: 3 - The game has finished   
+        status: 4 - Welcome to the game (Not broadcasted, only sent to one websocket) 
         """
         for connection in self.connections:
             try:

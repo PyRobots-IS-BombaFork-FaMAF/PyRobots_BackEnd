@@ -717,8 +717,8 @@ def test_unirse_a_partida_sin_robot():
 
 def test_websocket():
     with client.websocket_connect("/game/lobby/1") as websocket:
-        data = websocket.receive_text()
-        assert data == "Bienvenido a la partida"
+        data = websocket.receive_json()
+        assert data["message"] == "Bienvenido a la partida"
 
 def test_websocket_join():
     response_login = client.post(
@@ -742,8 +742,8 @@ def test_websocket_join():
         "robot": "Felipe"
         }
     with client.websocket_connect("/game/lobby/1") as websocket:
-        data = websocket.receive_text()
-        assert data == "Bienvenido a la partida"
+        data = websocket.receive_json()
+        assert data["message"]  == "Bienvenido a la partida"
         response = client.post(
         "/game/1/join",
         headers={"accept": "test_application/json", "Authorization": head},
@@ -818,8 +818,8 @@ def test_unirse_a_partida_en_curso():
 def test_ejecutar_partida():
     partida = PartidaObject.get_game_by_id(1)
     with client.websocket_connect("/game/lobby/1") as websocket:
-        data = websocket.receive_text()
-        assert data == "Bienvenido a la partida"
+        data = websocket.receive_json()
+        assert data["message"] == "Bienvenido a la partida"
         response_login = client.post(
         "/token",
         data={
