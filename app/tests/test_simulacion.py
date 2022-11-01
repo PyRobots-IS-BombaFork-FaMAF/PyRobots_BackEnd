@@ -29,8 +29,42 @@ def test_create_simulation():
     body = {
             "robots": [
                 {
-                "id": 1
+                "id": 2
                 },
+                {
+                "id": 3
+                }
+            ],
+            "rounds": {
+                "rounds": 1000
+            }    
+        }
+    response = client.post(
+        "/simulation",
+        headers={"accept": "test_application/json", "Authorization": head},
+        json=body
+    )
+    assert response.status_code == 200
+
+def test_create_simulation_invalid_number_robots():
+    response_login = client.post(
+        "/token",
+        data={
+            "grant_type": "",
+            "username": "tiffbri",
+            "password": "Tiffanyb19!",
+            "scope": "",
+            "client_id": "",
+            "client_secret": "",
+        },
+    )
+    assert response_login.status_code == 200
+    rta: dict = response_login.json()
+    token: str = rta["access_token"]
+    token_type: str = "Bearer "
+    head: str = token_type + token
+    body = {
+            "robots": [
                 {
                 "id": 2
                 }
@@ -44,4 +78,41 @@ def test_create_simulation():
         headers={"accept": "test_application/json", "Authorization": head},
         json=body
     )
-    assert response.status_code == 201
+    assert response.status_code == 400
+
+def test_create_simulation_invalid_number_rounds():
+    response_login = client.post(
+        "/token",
+        data={
+            "grant_type": "",
+            "username": "tiffbri",
+            "password": "Tiffanyb19!",
+            "scope": "",
+            "client_id": "",
+            "client_secret": "",
+        },
+    )
+    assert response_login.status_code == 200
+    rta: dict = response_login.json()
+    token: str = rta["access_token"]
+    token_type: str = "Bearer "
+    head: str = token_type + token
+    body = {
+            "robots": [
+                {
+                "id": 2
+                },
+                {
+                "id": 3
+                }
+            ],
+            "rounds": {
+                "rounds": 10001
+            }    
+        }
+    response = client.post(
+        "/simulation",
+        headers={"accept": "test_application/json", "Authorization": head},
+        json=body
+    )
+    assert response.status_code == 422
