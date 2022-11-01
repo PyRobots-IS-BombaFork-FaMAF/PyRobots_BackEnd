@@ -234,11 +234,10 @@ class GameState():
         for robot in self.ourRobots:
             if robot.damage < 1:
                 direction: Any = robot.robot._scan_direction
-                resolution: Any = robot.robot._resolution_in_degrees
-                menor = float('inf') 
+                resolution: Any = robot.robot._resolution_in_degrees 
                 x1_position: float = robot.position[0]
                 y1_position: float = robot.position[1]
-                shortest_distance = float('inf')         # >0 = robot distance, 'inf' = nothing
+                shortest_distance = float('inf')
 
                 if (isinstance(direction, numbers.Real) and isinstance(resolution, numbers.Real)
                     and resolution <= 10 and resolution >= 0):
@@ -255,9 +254,8 @@ class GameState():
                             y = y2_position - y1_position
                             angle = math.atan2(y, x) * (180.0 / math.pi)
                             anglediff = (direction - angle + 180 + 360) % 360 - 180
-                            if anglediff >= -resolution and anglediff <= resolution and distance < menor:
-                                menor = distance
-                                shortest_distance = menor
+                            if anglediff >= -resolution and anglediff <= resolution and distance < shortest_distance:
+                                shortest_distance = distance
                     robot.scanner_result = shortest_distance
                     if robot.round_result_for_animation != None:
                         robot.round_result_for_animation.set_scanner(direction, resolution)
