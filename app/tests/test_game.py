@@ -1,3 +1,4 @@
+import imp
 from app.core.game.game import *
 from app.core.game.robot import *
 
@@ -160,7 +161,6 @@ def test_empty_RobotInGame():
             { 'coords': {'x': robot.position[0], 'y': robot.position[1] }, 'direction': 135, 'speed': 0.1 }
         ]
     }
-
 
 def test2_RobotInGame():
     import app.tests.robots_for_testing.simple as simple
@@ -412,3 +412,68 @@ def testRunSimulation_forAnimation():
     assert simulationResult.robots[1].cause_of_death == None # NOTE: when adding collisions these may change
     assert simulationResult.robots[2].cause_of_death == "robot execution error"
     assert simulationResult.robots[3].cause_of_death == None
+
+def test_scanner_invalid():
+    import app.tests.robots_for_testing.scan_invalid as scan_invalid
+    game: GameState = GameState(
+        { 
+            'scan_invalid': scan_invalid.scan_invalid
+        },
+        for_animation=True
+    )
+
+    assert game.ourRobots[0].damage == 0
+    assert game.ourRobots[0].cause_of_death == None
+   
+    assert game.round == 0
+
+    assert len(game.ourRobots) == 1
+   
+    game.advance_round()
+    
+    assert game.round == 1
+    assert game.ourRobots[0].scanner_result == None
+    assert game.ourRobots[0].robot._last_scanned == None
+
+    game.advance_round()
+    assert game.round == 2
+    game.advance_round()
+    assert game.round == 3
+    assert game.ourRobots[0].scanner_result == None
+    assert game.ourRobots[0].robot._last_scanned == None
+
+def test_scanner_invalid():
+    import app.tests.robots_for_testing.scan as scan
+    import app.tests.robots_for_testing.empty as empty
+    game: GameState = GameState(
+        { 
+            'scan': scan.scan,
+            'empty': empty.empty
+        },
+        for_animation=True
+    )
+
+    assert game.round == 0
+    
+    assert len(game.ourRobots) == 2
+    assert game.ourRobots[0].damage == 0
+    assert game.ourRobots[1].damage == 0
+    assert game.ourRobots[0].name == 'scan'
+    assert game.ourRobots[1].name == 'empty'
+
+    game.ourRobots[0].position = (0,0)
+    
+    game.ourRobots[1].position = (10,10)
+
+    game.advance_round()
+
+    assert game.round == 1
+    
+    game.advance_round()
+
+    assert game.ourRobots[0].scanner_result != None
+
+    assert game.ourRobots[0].robot._last_scanned != None
+
+
+
