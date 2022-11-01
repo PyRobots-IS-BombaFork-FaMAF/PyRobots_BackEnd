@@ -1,4 +1,3 @@
-import imp
 from app.core.game.game import *
 from app.core.game.robot import *
 
@@ -442,7 +441,7 @@ def test_scanner_invalid():
     assert game.ourRobots[0].scanner_result == None
     assert game.ourRobots[0].robot._last_scanned == None
 
-def test_scanner_invalid():
+def test_scanner():
     import app.tests.robots_for_testing.scan as scan
     import app.tests.robots_for_testing.empty as empty
     game: GameState = GameState(
@@ -463,7 +462,7 @@ def test_scanner_invalid():
 
     game.ourRobots[0].position = (0,0)
     
-    game.ourRobots[1].position = (10,10)
+    game.ourRobots[1].position = (999,999)
 
     game.advance_round()
 
@@ -471,9 +470,11 @@ def test_scanner_invalid():
     
     game.advance_round()
 
+    assert game.round == 2
+    
     assert game.ourRobots[0].scanner_result != None
-
     assert game.ourRobots[0].robot._last_scanned != None
+    assert game.ourRobots[0].robot._last_scanned == 1412.799348810722
 
 
 
