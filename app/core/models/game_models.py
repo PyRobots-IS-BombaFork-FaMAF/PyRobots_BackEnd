@@ -19,6 +19,7 @@ class PartidaIn(BaseModel):
     max_players: Optional[int] = Field(4, ge=2, le=4)
     min_players: Optional[int] = Field(2, ge=2, le=4)
     password: str = Field(None, min_length=8, max_length=16)
+    robot: str
 
     @validator("min_players")
     def check_range(cls, v, values):
@@ -48,3 +49,13 @@ class Filters(BaseModel):
     game_creation_date: Optional[datetime] = None
     created_by_user: Optional[bool] = None
     only_private: Optional[bool] = None
+
+
+class PartidaJoin(BaseModel):
+    """
+    BaseModel for the data received when an user is trying to join
+    a game
+    """
+    game_id: int
+    robot: str
+    password: Optional[str] = Field(None)
