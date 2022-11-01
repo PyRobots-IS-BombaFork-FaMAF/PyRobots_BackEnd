@@ -1,9 +1,13 @@
 from fastapi import *
+from fastapi.responses import JSONResponse
 from app.core.models.base import db 
+from app.core.models.base import User as UserDB
+from app.core.models.base import Robot as RobotDB
 from app.core.handlers.auth_handlers import *
 from app.core.handlers.password_handlers import *
 from app.core.models.game_models import *
 from app.core.game.partida import *
+from datetime import datetime
 
 router = APIRouter()
 
@@ -121,19 +125,70 @@ async def start_game(
     msg = {"message": "La partida ha finalizado", "winners": str(winners)}
     return msg
 
+@router.get("/game/results")
+@db_session
+def get_player_results(
+    current_user: User = Depends(get_current_active_user)
+):
+    """
+    Endpoint to get a list of the results of every game
+    the user has played
+    """
+    username = current_user["username"]
+    #getting all finished games
+    games_played = Partida.select().filter(lambda p: p.game_over == 1)
+    for game in games_played:
+        #filtering the games where the player played
+        if not any(d['player'] == username for d in game.players):
+            games_played.pop(game)
+    #getting the results from the games where the player played
+    results = list(Results.select().filter(lambda r: r.partida in games_played))
+    results_list = []
+    for i in range(len(games_played)):
+        game = list(games_played)[i]
+        for result in results:
+            if result.partida == game:
+                game_result = result
+                break
+        #getting users and robots from results set
+        winners = list(UserDB.select().filter(lambda u: u in game_result.winners))
+        robots = list(RobotDB.select().filter(lambda u: u in game_result.robot_winners))
+        user_robot = []
+        #matching robots to their owner
+        for i in range(len(winners)):
+            uname = winners[i].username
+            for r in robots:
+                if r.user == winners[i]:
+                    robot_name = r.name
+                    break
+            user_robot.append({'player': uname, 'robot': robot_name})
+        result_dict = {
+            "id": game.id,
+            "name": game.name,
+            "creation_date": game.creation_date.strftime("%Y-%m-%d %H:%M:%S.%f"),
+            "creator": game.created_by.username,
+            "rounds": game.rounds,
+            "games": game.games,
+            "duration": game_result.duration,
+            "winners": user_robot,
+            "rounds_won": game_result.rounds_won
+        }
+        results_list.append(result_dict)
+    return JSONResponse(results_list)
+
 
 @router.websocket("/game/lobby/{game_id}")
 async def websocket_endpoint(websocket: WebSocket, game_id: int):
     try:
         partida = PartidaObject.get_game_by_id(game_id)
     except:
-        raise HTTPException(status_code=404, detail= "Partida inexistente")
+        raise "Partida inexistente"
     if partida == None:
-        raise HTTPException(status_code=404, detail= "Partida inexistente") 
+        return "Partida inexistente"
     try:
         await partida._connections.connect(websocket)
     except RuntimeError:
-        raise HTTPException(status_code=404, detail= "Error estableciendo conexión")
+        raise "Error estableciendo conexión"
     while True:
         try:
             await websocket.receive()
