@@ -5,6 +5,7 @@ from types import ModuleType
 from typing import NamedTuple
 import math
 from app.core.game.constants import *
+import numbers 
 
 
 class RobotResult_round():
@@ -234,12 +235,12 @@ class GameState():
             if robot.damage < 1:
                 direction: Any = robot.robot._scan_direction
                 resolution: Any = robot.robot._resolution_in_degrees
-                menor: float = board_size
+                menor = float('inf') 
                 x1_position: float = robot.position[0]
                 y1_position: float = robot.position[1]
                 shortest_distance = float('inf')         # >0 = robot distance, 'inf' = nothing
 
-                if (isinstance(direction, float) and isinstance(resolution, float)
+                if (isinstance(direction, numbers.Real) and isinstance(resolution, numbers.Real)
                     and resolution <= 10 and resolution >= 0):
                     direction = direction % 360
                     for robotInGame in self.ourRobots:
@@ -272,9 +273,9 @@ class GameState():
                 # They are of type `Any` because the robot code may have set anything
 
                 # Check types
-                if not isinstance(set_velocity, float):
+                if not isinstance(set_velocity, numbers.Real):
                     set_velocity = None
-                if not isinstance(set_direction, float):
+                if not isinstance(set_direction, numbers.Real):
                     set_direction = None
 
                 # Update movement of `RobotInGame`
