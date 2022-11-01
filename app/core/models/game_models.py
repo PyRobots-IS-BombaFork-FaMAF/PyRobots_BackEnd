@@ -55,4 +55,5 @@ class SimulationIn(BaseModel):
     BaseModel for the simulation, determines the data collected 
     to access the simulation endpoints
     """
+    
     rounds: Optional[int] = Field(10000, ge=1, le=10000)
