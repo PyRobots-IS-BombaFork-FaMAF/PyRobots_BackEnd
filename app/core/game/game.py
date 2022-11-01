@@ -24,11 +24,6 @@ class RobotResult_round():
         self.scanner_direction = scanner_direction
         self.resolution_in_degrees = resolution_in_degrees
 
-    def set_movement(self, coords: tuple[float, float], direction: float, speed: float):
-        self.coords = coords
-        self.direction = direction
-        self.speed = speed
-
     def set_scanner(self, direction: Optional[float], resolution: Optional[float]):
         self.scanner_direction = direction
         self.resolution_in_degrees = resolution
