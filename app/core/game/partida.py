@@ -114,8 +114,9 @@ class PartidaObject():
             
     @db_session
     async def execute_game(self):
+        msg = f"\n¡La partida se esta iniciando! Esperando resultados.."
         await self._connections.broadcast(
-            f"\n¡La partida se esta iniciando! Esperando resultados..",
+            msg,
             self._players, 2)
         self._gameStatus = 1
         robots_ingame = get_robot_inputs(self)
@@ -185,7 +186,7 @@ def get_robot_inputs(partida: PartidaObject):
             dict_player = {"input": input, "username": player["player"], "wins": 0}
             robots_ingame.append(dict_player)
     return robots_ingame
-    
+
 class ConnectionManager:
     def __init__(self):
         self.connections: List[WebSocket] = []
@@ -209,9 +210,9 @@ class ConnectionManager:
         for connection in self.connections:
             try:
                 await connection.send_json(
-                    json.dumps({"status": status,
+                    {"status": status,
                     "message": data,
-                    "players": players})
+                    "players": players}
                 )
             except:
                 self.connections.remove(connection)

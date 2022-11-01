@@ -120,9 +120,8 @@ async def start_game(
         raise HTTPException(status_code=403, 
             detail= f"Se necesitan mínimo {partida._min_players} para iniciar la partida")
     else:
-        winners = await partida.execute_game()
+        msg = {"message": "La partida ha finalizado", "winners": await partida.execute_game()}
 
-    msg = {"message": "La partida ha finalizado", "winners": str(winners)}
     return msg
 
 @router.get("/game/results")
@@ -169,6 +168,8 @@ def get_player_results(
             "creator": game.created_by.username,
             "rounds": game.rounds,
             "games": game.games,
+            "is_private": False if not game.password else True,
+            "players": game.players,
             "duration": game_result.duration,
             "winners": user_robot,
             "rounds_won": game_result.rounds_won
