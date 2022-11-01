@@ -74,7 +74,7 @@ def register(
             code.file.close()
 
         db.Robot(
-            name=robot.name,
+            name=robot.name.lower(),
             avatar=avatar_name,
             code=code_name,
             user=current_user["username"]

@@ -1,11 +1,4 @@
-from logging import Filter
-from tokenize import String
-from datetime import datetime, timedelta
 from fastapi import *
-from fastapi import WebSocket as ws
-from fastapi.responses import JSONResponse, HTMLResponse
-from pony.orm import *
-from typing import Union, Optional
 from app.core.models.base import db 
 from app.core.handlers.auth_handlers import *
 from app.core.handlers.robot_handlers import *
@@ -108,7 +101,7 @@ async def join_game(
     current_user: User = Depends(get_current_active_user)
 ):
     """
-    Adds a user to an existing game
+    Adds an user to an existing game
     """
     try:
         partida = PartidaObject.get_game_by_id(game.game_id)
@@ -118,7 +111,10 @@ async def join_game(
     if partida == None:
         raise HTTPException(status_code=404, detail= "Partida inexistente")
     elif not partida.is_available():
-        raise HTTPException(status_code=403, detail= "La partida ya está ejecutandose")
+        if partida._gameStatus == 1:
+            raise HTTPException(status_code=403, detail= "La partida ya está ejecutandose")
+        else:
+            raise HTTPException(status_code=403, detail= "La partida ya ha finalizado")
     elif not partida.can_join():
         raise HTTPException(status_code=403, detail= "Se alcanzó la cantidad máxima de jugadores")
     else:
@@ -127,7 +123,40 @@ async def join_game(
             raise HTTPException(status_code=403, detail= "La contraseña es incorrecta")
         else:
             await partida.join_game(current_user["username"], game.robot)
+
     msg = {"msg" : "Te uniste a la partida con éxito!", "WebSocket": partida._websocketurl}
+    return msg
+
+@router.get("/game/{game_id}/start", status_code=200, tags=["Game"])
+async def start_game(
+    game_id: int,
+    current_user: User = Depends(get_current_active_user)
+):
+    """
+    Endpoint to start a game
+    """
+    try:
+        partida = PartidaObject.get_game_by_id(game_id)
+    except:
+        raise HTTPException(status_code=404, detail= "Partida inexistente")
+
+    if partida == None:
+        raise HTTPException(status_code=404, detail= "Partida inexistente")
+    elif (current_user["username"] != partida._creator):
+        raise HTTPException(status_code=403, 
+            detail= "La partida solo puede ser iniciada por el creador de la misma")
+    elif not partida.is_available():
+        if partida._gameStatus == 1:
+            raise HTTPException(status_code=403, detail= "La partida ya está ejecutandose")
+        else:
+            raise HTTPException(status_code=403, detail= "La partida ya ha finalizado")
+    elif not partida.all_players():
+        raise HTTPException(status_code=403, 
+            detail= f"Se necesitan mínimo {partida._min_players} para iniciar la partida")
+    else:
+        winners = await partida.execute_game()
+
+    msg = {"message": "La partida ha finalizado", "winners": str(winners)}
     return msg
 
 
@@ -137,6 +166,8 @@ async def websocket_endpoint(websocket: WebSocket, game_id: int):
         partida = PartidaObject.get_game_by_id(game_id)
     except:
         raise HTTPException(status_code=404, detail= "Partida inexistente")
+    if partida == None:
+        raise HTTPException(status_code=404, detail= "Partida inexistente") 
     try:
         await partida._connections.connect(websocket)
     except RuntimeError:

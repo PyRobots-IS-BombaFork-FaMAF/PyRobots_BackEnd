@@ -19,16 +19,19 @@ class User(db.Entity):
     validated = Required(bool, unique=False, default=0)
     robots = Set('Robot')
     created_games = Set('Partida')
+    results = Set('Results')
     
 class Robot(db.Entity):
     """
     Database table to store the robot data
     """
     id = PrimaryKey(int, auto=True)
-    name = Required(str, unique=True)
+    name = Required(str)
     code = Required(str)
     avatar = Optional(str)
     user = Required(User)
+    results = Set('Results')
+    composite_key(user, name)
 
 
 class Validation_data(db.Entity):
@@ -56,6 +59,19 @@ class Partida(db.Entity):
     game_over = Required(bool, default=0)
     password = Optional(str)
     players = Required(Json)
+    Results = Optional('Results')
+
+class Results(db.Entity):
+    """
+    Database table to store the results from
+    the multiplayer games
+    """
+    id = PrimaryKey(int, auto=True)
+    partida = Required(Partida)
+    winners = Set(User)
+    robot_winners = Set(Robot)
+    duration = Required(float)
+    rounds_won = Required(int)
 
 def define_database_and_entities(**db_params):
     global db

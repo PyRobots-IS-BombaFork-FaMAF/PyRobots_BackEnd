@@ -313,4 +313,4 @@ def test_list_all_robots():
         json=body
     )
     tmp_list = response.json()
-    assert response.status_code == 200 and len(tmp_list) == 2
+    assert response.status_code == 200 and len(tmp_list) == 3
