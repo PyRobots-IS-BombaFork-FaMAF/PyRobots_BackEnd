@@ -85,7 +85,6 @@ def simulation(
             listRobots.append(allRobotsUser)
     else: 
         raise HTTPException(400, detail="Cantidad de robots invalida")
-    print(listRobots)
     for bot in listRobots:
         path = pathlib.Path(bot[0].code)
         print(path)
