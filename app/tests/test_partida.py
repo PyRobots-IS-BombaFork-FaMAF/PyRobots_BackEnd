@@ -1,5 +1,6 @@
 from calendar import c
 from datetime import datetime
+from http.client import HTTPException
 from fastapi.testclient import TestClient
 from app.tests.test_main import app_test
 from app.core.models.base import User, Validation_data, db, Robot
@@ -29,6 +30,20 @@ def test_create_valid_partida_sin_pass1():
     token: str = rta["access_token"]
     token_type: str = "Bearer "
     head: str = token_type + token
+    with open('app/tests/robots_for_testing/simple.py', 'rb') as f:
+        code_contents = f.read()
+        f.close()
+    code_file = {"code": ("simple.py", code_contents,
+                            "application/x-python-code")}
+    response = client.post(
+        "/robots/create",
+        headers={"accept": "test_application/json", "Authorization": head},
+        data={
+            "name": "Maximus"
+        },
+        files=code_file
+    )
+    assert response.status_code == 201
     body = {
             "rounds": 10000,
             "games": 200,
@@ -76,7 +91,6 @@ def test_create_valid_partida_con_pass():
         json=body
     )
     assert response.status_code == 201
-
 
 def test_create_valid_partida_default_rounds():
     response_login = client.post(
@@ -592,6 +606,19 @@ def test_unirse_a_partida_sin_pass():
     token: str = rta["access_token"]
     token_type: str = "Bearer "
     head: str = token_type + token
+    with open('app/tests/robots_for_testing/simple.py', 'rb') as f:
+        code_contents = f.read()
+        f.close()
+    code_file = {"code": ("simple.py", code_contents,
+                          "application/x-python-code")}
+    response = client.post(
+        "/robots/create",
+        headers={"accept": "test_application/json", "Authorization": head},
+        data={
+            "name": "Felipe"
+        },
+        files=code_file
+    )
     body = {
         "game_id": 1,
         "robot": "Felipe"
@@ -784,4 +811,177 @@ def test_unirse_a_partida_en_curso():
         headers={"accept": "test_application/json", "Authorization": head},
         json=body
     )
+    partida._gameStatus = 0
     assert response.status_code == 403
+
+
+def test_ejecutar_partida():
+    partida = PartidaObject.get_game_by_id(1)
+    with client.websocket_connect("/game/lobby/1") as websocket:
+        data = websocket.receive_text()
+        assert data == "Bienvenido a la partida"
+        response_login = client.post(
+        "/token",
+        data={
+            "grant_type": "",
+            "username": "tiffbri",
+            "password": "Tiffanyb19!",
+            "scope": "",
+            "client_id": "",
+            "client_secret": "",
+        },
+        )
+        assert response_login.status_code == 200
+        rta: dict = response_login.json()
+        token: str = rta["access_token"]
+        token_type: str = "Bearer "
+        head: str = token_type + token
+        response = client.get(
+            "/game/1/start",
+            headers={"accept": "test_application/json", "Authorization": head}
+        )
+        assert response.status_code == 200
+        print(response.json())
+        assert response.json()["message"] == "La partida ha finalizado"
+        assert response.json()["winners"] != "['tiffbri', 'tiffbr19']"
+        assert partida._gameStatus == 2
+        data = websocket.receive_json()
+        assert json.loads(data)["message"] == "\n¡La partida se esta iniciando! Esperando resultados.."
+        data = websocket.receive_json()
+        assert json.loads(data)["message"] == ("\n¡La partida ha finalizado!" 
+            + "\nLos ganadores son: ['tiffbri', 'tiffbr19']")
+
+def test_ejecutar_partida_finalizada():
+    partida = PartidaObject.get_game_by_id(1)
+    response_login = client.post(
+        "/token",
+        data={
+            "grant_type": "",
+            "username": "tiffbri",
+            "password": "Tiffanyb19!",
+            "scope": "",
+            "client_id": "",
+            "client_secret": "",
+        },
+    )
+    assert response_login.status_code == 200
+    rta: dict = response_login.json()
+    token: str = rta["access_token"]
+    token_type: str = "Bearer "
+    head: str = token_type + token
+    response = client.get(
+        "/game/1/start",
+        headers={"accept": "test_application/json", "Authorization": head}
+    )
+    assert response.status_code==403
+
+def test_ejecutar_partida_en_ejecucion():
+    partida = PartidaObject.get_game_by_id(1)
+    partida._gameStatus = 1
+    response_login = client.post(
+        "/token",
+        data={
+            "grant_type": "",
+            "username": "tiffbri",
+            "password": "Tiffanyb19!",
+            "scope": "",
+            "client_id": "",
+            "client_secret": "",
+        },
+    )
+    assert response_login.status_code == 200
+    rta: dict = response_login.json()
+    token: str = rta["access_token"]
+    token_type: str = "Bearer "
+    head: str = token_type + token
+    response = client.get(
+        "/game/1/start",
+        headers={"accept": "test_application/json", "Authorization": head}
+    )
+    partida._gameStatus = 0
+    assert response.status_code==403
+
+def test_ejecutar_partida_no_creador():
+    partida = PartidaObject.get_game_by_id(1)
+    partida._creator = "tiffb"
+    response_login = client.post(
+        "/token",
+        data={
+            "grant_type": "",
+            "username": "tiffbri",
+            "password": "Tiffanyb19!",
+            "scope": "",
+            "client_id": "",
+            "client_secret": "",
+        },
+    )
+    assert response_login.status_code == 200
+    rta: dict = response_login.json()
+    token: str = rta["access_token"]
+    token_type: str = "Bearer "
+    head: str = token_type + token
+    response = client.get(
+        "/game/1/start",
+        headers={"accept": "test_application/json", "Authorization": head}
+    )
+    assert response.status_code==403
+
+def test_ejecutar_partida_jugadores_insuficientes():
+    partida = PartidaObject.get_game_by_id(1)
+    partida._creator = "tiffbri"
+    partida._current_players = 0
+    response_login = client.post(
+        "/token",
+        data={
+            "grant_type": "",
+            "username": "tiffbri",
+            "password": "Tiffanyb19!",
+            "scope": "",
+            "client_id": "",
+            "client_secret": "",
+        },
+    )
+    assert response_login.status_code == 200
+    rta: dict = response_login.json()
+    token: str = rta["access_token"]
+    token_type: str = "Bearer "
+    head: str = token_type + token
+    response = client.get(
+        "/game/1/start",
+        headers={"accept": "test_application/json", "Authorization": head}
+    )
+    assert response.status_code==403
+
+def test_ejecutar_partida_inexistente():
+    partida = PartidaObject.get_game_by_id(1)
+    partida._creator = "tiffbri"
+    partida._current_players = 0
+    response_login = client.post(
+        "/token",
+        data={
+            "grant_type": "",
+            "username": "tiffbri",
+            "password": "Tiffanyb19!",
+            "scope": "",
+            "client_id": "",
+            "client_secret": "",
+        },
+    )
+    assert response_login.status_code == 200
+    rta: dict = response_login.json()
+    token: str = rta["access_token"]
+    token_type: str = "Bearer "
+    head: str = token_type + token
+    response = client.get(
+        "/game/1111/start",
+        headers={"accept": "test_application/json", "Authorization": head}
+    )
+    assert response.status_code==404
+
+def test_websocket_inexistente():
+    try:
+        with client.websocket_connect("/game/lobby/111") as websocket:
+            pass
+    except Exception as e:
+                print(e)
+                assert e.detail == "Partida inexistente"
