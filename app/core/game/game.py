@@ -14,15 +14,19 @@ class RobotResult_round():
     speed: float
     missile: Optional[tuple[float, float]]
 
-    def __init__():
-        pass
+    def __init__(self, coords: tuple[float, float], direction: float, speed: float,
+                 missile: Optional[tuple[float, float]] = None):
+        self.coords = coords
+        self.direction = direction
+        self.speed = speed
+        self.missile = missile
 
     def set_movement(self, coords: tuple[float, float], direction: float, speed: float):
         self.coords = coords
         self.direction = direction
         self.speed = speed
 
-    def set_missile(self, missile: Optional[tuple[float, float]]):
+    def set_missile(self, missile: Optional[tuple[float, float]] = None):
         self.missile = missile
 
     def json_output(self) -> dict:
@@ -65,9 +69,12 @@ class SimulationResult():
     def __init__(self, robots: list[RobotResult]):
         self.robots = robots
 
-    def json_output(self) -> list[dict]:
-        return [robot.json_output() for robot in self.robots]
-
+    def json_output(self) -> dict:
+        return {
+            "board_size": board_size,
+            "missile_velocity": missile_velocity,
+            "robots": [robot.json_output() for robot in self.robots]
+        }
 
 
 
@@ -95,19 +102,19 @@ class RobotInGame():
         self.desired_velocity = 0
         self.direction = 0
         self.damage = 0
-        self.is_cannon_ready: 0
+        self.is_cannon_ready = 0
         self.is_shooting: False
 
         if for_animation:
-            self.round_result_for_animation = RobotResult_round()
-            self.round_result_for_animation.set_movement(self.position, self.direction, self.actual_velocity)
+            self.round_result_for_animation = RobotResult_round(self.position, self.direction, self.actual_velocity)
             self.result_for_animation = RobotResult(
                 name,
-                [self.round_result_for_animation],
+                [RobotResult_round(self.position, self.direction, self.actual_velocity)],
                 None
             )
         else:
             self.result_for_animation = None
+            self.round_result_for_animation = None
 
         try:
             # There are no robots that do not inherit from Robot because that is checked in upload
@@ -131,12 +138,11 @@ class RobotInGame():
 
 
     def explotion_calculation (self):
-        self.is_cannon_ready -= 1
+        self.is_cannon_ready += -1
         if self.robot._is_shooting and self.is_cannon_ready <= 0:
             direction = self.robot._shot[0]
             distance = self.robot._shot[1]
 
-            #
             x_explotion: float = distance * math.cos(math.radians(direction))
             y_explotion: float = distance * math.sin(math.radians(direction))
             rounds_to_explotion: int = distance // missile_velocity
@@ -150,9 +156,8 @@ class RobotInGame():
             # If animation is needed add the missile shot to re result of the round
             if self.result_for_animation != None:
                 self.round_result_for_animation.set_missile(self.robot._shot)
-        else:
-            self.round_result_for_animation.set_missile(None)
-
+        elif self.result_for_animation != None:
+            self.round_result_for_animation.set_missile()
     def updateOurRobot_movement(self,
                 velocity: Optional[float] = None, direction: Optional[float] = None
             ):
@@ -205,13 +210,13 @@ class RobotInGame():
         # Update velocity
         self.actual_velocity += velocity_difference
 
-        # If animation is needed add the mevement to the round and the round to the result
+        # If animation is needed add the round to the result
         if self.result_for_animation != None:
-            self.round_result_for_animation.set_movement(self.position, self.direction, self.actual_velocity)
             self.result_for_animation.rounds.append(
-                self.round_result_for_animation
+                RobotResult_round(
+                    self.position, self.direction, self.actual_velocity,
+                )
             )
-
 
     def get_result_for_animation(self) -> Optional[RobotResult]:
         if self.result_for_animation != None:
@@ -281,7 +286,7 @@ class GameState():
                 robotInGame.robot._actual_velocity = robotInGame.actual_velocity
                 robotInGame.robot._actual_direction = robotInGame.direction
                 robotInGame.robot._damage = robotInGame.damage
-                robotInGame.robot._is_shooting = robotInGame.is_shooting
+                robotInGame.robot._is_shooting = False
                 robotInGame.robot._is_cannon_ready = robotInGame.is_cannon_ready <= 0
 
 

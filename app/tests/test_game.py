@@ -282,7 +282,7 @@ def testGameState():
     import app.tests.robots_for_testing.exception_respond as exception_respond
 
     game: GameState = GameState(
-        { 
+        {
             'empty': empty.empty,
             'simple': simple.simple,
             'exception_init': exception_init.exception_init,
@@ -356,11 +356,14 @@ def testGameState():
 
     json_output = result_for_animation.json_output()
 
-    assert len(json_output) == 4
-    assert len(json_output[0]['rounds']) == 3
-    assert len(json_output[1]['rounds']) == 3
-    assert len(json_output[2]['rounds']) == 1
-    assert len(json_output[3]['rounds']) == 1
+    assert 'board_size' in json_output.keys()
+    assert 'missile_velocity' in json_output.keys()
+    assert 'robots' in json_output.keys()
+    assert len(json_output['robots']) == 4
+    assert len(json_output['robots'][0]['rounds']) == 3
+    assert len(json_output['robots'][1]['rounds']) == 3
+    assert len(json_output['robots'][2]['rounds']) == 1
+    assert len(json_output['robots'][3]['rounds']) == 1
 
 def testRunSimulation():
     robotsForSimulation: list[RobotInput] = [
