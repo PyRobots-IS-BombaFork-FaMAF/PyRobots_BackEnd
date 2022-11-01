@@ -62,7 +62,7 @@ async def list_games(
     )
     return games
 
-@router.post("/simulation", status_code=201, tags=["Game"])
+@router.post("/simulation", status_code=200, tags=["Game"])
 @db_session
 def simulation( 
     robots: list[RobotSimulation],
@@ -81,20 +81,18 @@ def simulation(
             listRobots.append(allRobotsUser)
     else: 
         raise HTTPException(400, detail="Cantidad de robots invalida")
+    print(listRobots)
     for bot in listRobots:
-        path = pathlib.Path(bot[0].code)
-        print(path)
-        formatted_path = '.'.join(path.with_suffix('').parts)
-        robotInputs.append(RobotInput(formatted_path, 
-                                    get_original_filename(current_user, 
-                                                        bot[0].name, 
-                                                        bot[0].code.rsplit('/', 1)[1]
-                                                        ).rsplit('.', 1)[0], 
+        pathCodeRobot = bot[0].code.replace('/', '.')[:-3]
+        print(pathCodeRobot)
+        print(get_original_filename(uname, bot[0].name, bot[0].code.rsplit('/', 1)[1])[:-3])
+        robotInputs.append(RobotInput(pathCodeRobot, 
+                                    get_original_filename(uname, bot[0].name, bot[0].code.rsplit('/', 1)[1])[:-3], 
                                     bot[0].name))
     resultSimulation = runSimulation(robotInputs, rounds.rounds, True).json_output()
 
     return JSONResponse(resultSimulation)
-    
+
 
 @router.post("/game/{game_id}/join", status_code=200, tags=["Game"])
 async def join_game(
