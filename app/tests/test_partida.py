@@ -751,7 +751,7 @@ def test_websocket_join():
         )
         assert response.status_code == 200
         data = websocket.receive_json()
-        assert data["message"] == "\n¡El jugador tiffbr19 se ha unido a la partida!"
+        assert data["message"] == "¡El jugador tiffbr19 se ha unido a la partida!"
 
 def test_unirse_a_partida_llena():
     response_login = client.post(
@@ -845,10 +845,10 @@ def test_ejecutar_partida():
         #assert response.json()["winners"] == "['tiffbri', 'tiffbr19']"
         assert partida._gameStatus == 2
         data = websocket.receive_json()
-        assert data["message"] == "\n¡La partida se esta iniciando! Esperando resultados.."
+        assert data["message"] == "¡La partida se esta iniciando! Esperando resultados.."
         data = websocket.receive_json()
-        assert data["message"] == ("\n¡La partida ha finalizado!" 
-            + "\nLos ganadores son: ['tiffbri', 'tiffbr19']")
+        assert data["message"] == ("¡La partida ha finalizado!" 
+            + " Los ganadores son: ['tiffbri', 'tiffbr19']")
 
 def test_ejecutar_partida_finalizada():
     partida = PartidaObject.get_game_by_id(1)

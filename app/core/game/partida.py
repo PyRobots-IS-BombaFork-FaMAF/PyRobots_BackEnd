@@ -108,13 +108,13 @@ class PartidaObject():
         Partida[self._id].players = self._players 
         db.flush()
         await self._connections.broadcast(
-            f"\n¡El jugador {username} se ha unido a la partida!",
+            f"¡El jugador {username} se ha unido a la partida!",
             self._players, 0
             )
             
     @db_session
     async def execute_game(self):
-        msg = f"\n¡La partida se esta iniciando! Esperando resultados.."
+        msg = f"¡La partida se esta iniciando! Esperando resultados.."
         await self._connections.broadcast(
             msg,
             self._players, 2)
@@ -133,11 +133,11 @@ class PartidaObject():
         db.flush()
         results = save_results(robots_ingame, duration, self._id)
         winners = [d["username"] for d in results]
-        msg = f"\n¡La partida ha finalizado!" 
+        msg = f"¡La partida ha finalizado! " 
         if len(winners) != 1:
-            msg += f"\nLos ganadores son: " + str(winners)
+            msg += f"Los ganadores son: " + str(winners)
         else:
-            msg += f"\nEl ganador es: " + str(winners)
+            msg += f"El ganador es: " + str(winners)
         await self._connections.broadcast(
             msg,
             self._players, 3
