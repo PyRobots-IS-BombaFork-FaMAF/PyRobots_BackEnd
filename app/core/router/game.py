@@ -78,9 +78,12 @@ def simulation(
     if(len(robots) >= 2 and len(robots) <= 4):
         for robot in robots:
             allRobotsUser = db.select("select * from Robot where user = $uname and id = $robot.id")
+            if(allRobotsUser == []):
+                raise HTTPException(400, detail="robot invalido")
             listRobots.append(allRobotsUser)
     else: 
         raise HTTPException(400, detail="Cantidad de robots invalida")
+    print(listRobots)
     for bot in listRobots:
         pathCodeRobot = bot[0].code.replace('/', '.')[:-3]
         robotInputs.append(RobotInput(pathCodeRobot, 
