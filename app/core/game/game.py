@@ -169,7 +169,7 @@ class RobotInGame():
             self.explotions_points.append(explotion)
 
             self.is_shooting = False
-            self.is_cannon_ready = 2
+            self.is_cannon_ready = 60
 
             # If animation is needed add the missile shot to re result of the round
             if self.result_for_animation != None:
