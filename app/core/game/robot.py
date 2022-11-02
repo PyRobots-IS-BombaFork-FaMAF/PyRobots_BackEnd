@@ -14,6 +14,9 @@ class Robot(object):
     _set_direction: Optional[float]      # Direction that was set by the robot
     _position: Tuple[float, float]
     _damage: float
+    _scan_direction: Optional[float]
+    _resolution_in_degrees: Optional[float]
+    _last_scanned: Optional[float]
 
     def __init__(self):
         self._actual_velocity = 0
@@ -22,6 +25,9 @@ class Robot(object):
         self._set_direction = 0
         self._position = (0,0)
         self._damage = 0
+        self._scan_direction = 0
+        self._resolution_in_degrees = 0
+        self._last_scanned = 0
 
     @abstractmethod
     def initialize(self):
@@ -48,3 +54,11 @@ class Robot(object):
     def drive(self, direction, velocity):
         self._set_velocity = velocity / 100 * _constants.max_velocity
         self._set_direction = direction
+
+    #Scanner
+    def point_scanner(self, direction, resolution_in_degrees):
+        self._scan_direction = direction
+        self._resolution_in_degrees = resolution_in_degrees
+    
+    def scanned(self):
+        return self._last_scanned
