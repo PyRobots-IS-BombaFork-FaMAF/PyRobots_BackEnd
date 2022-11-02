@@ -43,6 +43,14 @@ def test_create_valid_partida_sin_pass1():
         },
         files=code_file
     )
+    response = client.post(
+        "/robots/create",
+        headers={"accept": "test_application/json", "Authorization": head},
+        data={
+            "name": "Megatron"
+        },
+        files=code_file
+    )
     assert response.status_code == 201
     body = {
             "rounds": 10000,
