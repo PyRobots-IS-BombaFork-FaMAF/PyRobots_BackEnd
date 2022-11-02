@@ -140,11 +140,16 @@ class RobotInGame():
     def explotion_calculation (self):
         self.is_cannon_ready += -1
         if self.robot._is_shooting and self.is_cannon_ready <= 0:
-            direction = self.robot._shot[0]
-            distance = self.robot._shot[1]
+            direction = self.robot._shot[0] % 360
+            distance = self.robot._shot[1] if self.robot._shot[1] < 700 else 700
 
-            x_explotion: float = distance * math.cos(math.radians(direction))
-            y_explotion: float = distance * math.sin(math.radians(direction))
+            x: float = distance * math.cos(math.radians(direction)) + self.position[0]
+            y: float = distance * math.sin(math.radians(direction)) + self.position[1]
+
+            #
+            x_explotion: float = 999 if x >= 1000 else (0 if x < 0 else x)
+            y_explotion: float = 999 if y >= 1000 else (0 if y < 0 else y)
+
             rounds_to_explotion: int = distance // missile_velocity
 
             explotion = (x_explotion, y_explotion, rounds_to_explotion)
@@ -158,6 +163,8 @@ class RobotInGame():
                 self.round_result_for_animation.set_missile(self.robot._shot)
         elif self.result_for_animation != None:
             self.round_result_for_animation.set_missile()
+
+
     def updateOurRobot_movement(self,
                 velocity: Optional[float] = None, direction: Optional[float] = None
             ):
