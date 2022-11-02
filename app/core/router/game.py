@@ -142,14 +142,14 @@ async def websocket_endpoint(websocket: WebSocket, game_id: int):
 
 @router.post("/game/{game_id}/leave", status_code=200, tags=["Game"])
 async def leave_game(
-    game: PartidaLeave,
+    game_id: int,
     current_user: User = Depends(get_current_active_user)
 ):
     """
     Remove an user to an existing game
     """
     try:
-        partida = PartidaObject.get_game_by_id(game.game_id)
+        partida = PartidaObject.get_game_by_id(game_id)
     except:
         raise HTTPException(status_code=404, detail= "Partida inexistente")
     if partida == None:
@@ -163,7 +163,7 @@ async def leave_game(
         else:
             raise HTTPException(status_code=403, detail= "La partida ya ha finalizado")
     else: 
-        await partida.leave_game(current_user["username"], game.robot)
+        await partida.leave_game(current_user["username"])
 
     msg = {"msg" : "Abandonaste la partida con éxito!"}
     return msg

@@ -113,9 +113,11 @@ class PartidaObject():
             )
 
     @db_session
-    async def leave_game (self, username, robot):
-        if any(d['player'] == username for d in self._players):
-            self._players.remove({'player': username, 'robot': robot})
+    async def leave_game (self, username):
+        for d in self._players:
+            if d['player'] == username:
+                self._players.remove(d)
+                break
         self._current_players = len(self._players)
         Partida[self._id].players = self._players
         db.flush()
