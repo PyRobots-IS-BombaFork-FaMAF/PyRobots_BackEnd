@@ -9,7 +9,7 @@ class Settings(BaseSettings):
     BACKEND_CORS_ORIGINS: List[AnyHttpUrl] = []
     DB_PROVIDER: str = "sqlite"
     DB_NAME: str = "pyrobots-db.sqlite"
-    DB_TEST_NAME: str = "test.sqlite"
+    DB_TEST_NAME: str = ":sharedmemory:"
 
     @validator("BACKEND_CORS_ORIGINS", pre=True)
     def assemble_cors_origins(cls, v: Union[str, List[str]]) -> Union[List[str], str]:

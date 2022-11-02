@@ -23,7 +23,7 @@ def get_application():
         allow_headers=["*"],
     )
 
-    PartidaObject.init_from_db(Partida)
+    PartidaObject.init_from_db()
 
     _app.include_router(users.router)
     _app.include_router(robots.router)

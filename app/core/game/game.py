@@ -5,6 +5,7 @@ from types import ModuleType
 from typing import NamedTuple
 import math
 from app.core.game.constants import *
+import numbers
 
 
 
@@ -13,21 +14,26 @@ class RobotResult_round():
     direction: float
     speed: float
     missile: Optional[tuple[float, float]]
+    scanner_direction: Optional[float]
+    resolution_in_degrees: Optional[float]
 
     def __init__(self, coords: tuple[float, float], direction: float, speed: float,
+                 scanner_direction: Optional[float] = None, resolution_in_degrees: Optional[float] = None,
                  missile: Optional[tuple[float, float]] = None):
+
         self.coords = coords
         self.direction = direction
         self.speed = speed
         self.missile = missile
-
-    def set_movement(self, coords: tuple[float, float], direction: float, speed: float):
-        self.coords = coords
-        self.direction = direction
-        self.speed = speed
+        self.scanner_direction = scanner_direction
+        self.resolution_in_degrees = resolution_in_degrees
 
     def set_missile(self, missile: Optional[tuple[float, float]] = None):
         self.missile = missile
+
+    def set_scanner(self, direction: Optional[float], resolution: Optional[float]):
+        self.scanner_direction = direction
+        self.resolution_in_degrees = resolution
 
     def json_output(self) -> dict:
         res = {
@@ -35,6 +41,11 @@ class RobotResult_round():
             "direction": self.direction,
             "speed": self.speed
         }
+        if self.resolution_in_degrees != None and self.scanner_direction != None:
+            res["scanner"] = {
+                "direction": self.scanner_direction,
+                "resolution_in_degrees": self.resolution_in_degrees
+                }
         if self.missile != None:
             res["missile"] = { "direction": self.missile[0], "distance": self.missile[1] }
         return res
@@ -90,6 +101,7 @@ class RobotInGame():
     is_shooting: bool
     is_cannon_ready: int # the rounds needed to that the canon is ready, if is <= 0 then the canoon is ready
     explotions_points: list[tuple[float,float,int]] # list of missile impacts positions launched [x,y, rounds to impact]
+    scanner_result: float
 
     round_result_for_animation: Optional[RobotResult_round]
     result_for_animation: Optional[RobotResult] # Only when animation is needed
@@ -218,11 +230,12 @@ class RobotInGame():
         # Update velocity
         self.actual_velocity += velocity_difference
 
-        # If animation is needed add the round to the result
         if self.result_for_animation != None:
             self.result_for_animation.rounds.append(
                 RobotResult_round(
                     self.position, self.direction, self.actual_velocity,
+                    self.round_result_for_animation.scanner_direction,
+                    self.round_result_for_animation.resolution_in_degrees,
                     self.round_result_for_animation.missile
                 )
             )
@@ -247,7 +260,6 @@ class GameState():
         """
         self.round = 0
         self.ourRobots = [RobotInGame(robotClasses[name], name, for_animation) for name in robotClasses]
-
         self.for_animation = for_animation
 
     def amount_of_robots_alive(self) -> int:
@@ -260,11 +272,44 @@ class GameState():
             if robotInGame.damage < 1:
                 robotInGame.executeRobotCode()
 
+        # For scanner
+        for robot in self.ourRobots:
+            if robot.damage < 1:
+                direction: Any = robot.robot._scan_direction
+                resolution: Any = robot.robot._resolution_in_degrees
+                x1_position: float = robot.position[0]
+                y1_position: float = robot.position[1]
+                shortest_distance = float('inf')
+
+                if (isinstance(direction, numbers.Real) and isinstance(resolution, numbers.Real)
+                    and resolution <= 10 and resolution >= 0):
+                    direction = direction % 360
+                    for robotInGame in self.ourRobots:
+                        if robotInGame is not robot and robotInGame.damage < 1:
+                            # Distance formula
+                            x2_position: float = robotInGame.position[0]
+                            y2_position: float = robotInGame.position[1]
+                            distance = math.sqrt((x2_position-x1_position)**2+(y2_position-y1_position)**2)
+
+                            # Angle formula
+                            x = x2_position - x1_position
+                            y = y2_position - y1_position
+                            angle = math.atan2(y, x) * (180.0 / math.pi)
+                            anglediff = (direction - angle + 180 + 360) % 360 - 180
+                            if anglediff >= -resolution and anglediff <= resolution and distance < shortest_distance:
+                                shortest_distance = distance
+                    robot.scanner_result = shortest_distance
+                    if robot.round_result_for_animation != None:
+                        robot.round_result_for_animation.set_scanner(direction, resolution)
+                else:
+                    robot.scanner_result = None
+
         # Shoot
         for robotInGame in self.ourRobots:
             if robotInGame.damage < 1:
                 # Calculate the position and de round where the missile shots whill explote
                 robotInGame.explotion_calculation()
+
 
         # Move
         for robotInGame in self.ourRobots:
@@ -275,16 +320,14 @@ class GameState():
                 # They are of type `Any` because the robot code may have set anything
 
                 # Check types
-                if not isinstance(set_velocity, float):
+                if not isinstance(set_velocity, numbers.Real):
                     set_velocity = None
-                if not isinstance(set_direction, float):
+                if not isinstance(set_direction, numbers.Real):
                     set_direction = None
 
                 # Update movement of `RobotInGame`
                 robotInGame.updateOurRobot_movement(set_velocity, set_direction)
 
-
-        # NOTE: When adding scanning and cannon, more `for`s will be needed
 
         # Update `Robot` fields
         for robotInGame in self.ourRobots:
@@ -297,7 +340,9 @@ class GameState():
                 robotInGame.robot._damage = robotInGame.damage
                 robotInGame.robot._is_shooting = False
                 robotInGame.robot._is_cannon_ready = robotInGame.is_cannon_ready <= 0
-
+                robotInGame.robot._last_scanned = robotInGame.scanner_result
+                robotInGame.robot._scan_direction = None
+                robotInGame.robot._resolution_in_degrees = None
 
     def get_result_for_animation(self) -> Optional[SimulationResult]:
         if self.for_animation:
