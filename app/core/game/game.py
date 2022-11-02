@@ -1,5 +1,5 @@
 import random
-from typing import Any, Dict, Optional, Union
+from typing import Any, Dict, Optional, Tuple, Union
 from app.core.game.robot import Robot
 from types import ModuleType
 from typing import NamedTuple
@@ -254,12 +254,12 @@ class GameState():
 
     for_animation: bool
 
-    def __init__(self, robotClasses: Dict[str, type], for_animation: bool = False):
+    def __init__(self, robotClasses: list[Tuple[str, type]], for_animation: bool = False):
         """
             `robotClasses` is a dictionary of robot names and their classes
         """
         self.round = 0
-        self.ourRobots = [RobotInGame(robotClasses[name], name, for_animation) for name in robotClasses]
+        self.ourRobots = [RobotInGame(robot[1], robot[0], for_animation) for robot in robotClasses]
         self.for_animation = for_animation
 
     def amount_of_robots_alive(self) -> int:
@@ -384,7 +384,7 @@ def runSimulation(robots: list[RobotInput], rounds: int, for_animation: bool = F
     robotsClasses: list[type] = getRobots(robots)
     robotsNames: list[str] = list(map((lambda robot: robot.name), robots))
 
-    gameState: GameState = GameState(dict(zip(robotsNames, robotsClasses)), for_animation)
+    gameState: GameState = GameState(list(zip(robotsNames, robotsClasses)), for_animation)
 
     while gameState.amount_of_robots_alive() > 1 and gameState.round < rounds:
         gameState.advance_round()
