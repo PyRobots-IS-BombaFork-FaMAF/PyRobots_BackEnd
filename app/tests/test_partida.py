@@ -985,3 +985,106 @@ def test_websocket_inexistente():
     except Exception as e:
                 print(e)
                 assert e.detail == "Partida inexistente"
+
+def test_abandonar_partida():
+    partida = PartidaObject.get_game_by_id(1)
+    partida._creator = "tiffb"
+    response_login = client.post(
+        "/token",
+        data={
+            "grant_type": "",
+            "username": "tiffbri",
+            "password": "Tiffanyb19!",
+            "scope": "",
+            "client_id": "",
+            "client_secret": "",
+        },
+    )
+    assert response_login.status_code == 200
+    rta: dict = response_login.json()
+    token: str = rta["access_token"]
+    token_type: str = "Bearer "
+    head: str = token_type + token
+    response = client.post(
+        "/game/1/leave",
+        headers={"accept": "test_application/json", "Authorization": head}
+    )
+    assert response.status_code==200
+    
+
+def test_abandonar_partida_creador():
+    partida = PartidaObject.get_game_by_id(1)
+    partida._creator = "tiffbri"
+    response_login = client.post(
+        "/token",
+        data={
+            "grant_type": "",
+            "username": "tiffbri",
+            "password": "Tiffanyb19!",
+            "scope": "",
+            "client_id": "",
+            "client_secret": "",
+        },
+    )
+    assert response_login.status_code == 200
+    rta: dict = response_login.json()
+    token: str = rta["access_token"]
+    token_type: str = "Bearer "
+    head: str = token_type + token
+    response = client.post(
+        "/game/1/leave",
+        headers={"accept": "test_application/json", "Authorization": head}
+    )
+    assert response.status_code==403
+
+def test_abandonar_partida_inexistente():
+    partida = PartidaObject.get_game_by_id(1)
+    partida._creator = "tiffb"
+    partida._current_players = 0
+    response_login = client.post(
+        "/token",
+        data={
+            "grant_type": "",
+            "username": "tiffbri",
+            "password": "Tiffanyb19!",
+            "scope": "",
+            "client_id": "",
+            "client_secret": "",
+        },
+    )
+    assert response_login.status_code == 200
+    rta: dict = response_login.json()
+    token: str = rta["access_token"]
+    token_type: str = "Bearer "
+    head: str = token_type + token
+    response = client.post(
+        "/game/1111/leave",
+        headers={"accept": "test_application/json", "Authorization": head}
+    )
+    assert response.status_code==404   
+
+def test_abandonar_partida_en_ejecucion():
+    partida = PartidaObject.get_game_by_id(1)
+    partida._gameStatus = 1
+    response_login = client.post(
+        "/token",
+        data={
+            "grant_type": "",
+            "username": "tiffbri",
+            "password": "Tiffanyb19!",
+            "scope": "",
+            "client_id": "",
+            "client_secret": "",
+        },
+    )
+    assert response_login.status_code == 200
+    rta: dict = response_login.json()
+    token: str = rta["access_token"]
+    token_type: str = "Bearer "
+    head: str = token_type + token
+    response = client.post(
+        "/game/1/leave",
+        headers={"accept": "test_application/json", "Authorization": head}
+    )
+    partida._gameStatus = 0
+    assert response.status_code==403
