@@ -247,7 +247,7 @@ class GameState():
                             # Angle formula
                             x = x2_position - x1_position
                             y = y2_position - y1_position
-                            angle = math.atan2(y, x) * (180.0 / math.pi)
+                            angle = math.sin(y / x) * (180.0 / math.pi)
                             anglediff = (direction - angle + 180 + 360) % 360 - 180
                             if anglediff >= -resolution and anglediff <= resolution and distance < shortest_distance:
                                 shortest_distance = distance
