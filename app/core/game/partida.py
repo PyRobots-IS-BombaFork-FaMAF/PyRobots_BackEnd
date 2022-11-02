@@ -11,6 +11,7 @@ import json
 import time
 from fastapi import WebSocket
 from typing import List
+import asyncio
 
 class PartidaObject():
 
@@ -113,11 +114,7 @@ class PartidaObject():
             )
             
     @db_session
-    async def execute_game(self):
-        msg = f"¡La partida se esta iniciando! Esperando resultados.."
-        await self._connections.broadcast(
-            msg,
-            self._players, 2)
+    def execute_game(self):
         self._gameStatus = 1
         robots_ingame = get_robot_inputs(self)
         list_of_inputs = [dict_player["input"] for dict_player in robots_ingame]
@@ -138,10 +135,10 @@ class PartidaObject():
             msg += f"Los ganadores son: " + str(winners)
         else:
             msg += f"El ganador es: " + str(winners)
-        await self._connections.broadcast(
+        asyncio.run(self._connections.broadcast(
             msg,
             self._players, 3
-            )
+            ))
         return winners
 
     def is_available(self):

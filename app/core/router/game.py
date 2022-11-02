@@ -8,6 +8,7 @@ from app.core.handlers.password_handlers import *
 from app.core.models.game_models import *
 from app.core.game.partida import *
 from datetime import datetime
+import asyncio
 
 router = APIRouter()
 
@@ -96,7 +97,8 @@ async def join_game(
 @router.get("/game/{game_id}/start", status_code=200, tags=["Game"])
 async def start_game(
     game_id: int,
-    current_user: User = Depends(get_current_active_user)
+    current_user: User = Depends(get_current_active_user),
+    background_t: BackgroundTasks = BackgroundTasks()
 ):
     """
     Endpoint to start a game
@@ -120,7 +122,13 @@ async def start_game(
         raise HTTPException(status_code=403, 
             detail= f"Se necesitan mínimo {partida._min_players} para iniciar la partida")
     else:
-        msg = {"message": "La partida ha finalizado", "winners": await partida.execute_game()}
+        msg = f"¡La partida se esta iniciando! Esperando resultados.."
+        await partida._connections.broadcast(
+            msg,
+            partida._players, 2)
+        background_t.add_task(partida.execute_game)
+        
+    msg = {"message": "La partida ha finalizado"}
 
     return msg
 
