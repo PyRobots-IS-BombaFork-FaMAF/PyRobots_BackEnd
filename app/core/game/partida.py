@@ -11,6 +11,7 @@ import json
 import time
 from fastapi import WebSocket
 from typing import List
+import asyncio
 
 class PartidaObject():
 
@@ -108,7 +109,7 @@ class PartidaObject():
         Partida[self._id].players = self._players 
         db.flush()
         await self._connections.broadcast(
-            f"\n¡El jugador {username} se ha unido a la partida!",
+            f"¡El jugador {username} se ha unido a la partida!",
             self._players, 0
             )
 
@@ -127,10 +128,7 @@ class PartidaObject():
         )
 
     @db_session
-    async def execute_game(self):
-        await self._connections.broadcast(
-            f"\n¡La partida se esta iniciando! Esperando resultados..",
-            self._players, 2)
+    def execute_game(self):
         self._gameStatus = 1
         robots_ingame = get_robot_inputs(self)
         list_of_inputs = [dict_player["input"] for dict_player in robots_ingame]
@@ -146,15 +144,15 @@ class PartidaObject():
         db.flush()
         results = save_results(robots_ingame, duration, self._id)
         winners = [d["username"] for d in results]
-        msg = f"\n¡La partida ha finalizado!" 
+        msg = f"¡La partida ha finalizado! " 
         if len(winners) != 1:
-            msg += f"\nLos ganadores son: " + str(winners)
+            msg += f"Los ganadores son: " + str(winners)
         else:
-            msg += f"\nEl ganador es: " + str(winners)
-        await self._connections.broadcast(
+            msg += f"El ganador es: " + str(winners)
+        asyncio.run(self._connections.broadcast(
             msg,
             self._players, 3
-            )
+            ))
         return winners
 
     def is_available(self):
@@ -199,7 +197,7 @@ def get_robot_inputs(partida: PartidaObject):
             dict_player = {"input": input, "username": player["player"], "wins": 0}
             robots_ingame.append(dict_player)
     return robots_ingame
-    
+
 class ConnectionManager:
     def __init__(self):
         self.connections: List[WebSocket] = []
@@ -208,9 +206,13 @@ class ConnectionManager:
         await websocket.close()
         self.connections.remove(websocket)
 
-    async def connect(self, websocket: WebSocket):
+    async def connect(self, websocket: WebSocket, players):
         await websocket.accept()
-        await websocket.send_text("Bienvenido a la partida")
+        await websocket.send_json(
+            {"status": 4,
+            "message": "Bienvenido a la partida",
+            "players": players}
+            )
         self.connections.append(websocket)
 
     async def broadcast(self, data: str, players, status):
@@ -218,14 +220,15 @@ class ConnectionManager:
         status: 0 - Someone joined the game
         status: 1 - Someone left the game
         status: 2 - The game has started
-        status: 3 - The game has finished    
+        status: 3 - The game has finished   
+        status: 4 - Welcome to the game (Not broadcasted, only sent to one websocket) 
         """
         for connection in self.connections:
             try:
                 await connection.send_json(
-                    json.dumps({"status": status,
+                    {"status": status,
                     "message": data,
-                    "players": players})
+                    "players": players}
                 )
             except:
                 self.connections.remove(connection)
