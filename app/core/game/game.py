@@ -1,31 +1,48 @@
 import random
-from typing import Any, Dict, Optional, Union
+from typing import Any, Dict, Optional, Tuple, Union
 from app.core.game.robot import Robot
 from types import ModuleType
 from typing import NamedTuple
 import math
 from app.core.game.constants import *
+import numbers 
 
 
 class RobotResult_round():
     coords: tuple[float, float]
     direction: float
     speed: float
+    scanner_direction: Optional[float]
+    resolution_in_degrees: Optional[float]
 
-    def __init__(self, coords: tuple[float, float], direction: float, speed: float):
+
+    def __init__(self, coords: tuple[float, float], direction: float, speed: float, 
+            scanner_direction: Optional[float] = None, resolution_in_degrees: Optional[float] = None):
         self.coords = coords
         self.direction = direction
         self.speed = speed
-    
+        self.scanner_direction = scanner_direction
+        self.resolution_in_degrees = resolution_in_degrees
+
+    def set_scanner(self, direction: Optional[float], resolution: Optional[float]):
+        self.scanner_direction = direction
+        self.resolution_in_degrees = resolution
+
     def json_output(self) -> dict:
-        return {
+        res = {
             "coords": {"x": self.coords[0], "y": self.coords[1]},
             "direction": self.direction,
             "speed": self.speed
         }
+        if self.resolution_in_degrees != None and self.scanner_direction != None:
+            res["scanner"] = {
+                "direction": self.scanner_direction,
+                "resolution_in_degrees": self.resolution_in_degrees
+                }
+        return res
 
 class RobotResult():
-            
+
     name: str
     rounds: list[RobotResult_round]
     cause_of_death: Optional[str]
@@ -34,7 +51,7 @@ class RobotResult():
         self.name = name
         self.rounds = rounds
         self.cause_of_death = cause_of_death
-    
+
     def json_output(self) -> dict:
         res = {
             "name": self.name,
@@ -55,10 +72,12 @@ class SimulationResult():
     def __init__(self, robots: list[RobotResult]):
         self.robots = robots
 
-    def json_output(self) -> list[dict]:
-        return [robot.json_output() for robot in self.robots]
-
-
+    def json_output(self) -> dict:
+        return {
+            "board_size": board_size,
+            "missile_velocity": missile_velocity,
+            "robots": [robot.json_output() for robot in self.robots]
+        }
 
 
 class RobotInGame():
@@ -70,7 +89,9 @@ class RobotInGame():
     direction: float  # degrees (so it is modulo 360)
     damage: float     # with damage ∈ [0;1) robot is alive
     cause_of_death: Optional[str]
+    scanner_result: float
 
+    round_result_for_animation: Optional[RobotResult_round]
     result_for_animation: Optional[RobotResult] # Only when animation is needed
 
     def __init__(self, robotClass: type, name: str, for_animation: bool):
@@ -83,6 +104,7 @@ class RobotInGame():
         self.damage = 0
 
         if for_animation:
+            self.round_result_for_animation = RobotResult_round(self.position, self.direction, self.actual_velocity)
             self.result_for_animation = RobotResult(
                 name,
                 [RobotResult_round(self.position, self.direction, self.actual_velocity)],
@@ -90,6 +112,7 @@ class RobotInGame():
             )
         else:
             self.result_for_animation = None
+            self.round_result_for_animation = None
 
         try:
             # There are no robots that do not inherit from Robot because that is checked in upload
@@ -127,7 +150,7 @@ class RobotInGame():
         # Update direction
         if direction != None and self.actual_velocity <= max_velocity/2:
             self.direction = direction % 360
-        
+
         x_component_direction: float = math.cos(math.radians(self.direction))
         y_component_direction: float = math.sin(math.radians(self.direction))
 
@@ -163,12 +186,15 @@ class RobotInGame():
         # Update velocity
         self.actual_velocity += velocity_difference
 
-        # If animation is needed add the round to the result
         if self.result_for_animation != None:
             self.result_for_animation.rounds.append(
-                RobotResult_round(self.position, self.direction, self.actual_velocity)
+                RobotResult_round(
+                    self.position, self.direction, self.actual_velocity,
+                    self.round_result_for_animation.scanner_direction,
+                    self.round_result_for_animation.resolution_in_degrees
+                )
             )
-    
+
     def get_result_for_animation(self) -> Optional[RobotResult]:
         if self.result_for_animation != None:
             self.result_for_animation.cause_of_death = self.cause_of_death
@@ -181,13 +207,12 @@ class GameState():
 
     for_animation: bool
 
-    def __init__(self, robotClasses: Dict[str, type], for_animation: bool = False):
+    def __init__(self, robotClasses: list[Tuple[str, type]], for_animation: bool = False):
         """
             `robotClasses` is a dictionary of robot names and their classes
         """
         self.round = 0
-        self.ourRobots = [RobotInGame(robotClasses[name], name, for_animation) for name in robotClasses]
-
+        self.ourRobots = [RobotInGame(robot[1], robot[0], for_animation) for robot in robotClasses]
         self.for_animation = for_animation
 
     def amount_of_robots_alive(self) -> int:
@@ -200,6 +225,39 @@ class GameState():
             if robotInGame.damage < 1:
                 robotInGame.executeRobotCode()
 
+        # For scanner
+        for robot in self.ourRobots:
+            if robot.damage < 1:
+                direction: Any = robot.robot._scan_direction
+                resolution: Any = robot.robot._resolution_in_degrees 
+                x1_position: float = robot.position[0]
+                y1_position: float = robot.position[1]
+                shortest_distance = float('inf')
+
+                if (isinstance(direction, numbers.Real) and isinstance(resolution, numbers.Real)
+                    and resolution <= 10 and resolution >= 0):
+                    direction = direction % 360
+                    for robotInGame in self.ourRobots:
+                        if robotInGame is not robot and robotInGame.damage < 1:
+                            # Distance formula
+                            x2_position: float = robotInGame.position[0]
+                            y2_position: float = robotInGame.position[1]
+                            distance = math.sqrt((x2_position-x1_position)**2+(y2_position-y1_position)**2)
+
+                            # Angle formula
+                            x = x2_position - x1_position
+                            y = y2_position - y1_position
+                            angle = math.atan2(y, x) * (180.0 / math.pi)
+                            anglediff = (direction - angle + 180 + 360) % 360 - 180
+                            if anglediff >= -resolution and anglediff <= resolution and distance < shortest_distance:
+                                shortest_distance = distance
+                    robot.scanner_result = shortest_distance
+                    if robot.round_result_for_animation != None:
+                        robot.round_result_for_animation.set_scanner(direction, resolution)
+                else:
+                    robot.scanner_result = None
+
+
         for robotInGame in self.ourRobots:
             if robotInGame.damage < 1:
                 # Extract new velocity and direction from `robotInGame.robot`
@@ -208,15 +266,15 @@ class GameState():
                 # They are of type `Any` because the robot code may have set anything
 
                 # Check types
-                if not isinstance(set_velocity, float):
+                if not isinstance(set_velocity, numbers.Real):
                     set_velocity = None
-                if not isinstance(set_direction, float):
+                if not isinstance(set_direction, numbers.Real):
                     set_direction = None
 
                 # Update movement of `RobotInGame`
                 robotInGame.updateOurRobot_movement(set_velocity, set_direction)
 
-        # NOTE: When adding scanning and cannon, more `for`s will be needed
+        # NOTE: When adding cannon, more `for`s will be needed
 
         # Update `Robot` fields
         for robotInGame in self.ourRobots:
@@ -227,7 +285,10 @@ class GameState():
                 robotInGame.robot._actual_velocity = robotInGame.actual_velocity
                 robotInGame.robot._actual_direction = robotInGame.direction
                 robotInGame.robot._damage = robotInGame.damage
-    
+                robotInGame.robot._last_scanned = robotInGame.scanner_result
+                robotInGame.robot._scan_direction = None
+                robotInGame.robot._resolution_in_degrees = None
+
     def get_result_for_animation(self) -> Optional[SimulationResult]:
         if self.for_animation:
             return SimulationResult([robot.get_result_for_animation() for robot in self.ourRobots])
@@ -250,7 +311,7 @@ def getRobots(robots: list[RobotInput]) -> list[type]:
         robotModule: ModuleType = __import__(pathToRobot, fromlist=[robotClassName])
         robotClass: type = getattr(robotModule, robotClassName)
         return robotClass
-    
+
     return list(map(lambda robotInput: getRobot(robotInput.pathToCode, robotInput.robotClassName), robots))
 
 
@@ -268,11 +329,11 @@ def runSimulation(robots: list[RobotInput], rounds: int, for_animation: bool = F
     robotsClasses: list[type] = getRobots(robots)
     robotsNames: list[str] = list(map((lambda robot: robot.name), robots))
 
-    gameState: GameState = GameState(dict(zip(robotsNames, robotsClasses)), for_animation)
+    gameState: GameState = GameState(list(zip(robotsNames, robotsClasses)), for_animation)
 
     while gameState.amount_of_robots_alive() > 1 and gameState.round < rounds:
         gameState.advance_round()
-    
+
     if for_animation:
         return gameState.get_result_for_animation()
     else:
