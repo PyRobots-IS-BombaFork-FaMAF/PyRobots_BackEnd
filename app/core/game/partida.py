@@ -111,7 +111,19 @@ class PartidaObject():
             f"\n¡El jugador {username} se ha unido a la partida!",
             self._players, 0
             )
-            
+
+    @db_session
+    async def leave_game (self, username, robot):
+        if any(d['player'] == username for d in self._players):
+            self._players.remove({'player': username, 'robot': robot})
+        self._current_players = len(self._players)
+        Partida[self._id].players = self._players
+        db.flush()
+        await self._connections.broadcast(
+            f"\n¡El jugador {username} se ha abandonado la partida!",
+            self._players, 1
+        )
+
     @db_session
     async def execute_game(self):
         await self._connections.broadcast(

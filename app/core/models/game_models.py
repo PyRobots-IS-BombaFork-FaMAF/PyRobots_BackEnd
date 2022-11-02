@@ -59,3 +59,11 @@ class PartidaJoin(BaseModel):
     game_id: int
     robot: str
     password: Optional[str] = Field(None)
+
+class PartidaLeave(BaseModel):
+    """
+    BaseModel for the data received when an user is trying to leave 
+    a game
+    """
+    game_id: int
+    robot: str
