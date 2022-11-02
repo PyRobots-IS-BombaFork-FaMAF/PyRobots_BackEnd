@@ -70,7 +70,7 @@ class Robot(object):
 
     #Cannon
     def is_cannon_ready(self):
-        return sel._is_cannon_ready
+        return self._is_cannon_ready
 
     def cannon(self, degree, distance):
         self._shot = (degree, distance)
