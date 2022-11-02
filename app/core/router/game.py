@@ -187,7 +187,7 @@ async def websocket_endpoint(websocket: WebSocket, game_id: int):
     if partida == None:
         return "Partida inexistente"
     try:
-        await partida._connections.connect(websocket)
+        await partida._connections.connect(websocket, partida._players)
     except RuntimeError:
         raise "Error estableciendo conexión"
     while True:

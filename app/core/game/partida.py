@@ -195,11 +195,12 @@ class ConnectionManager:
         await websocket.close()
         self.connections.remove(websocket)
 
-    async def connect(self, websocket: WebSocket):
+    async def connect(self, websocket: WebSocket, players):
         await websocket.accept()
         await websocket.send_json(
             {"status": 4,
-            "message": "Bienvenido a la partida"}
+            "message": "Bienvenido a la partida",
+            "players": players}
             )
         self.connections.append(websocket)
 
