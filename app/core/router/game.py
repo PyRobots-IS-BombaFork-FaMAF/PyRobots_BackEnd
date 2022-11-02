@@ -107,9 +107,16 @@ async def start_game(
         partida = PartidaObject.get_game_by_id(game_id)
     except:
         raise HTTPException(status_code=404, detail= "Partida inexistente")
+    
+    try:
+        robot = db.select("select * from Robot where name = $game.robot")
+    except:
+        raise HTTPException(status_code=404, detail= "Robot inexistente")
 
     if partida == None:
         raise HTTPException(status_code=404, detail= "Partida inexistente")
+    elif robot == None:
+        raise HTTPException(status_code=404, detail= "Robot inexistente")
     elif (current_user["username"] != partida._creator):
         raise HTTPException(status_code=403, 
             detail= "La partida solo puede ser iniciada por el creador de la misma")
