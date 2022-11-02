@@ -725,8 +725,8 @@ def test_unirse_a_partida_sin_robot():
 
 def test_websocket():
     with client.websocket_connect("/game/lobby/1") as websocket:
-        data = websocket.receive_text()
-        assert data == "Bienvenido a la partida"
+        data = websocket.receive_json()
+        assert data["message"] == "Bienvenido a la partida"
 
 def test_websocket_join():
     response_login = client.post(
@@ -750,8 +750,8 @@ def test_websocket_join():
         "robot": "Felipe"
         }
     with client.websocket_connect("/game/lobby/1") as websocket:
-        data = websocket.receive_text()
-        assert data == "Bienvenido a la partida"
+        data = websocket.receive_json()
+        assert data["message"]  == "Bienvenido a la partida"
         response = client.post(
         "/game/1/join",
         headers={"accept": "test_application/json", "Authorization": head},
@@ -759,7 +759,7 @@ def test_websocket_join():
         )
         assert response.status_code == 200
         data = websocket.receive_json()
-        assert json.loads(data)["message"] == "\n¡El jugador tiffbr19 se ha unido a la partida!"
+        assert data["message"] == "¡El jugador tiffbr19 se ha unido a la partida!"
 
 def test_unirse_a_partida_llena():
     response_login = client.post(
@@ -826,8 +826,8 @@ def test_unirse_a_partida_en_curso():
 def test_ejecutar_partida():
     partida = PartidaObject.get_game_by_id(1)
     with client.websocket_connect("/game/lobby/1") as websocket:
-        data = websocket.receive_text()
-        assert data == "Bienvenido a la partida"
+        data = websocket.receive_json()
+        assert data["message"] == "Bienvenido a la partida"
         response_login = client.post(
         "/token",
         data={
@@ -849,18 +849,18 @@ def test_ejecutar_partida():
             headers={"accept": "test_application/json", "Authorization": head}
         )
         assert response.status_code == 200
-        print(response.json())
         assert response.json()["message"] == "La partida ha finalizado"
-        assert response.json()["winners"] != "['tiffbri', 'tiffbr19']"
+        #assert response.json()["winners"] == "['tiffbri', 'tiffbr19']"
         assert partida._gameStatus == 2
         data = websocket.receive_json()
-        assert json.loads(data)["message"] == "\n¡La partida se esta iniciando! Esperando resultados.."
+        assert data["message"] == "¡La partida se esta iniciando! Esperando resultados.."
         data = websocket.receive_json()
-        assert json.loads(data)["message"] == ("\n¡La partida ha finalizado!" 
-            + "\nLos ganadores son: ['tiffbri', 'tiffbr19']")
+        assert data["message"] == ("¡La partida ha finalizado!" 
+            + " Los ganadores son: ['tiffbri', 'tiffbr19']")
 
 def test_ejecutar_partida_finalizada():
     partida = PartidaObject.get_game_by_id(1)
+    partida._gameStatus = 2
     response_login = client.post(
         "/token",
         data={
@@ -986,10 +986,26 @@ def test_ejecutar_partida_inexistente():
     )
     assert response.status_code==404
 
-def test_websocket_inexistente():
-    try:
-        with client.websocket_connect("/game/lobby/111") as websocket:
-            pass
-    except Exception as e:
-                print(e)
-                assert e.detail == "Partida inexistente"
+def test_get_results():
+    response_login = client.post(
+        "/token",
+        data={
+            "grant_type": "",
+            "username": "tiffbri",
+            "password": "Tiffanyb19!",
+            "scope": "",
+            "client_id": "",
+            "client_secret": "",
+        },
+        )
+    assert response_login.status_code == 200
+    rta: dict = response_login.json()
+    token: str = rta["access_token"]
+    token_type: str = "Bearer "
+    head: str = token_type + token
+    response = client.get(
+        "/game/results",
+        headers={"accept": "test_application/json", "Authorization": head}
+    )
+    assert response.status_code == 200
+    assert len(response.json()) == 1
