@@ -106,7 +106,7 @@ def list_robots(
         listRobots = {
             'id': robot.id,
             'name': robot.name,
-            'code': get_original_filename(current_user, robot.name, robot.code.rsplit('/', 1)[1]),
+            'code': get_original_filename(uname, robot.name, robot.code.rsplit('/', 1)[1]),
             'avatar': robot.avatar
         }
         listRobotsUser.append(listRobots)

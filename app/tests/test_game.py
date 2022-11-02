@@ -281,12 +281,12 @@ def testGameState():
     import app.tests.robots_for_testing.exception_respond as exception_respond
 
     game: GameState = GameState(
-        { 
-            'empty': empty.empty,
-            'simple': simple.simple,
-            'exception_init': exception_init.exception_init,
-            'exception_respond': exception_respond.exception_respond
-        },
+        [
+            ('empty', empty.empty),
+            ('simple', simple.simple),
+            ('exception_init', exception_init.exception_init),
+            ('exception_respond', exception_respond.exception_respond)
+        ],
         for_animation=True
     )
 
@@ -377,10 +377,10 @@ def testGameState_noAnimation():
     import app.tests.robots_for_testing.simple as simple
 
     game: GameState = GameState(
-        { 
-            'empty': empty.empty,
-            'simple': simple.simple
-        },
+        [
+            ('empty', empty.empty),
+            ('simple', simple.simple)
+        ],
         for_animation=False
     )
 
@@ -444,9 +444,9 @@ def testRunSimulation_forAnimation():
 def test_scanner_invalid():
     import app.tests.robots_for_testing.scan_invalid as scan_invalid
     game: GameState = GameState(
-        { 
-            'scan_invalid': scan_invalid.scan_invalid
-        },
+        [
+            ('scan_invalid', scan_invalid.scan_invalid)
+        ],
         for_animation=True
     )
 
@@ -474,10 +474,10 @@ def test_scanner():
     import app.tests.robots_for_testing.scan as scan
     import app.tests.robots_for_testing.empty as empty
     game: GameState = GameState(
-        { 
-            'scan': scan.scan,
-            'empty': empty.empty
-        },
+        [
+            ('scan', scan.scan),
+            ('empty', empty.empty)
+        ],
         for_animation=True
     )
 
@@ -508,16 +508,14 @@ def test_scanner():
 def test_scanner():
     import app.tests.robots_for_testing.scan2 as scan2
     import app.tests.robots_for_testing.empty as empty
-    import app.tests.robots_for_testing.empty2 as empty2
-    import app.tests.robots_for_testing.empty3 as empty3
 
     game: GameState = GameState(
-        {
-            'scan': scan2.scan2,
-            'empty': empty.empty,
-            'empty2': empty2.empty2,
-            'empty3': empty3.empty3
-        }
+        [
+            ('scan', scan2.scan2),
+            ('empty', empty.empty),
+            ('empty', empty.empty),
+            ('empty', empty.empty)
+        ]
     )
 
     game.ourRobots[0].position = (500, 500)
