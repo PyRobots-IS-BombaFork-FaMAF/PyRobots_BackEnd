@@ -412,3 +412,95 @@ def testRunSimulation_forAnimation():
     assert simulationResult.robots[1].cause_of_death == None # NOTE: when adding collisions these may change
     assert simulationResult.robots[2].cause_of_death == "robot execution error"
     assert simulationResult.robots[3].cause_of_death == None
+
+def test_shoot():
+    import app.tests.robots_for_testing.shooter as shooter
+    game: GameState = GameState(
+        {
+            'shooter': shooter.shooter
+        },
+        for_animation=True
+    )
+
+    game.ourRobots[0].position = (500, 500)
+
+    game.advance_round()
+    game.advance_round()
+
+    assert game.ourRobots[0].explotions_points[0] == (800, 500, 0)
+
+    game.advance_round()
+    game.advance_round()
+
+    assert len(game.ourRobots[0].explotions_points) == 2
+    assert game.ourRobots[0].explotions_points[1] == (500, 900, 1)
+
+    game.ourRobots[0].position = (10, 10)
+    game.advance_round()
+    game.advance_round()
+
+    assert len(game.ourRobots[0].explotions_points) == 3
+    assert game.ourRobots[0].explotions_points[2] == (710, 10, 2)
+
+def test_shoot_out_of_bound():
+    import app.tests.robots_for_testing.bad_aim_shooter as bad_aim_shooter
+    game: GameState = GameState(
+        {
+            'bad_aim_shooter': bad_aim_shooter.bad_aim_shooter
+        },
+        for_animation= False
+    )
+
+    game.ourRobots[0].position = (500, 500)
+
+    game.advance_round()
+    game.advance_round()
+
+    assert abs(game.ourRobots[0].explotions_points[0][0] - 999) < 0.00001
+    assert abs(game.ourRobots[0].explotions_points[0][1] - 500) < 0.00001
+    assert game.ourRobots[0].explotions_points[0][2] == 2
+
+    game.advance_round()
+    game.advance_round()
+
+    assert abs(game.ourRobots[0].explotions_points[1][0] - 500) < 0.00001
+    assert abs(game.ourRobots[0].explotions_points[1][1] - 999) < 0.00001
+    assert game.ourRobots[0].explotions_points[1][2] == 2
+
+    game.advance_round()
+    game.advance_round()
+
+    assert abs(game.ourRobots[0].explotions_points[2][0] - 0) < 0.00001
+    assert abs(game.ourRobots[0].explotions_points[2][1] - 500) < 0.00001
+    assert game.ourRobots[0].explotions_points[2][2] == 2
+
+    game.advance_round()
+    game.advance_round()
+
+    assert abs(game.ourRobots[0].explotions_points[3][0] - 500) < 0.00001
+    assert abs(game.ourRobots[0].explotions_points[3][1] - 0) < 0.00001
+    assert game.ourRobots[0].explotions_points[3][2] == 2
+
+
+def test_missiles_json():
+    import app.tests.robots_for_testing.shooter as shooter
+    game: GameState = GameState(
+        {
+            'shooter': shooter.shooter
+        },
+        for_animation=True
+    )
+
+    game.advance_round()
+    game.advance_round()
+    game.advance_round()
+    game.advance_round()
+    game.advance_round()
+    game.advance_round()
+
+    result_for_animation: SimulationResult = game.get_result_for_animation()
+    json_output = result_for_animation.json_output()
+
+    assert json_output['robots'][0]['rounds'][2]['missile'] != None
+    assert json_output['robots'][0]['rounds'][4]['missile'] != None
+    assert json_output['robots'][0]['rounds'][6]['missile'] != None

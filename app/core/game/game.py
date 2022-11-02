@@ -36,7 +36,7 @@ class RobotResult_round():
             "speed": self.speed
         }
         if self.missile != None:
-            res["missile"]: { "direction": self.missile[0], "distance": self.missile[1] }
+            res["missile"] = { "direction": self.missile[0], "distance": self.missile[1] }
         return res
 
 class RobotResult():
@@ -104,6 +104,7 @@ class RobotInGame():
         self.damage = 0
         self.is_cannon_ready = 0
         self.is_shooting: False
+        self.explotions_points = []
 
         if for_animation:
             self.round_result_for_animation = RobotResult_round(self.position, self.direction, self.actual_velocity)
@@ -222,6 +223,7 @@ class RobotInGame():
             self.result_for_animation.rounds.append(
                 RobotResult_round(
                     self.position, self.direction, self.actual_velocity,
+                    self.round_result_for_animation.missile
                 )
             )
 
