@@ -161,7 +161,6 @@ def test_empty_RobotInGame():
         ]
     }
 
-
 def test2_RobotInGame():
     import app.tests.robots_for_testing.simple as simple
 
@@ -328,6 +327,9 @@ def testGameState():
     assert 0 <= game.ourRobots[2].position[0] <= 1000 and 0 <= game.ourRobots[2].position[1] <= 1000
     assert 0 <= game.ourRobots[3].position[0] <= 1000 and 0 <= game.ourRobots[3].position[1] <= 1000
 
+    robot0_position0 = (game.ourRobots[0].position[0], game.ourRobots[0].position[1])
+    robot1_position0 = (game.ourRobots[1].position[0], game.ourRobots[1].position[1])
+
     game.advance_round()
 
     assert game.round == 1
@@ -341,6 +343,11 @@ def testGameState():
     assert game.ourRobots[1].damage == 0
     assert game.ourRobots[2].damage == 1
     assert game.ourRobots[3].damage == 1
+
+    assert game.ourRobots[0].position[0] == robot0_position0[0]
+    assert game.ourRobots[0].position[1] == robot0_position0[1]
+    assert abs(game.ourRobots[1].position[0] - (robot1_position0[0] + 0.1 * math.cos(math.pi/4))) < 0.00001
+    assert abs(game.ourRobots[1].position[1] - (robot1_position0[1] + 0.1 * math.sin(math.pi/4))) < 0.00001
 
     game.advance_round()
 
@@ -356,11 +363,35 @@ def testGameState():
 
     json_output = result_for_animation.json_output()
 
-    assert len(json_output) == 4
-    assert len(json_output[0]['rounds']) == 3
-    assert len(json_output[1]['rounds']) == 3
-    assert len(json_output[2]['rounds']) == 1
-    assert len(json_output[3]['rounds']) == 1
+    assert 'board_size' in json_output.keys()
+    assert 'missile_velocity' in json_output.keys()
+    assert 'robots' in json_output.keys()
+    assert len(json_output['robots']) == 4
+    assert len(json_output['robots'][0]['rounds']) == 3
+    assert len(json_output['robots'][1]['rounds']) == 3
+    assert len(json_output['robots'][2]['rounds']) == 1
+    assert len(json_output['robots'][3]['rounds']) == 1
+
+def testGameState_noAnimation():
+    import app.tests.robots_for_testing.empty as empty
+    import app.tests.robots_for_testing.simple as simple
+
+    game: GameState = GameState(
+        { 
+            'empty': empty.empty,
+            'simple': simple.simple
+        },
+        for_animation=False
+    )
+
+    assert game.round == 0
+
+    game.advance_round()
+
+    assert game.round == 1
+
+    assert game.get_result_for_animation() == None
+
 
 def testRunSimulation():
     robotsForSimulation: list[RobotInput] = [
@@ -409,3 +440,152 @@ def testRunSimulation_forAnimation():
     assert simulationResult.robots[1].cause_of_death == None # NOTE: when adding collisions these may change
     assert simulationResult.robots[2].cause_of_death == "robot execution error"
     assert simulationResult.robots[3].cause_of_death == None
+
+def test_scanner_invalid():
+    import app.tests.robots_for_testing.scan_invalid as scan_invalid
+    game: GameState = GameState(
+        { 
+            'scan_invalid': scan_invalid.scan_invalid
+        },
+        for_animation=True
+    )
+
+    assert game.ourRobots[0].damage == 0
+    assert game.ourRobots[0].cause_of_death == None
+   
+    assert game.round == 0
+
+    assert len(game.ourRobots) == 1
+   
+    game.advance_round()
+    
+    assert game.round == 1
+    assert game.ourRobots[0].scanner_result == None
+    assert game.ourRobots[0].robot._last_scanned == None
+
+    game.advance_round()
+    assert game.round == 2
+    game.advance_round()
+    assert game.round == 3
+    assert game.ourRobots[0].scanner_result == None
+    assert game.ourRobots[0].robot._last_scanned == None
+
+def test_scanner():
+    import app.tests.robots_for_testing.scan as scan
+    import app.tests.robots_for_testing.empty as empty
+    game: GameState = GameState(
+        { 
+            'scan': scan.scan,
+            'empty': empty.empty
+        },
+        for_animation=True
+    )
+
+    assert game.round == 0
+    
+    assert len(game.ourRobots) == 2
+    assert game.ourRobots[0].damage == 0
+    assert game.ourRobots[1].damage == 0
+    assert game.ourRobots[0].name == 'scan'
+    assert game.ourRobots[1].name == 'empty'
+
+    game.ourRobots[0].position = (0,0)
+    
+    game.ourRobots[1].position = (999,999)
+
+    game.advance_round()
+
+    assert game.round == 1
+    
+    game.advance_round()
+
+    assert game.round == 2
+    
+    assert game.ourRobots[0].scanner_result != None
+    assert game.ourRobots[0].robot._last_scanned != None
+    assert game.ourRobots[0].robot._last_scanned == 1412.799348810722
+
+def test_scanner():
+    import app.tests.robots_for_testing.scan2 as scan2
+    import app.tests.robots_for_testing.empty as empty
+    import app.tests.robots_for_testing.empty2 as empty2
+    import app.tests.robots_for_testing.empty3 as empty3
+
+    game: GameState = GameState(
+        {
+            'scan': scan2.scan2,
+            'empty': empty.empty,
+            'empty2': empty2.empty2,
+            'empty3': empty3.empty3
+        }
+    )
+
+    game.ourRobots[0].position = (500, 500)
+
+    game.ourRobots[1].position = (600, 601)
+    game.ourRobots[2].position = (499.99999, 499.99999)
+    game.ourRobots[3].position = (510, 555)
+
+    game.advance_round()
+
+    assert game.ourRobots[0].scanner_result == math.sqrt(100**2 + 101**2)
+    assert game.ourRobots[0].robot._last_scanned == math.sqrt(100**2 + 101**2)
+    assert game.ourRobots[0].robot._scan_direction == None
+    assert game.ourRobots[0].robot._resolution_in_degrees == None
+
+    game.ourRobots[1].position = (620, 620)
+    game.ourRobots[2].position = (600, 601)
+    game.ourRobots[3].position = (800, 800)
+
+    game.advance_round()
+
+    assert game.ourRobots[0].scanner_result == math.sqrt(120**2 + 120**2)
+    assert game.ourRobots[0].robot._last_scanned == math.sqrt(120**2 + 120**2)
+    assert game.ourRobots[0].robot._scan_direction == None
+    assert game.ourRobots[0].robot._resolution_in_degrees == None
+
+    game.ourRobots[1].position = (700, 501)
+    game.ourRobots[2].position = (800, 499)
+    game.ourRobots[3].position = (499.99999, 500)
+
+    game.advance_round()
+
+    assert game.ourRobots[0].scanner_result == math.sqrt(1**2 + 200**2)
+    assert game.ourRobots[0].robot._last_scanned == math.sqrt(1**2 + 200**2)
+    assert game.ourRobots[0].robot._scan_direction == None
+    assert game.ourRobots[0].robot._resolution_in_degrees == None
+
+    game.ourRobots[1].position = (900, 501)
+    game.ourRobots[2].position = (800, 499)
+    game.ourRobots[3].position = (1000, 1000)
+
+    game.advance_round()
+
+    assert game.ourRobots[0].scanner_result == math.sqrt(1**2 + 300**2)
+    assert game.ourRobots[0].robot._last_scanned == math.sqrt(1**2 + 300**2)
+    assert game.ourRobots[0].robot._scan_direction == None
+    assert game.ourRobots[0].robot._resolution_in_degrees == None
+
+    game.ourRobots[1].position = (900, 501)
+    game.ourRobots[2].position = (800, 499)
+    game.ourRobots[3].position = (1000, 1000)
+
+    game.advance_round()
+
+    assert game.ourRobots[0].scanner_result == math.sqrt(1**2 + 300**2)
+    assert game.ourRobots[0].robot._last_scanned == math.sqrt(1**2 + 300**2)
+    assert game.ourRobots[0].robot._scan_direction == None
+    assert game.ourRobots[0].robot._resolution_in_degrees == None
+
+    game.ourRobots[1].position = (520, 660)
+    game.ourRobots[2].position = (800, 499)
+    game.ourRobots[3].position = (1000, 1000)
+
+    game.advance_round()
+
+    assert game.ourRobots[0].scanner_result == math.sqrt(300**2 + 1**2)
+    assert game.ourRobots[0].robot._last_scanned == math.sqrt(300**2 + 1**2)
+    assert game.ourRobots[0].robot._scan_direction == None
+    assert game.ourRobots[0].robot._resolution_in_degrees == None
+
+
