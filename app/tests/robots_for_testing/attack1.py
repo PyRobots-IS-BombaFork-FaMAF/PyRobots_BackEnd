@@ -37,7 +37,7 @@ class attack1(Robot):
                 y = robot_localiced_y - self.get_position()[1]
                 angle = math.atan2(y, x) * (180.0 / math.pi)
                 anglediff = (direction - angle + 180 + 360) % 360 - 180
-                self.drive(self.robot_localiced[0], 50)
+                self.drive(self.robot_localiced[0], 100)
                 self.cannon(angle, 1000)
                 self.point_scanner(anglediff, resolution)
             self.round += 1
