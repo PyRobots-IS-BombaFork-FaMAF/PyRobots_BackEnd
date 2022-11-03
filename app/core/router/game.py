@@ -179,16 +179,16 @@ def get_player_results(
     username = current_user["username"]
     #getting all finished games
     try:
-        games_played = Partida.select().filter(lambda p: p.game_over == 1)
+        games_played = list(Partida.select().filter(lambda p: p.game_over == 1))
     except:
         raise HTTPException(status_code=404, detail= "No hay resultados")
     
     results_list = []
-    if games_played != []:
+    if list(games_played) != []:
         for game in games_played:
             #filtering the games where the player played
             if not any(d['player'] == username for d in game.players):
-                games_played.pop(game)
+                games_played.remove(game)
         #getting the results from the games where the player played
         results = list(Results.select().filter(lambda r: r.partida in games_played))
         for i in range(len(games_played)):
