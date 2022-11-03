@@ -189,7 +189,6 @@ def get_player_results(
         for game in games_played:
             #filtering the games where the player played
             if not any(d['player'] == username.lower() for d in game.players):
-                print(any(dict(d)['player'] == username.lower() for d in list(game.players)))
                 game_copy.remove(game)
         #getting the results from the games where the player played
         results = list(Results.select().filter(lambda r: r.partida in game_copy))
