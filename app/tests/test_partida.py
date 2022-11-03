@@ -1105,3 +1105,8 @@ def test_abandonar_partida_en_ejecucion():
     )
     partida._gameStatus = 0
     assert response.status_code==403
+<<<<<<< HEAD
+=======
+
+
+>>>>>>> e48bfa174c495c179dd2366e17a2d865a8a4340e
