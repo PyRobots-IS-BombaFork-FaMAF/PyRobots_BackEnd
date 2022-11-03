@@ -848,13 +848,8 @@ def test_ejecutar_partida():
         data = websocket.receive_json()
         assert data["message"] == "¡La partida se esta iniciando! Esperando resultados.."
         data = websocket.receive_json()
-<<<<<<< HEAD
-        assert json.loads(data)["message"] == ("\n¡La partida ha finalizado!"
-            + "\nLos ganadores son: ['tiffbri', 'tiffbr19']")
-=======
-        assert data["message"] == ("¡La partida ha finalizado!" 
+        assert data["message"] == ("¡La partida ha finalizado!"
             + " Los ganadores son: ['tiffbri', 'tiffbr19']")
->>>>>>> develop
 
 def test_ejecutar_partida_finalizada():
     partida = PartidaObject.get_game_by_id(1)
@@ -1032,7 +1027,7 @@ def test_abandonar_partida():
         headers={"accept": "test_application/json", "Authorization": head}
     )
     assert response.status_code==200
-    
+
 
 def test_abandonar_partida_creador():
     partida = PartidaObject.get_game_by_id(1)
@@ -1083,7 +1078,7 @@ def test_abandonar_partida_inexistente():
         "/game/1111/leave",
         headers={"accept": "test_application/json", "Authorization": head}
     )
-    assert response.status_code==404   
+    assert response.status_code==404
 
 def test_abandonar_partida_en_ejecucion():
     partida = PartidaObject.get_game_by_id(1)
@@ -1110,5 +1105,8 @@ def test_abandonar_partida_en_ejecucion():
     )
     partida._gameStatus = 0
     assert response.status_code==403
+<<<<<<< HEAD
+=======
 
 
+>>>>>>> e48bfa174c495c179dd2366e17a2d865a8a4340e
