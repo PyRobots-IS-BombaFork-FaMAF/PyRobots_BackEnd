@@ -5,24 +5,31 @@ from types import ModuleType
 from typing import NamedTuple
 import math
 from app.core.game.constants import *
-import numbers 
+import numbers
+
 
 
 class RobotResult_round():
     coords: tuple[float, float]
     direction: float
     speed: float
+    missile: Optional[tuple[float, float]]
     scanner_direction: Optional[float]
     resolution_in_degrees: Optional[float]
 
+    def __init__(self, coords: tuple[float, float], direction: float, speed: float,
+                 scanner_direction: Optional[float] = None, resolution_in_degrees: Optional[float] = None,
+                 missile: Optional[tuple[float, float]] = None):
 
-    def __init__(self, coords: tuple[float, float], direction: float, speed: float, 
-            scanner_direction: Optional[float] = None, resolution_in_degrees: Optional[float] = None):
         self.coords = coords
         self.direction = direction
         self.speed = speed
+        self.missile = missile
         self.scanner_direction = scanner_direction
         self.resolution_in_degrees = resolution_in_degrees
+
+    def set_missile(self, missile: Optional[tuple[float, float]] = None):
+        self.missile = missile
 
     def set_scanner(self, direction: Optional[float], resolution: Optional[float]):
         self.scanner_direction = direction
@@ -39,10 +46,11 @@ class RobotResult_round():
                 "direction": self.scanner_direction,
                 "resolution_in_degrees": self.resolution_in_degrees
                 }
+        if self.missile != None:
+            res["missile"] = { "direction": self.missile[0], "distance": self.missile[1] }
         return res
 
 class RobotResult():
-
     name: str
     rounds: list[RobotResult_round]
     cause_of_death: Optional[str]
@@ -80,6 +88,7 @@ class SimulationResult():
         }
 
 
+
 class RobotInGame():
     name: str  # Only for generating the `json`
     robot: Robot
@@ -89,6 +98,9 @@ class RobotInGame():
     direction: float  # degrees (so it is modulo 360)
     damage: float     # with damage ∈ [0;1) robot is alive
     cause_of_death: Optional[str]
+    is_shooting: bool
+    is_cannon_ready: int # the rounds needed to that the canon is ready, if is <= 0 then the canoon is ready
+    explotions_points: list[tuple[float,float,int]] # list of missile impacts positions launched [x,y, rounds to impact]
     scanner_result: float
 
     round_result_for_animation: Optional[RobotResult_round]
@@ -102,6 +114,9 @@ class RobotInGame():
         self.desired_velocity = 0
         self.direction = 0
         self.damage = 0
+        self.is_cannon_ready = 0
+        self.is_shooting: False
+        self.explotions_points = []
 
         if for_animation:
             self.round_result_for_animation = RobotResult_round(self.position, self.direction, self.actual_velocity)
@@ -133,6 +148,35 @@ class RobotInGame():
             except:
                 self.damage = 1
                 self.cause_of_death = "robot execution error"
+
+
+    def explotion_calculation (self):
+        self.is_cannon_ready += -1
+        if self.robot._is_shooting and self.is_cannon_ready <= 0:
+            direction = self.robot._shot[0] % 360
+            distance = self.robot._shot[1] if self.robot._shot[1] < 700 else 700
+
+            x: float = distance * math.cos(math.radians(direction)) + self.position[0]
+            y: float = distance * math.sin(math.radians(direction)) + self.position[1]
+
+            #
+            x_explotion: float = 999 if x >= 1000 else (0 if x < 0 else x)
+            y_explotion: float = 999 if y >= 1000 else (0 if y < 0 else y)
+
+            rounds_to_explotion: int = distance // missile_velocity
+
+            explotion = (x_explotion, y_explotion, rounds_to_explotion)
+            self.explotions_points.append(explotion)
+
+            self.is_shooting = False
+            self.is_cannon_ready = rounds_to_reload 
+
+            # If animation is needed add the missile shot to re result of the round
+            if self.result_for_animation != None:
+                self.round_result_for_animation.set_missile(self.robot._shot)
+        elif self.result_for_animation != None:
+            self.round_result_for_animation.set_missile()
+
 
     def updateOurRobot_movement(self,
                 velocity: Optional[float] = None, direction: Optional[float] = None
@@ -191,7 +235,8 @@ class RobotInGame():
                 RobotResult_round(
                     self.position, self.direction, self.actual_velocity,
                     self.round_result_for_animation.scanner_direction,
-                    self.round_result_for_animation.resolution_in_degrees
+                    self.round_result_for_animation.resolution_in_degrees,
+                    self.round_result_for_animation.missile
                 )
             )
 
@@ -199,6 +244,8 @@ class RobotInGame():
         if self.result_for_animation != None:
             self.result_for_animation.cause_of_death = self.cause_of_death
         return self.result_for_animation
+
+
 
 
 class GameState():
@@ -229,7 +276,7 @@ class GameState():
         for robot in self.ourRobots:
             if robot.damage < 1:
                 direction: Any = robot.robot._scan_direction
-                resolution: Any = robot.robot._resolution_in_degrees 
+                resolution: Any = robot.robot._resolution_in_degrees
                 x1_position: float = robot.position[0]
                 y1_position: float = robot.position[1]
                 shortest_distance = float('inf')
@@ -257,7 +304,14 @@ class GameState():
                 else:
                     robot.scanner_result = None
 
+        # Shoot
+        for robotInGame in self.ourRobots:
+            if robotInGame.damage < 1:
+                # Calculate the position and de round where the missile shots whill explote
+                robotInGame.explotion_calculation()
 
+
+        # Move
         for robotInGame in self.ourRobots:
             if robotInGame.damage < 1:
                 # Extract new velocity and direction from `robotInGame.robot`
@@ -274,7 +328,6 @@ class GameState():
                 # Update movement of `RobotInGame`
                 robotInGame.updateOurRobot_movement(set_velocity, set_direction)
 
-        # NOTE: When adding cannon, more `for`s will be needed
 
         # Update `Robot` fields
         for robotInGame in self.ourRobots:
@@ -285,6 +338,8 @@ class GameState():
                 robotInGame.robot._actual_velocity = robotInGame.actual_velocity
                 robotInGame.robot._actual_direction = robotInGame.direction
                 robotInGame.robot._damage = robotInGame.damage
+                robotInGame.robot._is_shooting = False
+                robotInGame.robot._is_cannon_ready = robotInGame.is_cannon_ready <= 0
                 robotInGame.robot._last_scanned = robotInGame.scanner_result
                 robotInGame.robot._scan_direction = None
                 robotInGame.robot._resolution_in_degrees = None
@@ -338,8 +393,3 @@ def runSimulation(robots: list[RobotInput], rounds: int, for_animation: bool = F
         return gameState.get_result_for_animation()
     else:
         return [robotsNames.index(robot.name) for robot in gameState.ourRobots if robot.damage < 1]
-
-
-
-
-

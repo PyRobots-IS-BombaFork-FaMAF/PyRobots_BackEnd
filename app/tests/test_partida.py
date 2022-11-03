@@ -131,7 +131,6 @@ def test_create_valid_partida_default_rounds():
     )
     assert response.status_code == 201
 
-
 def test_create_valid_partida_default_games():
     response_login = client.post(
         "/token",
@@ -162,7 +161,6 @@ def test_create_valid_partida_default_games():
     )
     assert response.status_code == 201
 
-
 def test_create_valid_partida_default_max_players():
     response_login = client.post(
         "/token",
@@ -192,7 +190,6 @@ def test_create_valid_partida_default_max_players():
     )
     assert response.status_code == 201
 
-
 def test_create_valid_partida_default_min_players():
     response_login = client.post(
         "/token",
@@ -220,7 +217,6 @@ def test_create_valid_partida_default_min_players():
         json=body
     )
     assert response.status_code == 201
-
 
 def test_create_valid_partida_invalid_rounds1():
     response_login = client.post(
@@ -254,7 +250,6 @@ def test_create_valid_partida_invalid_rounds1():
     )
     assert response.status_code == 422
 
-
 def test_create_valid_partida_invalid_rounds2():
     response_login = client.post(
         "/token",
@@ -286,7 +281,6 @@ def test_create_valid_partida_invalid_rounds2():
         json=body
     )
     assert response.status_code == 422
-
 
 def test_create_valid_partida_invalid_games1():
     response_login = client.post(
@@ -338,7 +332,7 @@ def test_create_valid_partida_invalid_games2():
     token_type: str = "Bearer "
     head: str = token_type + token
     body = {
-            "rounds": 100, 
+            "rounds": 100,
             "games": 1000, # games > 200
             "name": "Prueba1",
             "max_players": 4,
@@ -370,8 +364,8 @@ def test_create_valid_partida_invalid_max_players1():
     token_type: str = "Bearer "
     head: str = token_type + token
     body = {
-            "rounds": 100, 
-            "games": 200, 
+            "rounds": 100,
+            "games": 200,
             "name": "Prueba1",
             "max_players": 1, # max_player < 2
             "min_players": 2,
@@ -402,8 +396,8 @@ def test_create_invalid_players():
     token_type: str = "Bearer "
     head: str = token_type + token
     body = {
-            "rounds": 100, 
-            "games": 200, 
+            "rounds": 100,
+            "games": 200,
             "name": "Prueba1",
             "max_players": 3, # min_player > max_player
             "min_players": 4,
@@ -418,8 +412,8 @@ def test_create_invalid_players():
 
 def test_create_partida_without_login():
     body = {
-            "rounds": 100, 
-            "games": 200, 
+            "rounds": 100,
+            "games": 200,
             "name": "Prueba1",
             "max_players": 4, # min_player > max_player
             "min_players": 2,
@@ -636,7 +630,7 @@ def test_unirse_a_partida_sin_pass():
         headers={"accept": "test_application/json", "Authorization": head},
         json=body
     )
-    assert response.status_code == 200 
+    assert response.status_code == 200
 
 def test_unirse_a_partida_con_pass():
     response_login = client.post(
@@ -665,7 +659,7 @@ def test_unirse_a_partida_con_pass():
         headers={"accept": "test_application/json", "Authorization": head},
         json=body
     )
-    assert response.status_code == 200 
+    assert response.status_code == 200
 
 def test_unirse_a_partida_con_pass_invalido():
     response_login = client.post(
@@ -822,7 +816,6 @@ def test_unirse_a_partida_en_curso():
     partida._gameStatus = 0
     assert response.status_code == 403
 
-
 def test_ejecutar_partida():
     partida = PartidaObject.get_game_by_id(1)
     with client.websocket_connect("/game/lobby/1") as websocket:
@@ -855,7 +848,7 @@ def test_ejecutar_partida():
         data = websocket.receive_json()
         assert data["message"] == "¡La partida se esta iniciando! Esperando resultados.."
         data = websocket.receive_json()
-        assert data["message"] == ("¡La partida ha finalizado!" 
+        assert data["message"] == ("¡La partida ha finalizado!"
             + " Los ganadores son: ['tiffbri', 'tiffbr19']")
 
 def test_ejecutar_partida_finalizada():
@@ -1034,7 +1027,7 @@ def test_abandonar_partida():
         headers={"accept": "test_application/json", "Authorization": head}
     )
     assert response.status_code==200
-    
+
 
 def test_abandonar_partida_creador():
     partida = PartidaObject.get_game_by_id(1)
@@ -1085,7 +1078,7 @@ def test_abandonar_partida_inexistente():
         "/game/1111/leave",
         headers={"accept": "test_application/json", "Authorization": head}
     )
-    assert response.status_code==404   
+    assert response.status_code==404
 
 def test_abandonar_partida_en_ejecucion():
     partida = PartidaObject.get_game_by_id(1)
@@ -1112,5 +1105,8 @@ def test_abandonar_partida_en_ejecucion():
     )
     partida._gameStatus = 0
     assert response.status_code==403
+<<<<<<< HEAD
+=======
 
 
+>>>>>>> e48bfa174c495c179dd2366e17a2d865a8a4340e

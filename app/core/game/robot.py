@@ -14,6 +14,9 @@ class Robot(object):
     _set_direction: Optional[float]      # Direction that was set by the robot
     _position: Tuple[float, float]
     _damage: float
+    _is_cannon_ready: bool
+    _is_shooting: bool
+    _shot: Tuple[float,float]            # [direction of the shot in degree, shooting distance]
     _scan_direction: Optional[float]
     _resolution_in_degrees: Optional[float]
     _last_scanned: Optional[float]
@@ -25,6 +28,8 @@ class Robot(object):
         self._set_direction = 0
         self._position = (0,0)
         self._damage = 0
+        self._is_cannon_ready = True
+        self._is_shooting = False
         self._scan_direction = 0
         self._resolution_in_degrees = 0
         self._last_scanned = 0
@@ -59,6 +64,14 @@ class Robot(object):
     def point_scanner(self, direction, resolution_in_degrees):
         self._scan_direction = direction
         self._resolution_in_degrees = resolution_in_degrees
-    
+
     def scanned(self):
         return self._last_scanned
+
+    #Cannon
+    def is_cannon_ready(self):
+        return self._is_cannon_ready
+
+    def cannon(self, degree, distance):
+        self._shot = (degree, distance)
+        self._is_shooting = True

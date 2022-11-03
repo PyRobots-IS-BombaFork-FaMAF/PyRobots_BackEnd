@@ -441,6 +441,101 @@ def testRunSimulation_forAnimation():
     assert simulationResult.robots[2].cause_of_death == "robot execution error"
     assert simulationResult.robots[3].cause_of_death == None
 
+
+def test_shoot():
+    import app.tests.robots_for_testing.shooter as shooter
+    game: GameState = GameState(
+        [
+            ('shooter', shooter.shooter)
+        ],
+        for_animation=True
+    )
+
+    game.ourRobots[0].position = (500, 500)
+
+    game.advance_round()
+    game.advance_round()
+
+    assert game.ourRobots[0].explotions_points[0] == (800, 500, 85)
+
+    for x in range(rounds_to_reload):
+        game.advance_round()
+
+    assert len(game.ourRobots[0].explotions_points) == 2
+    assert game.ourRobots[0].explotions_points[1] == (500, 900, 114)
+
+    game.ourRobots[0].position = (10, 10)
+
+    for x in range(rounds_to_reload):
+        game.advance_round()
+
+    assert len(game.ourRobots[0].explotions_points) == 3
+    assert game.ourRobots[0].explotions_points[2] == (710, 10, 200)
+
+
+def test_shoot_out_of_bound():
+    import app.tests.robots_for_testing.bad_aim_shooter as bad_aim_shooter
+    game: GameState = GameState(
+        [
+            ('bad_aim_shooter', bad_aim_shooter.bad_aim_shooter)
+        ],
+        for_animation= False
+    )
+
+    game.ourRobots[0].position = (500, 500)
+
+    game.advance_round()
+    game.advance_round()
+
+    assert abs(game.ourRobots[0].explotions_points[0][0] - 999) < 0.00001
+    assert abs(game.ourRobots[0].explotions_points[0][1] - 500) < 0.00001
+    assert game.ourRobots[0].explotions_points[0][2] == 200
+
+    for x in range(rounds_to_reload):
+        game.advance_round()
+
+    assert abs(game.ourRobots[0].explotions_points[1][0] - 500) < 0.00001
+    assert abs(game.ourRobots[0].explotions_points[1][1] - 999) < 0.00001
+    assert game.ourRobots[0].explotions_points[1][2] == 200
+
+    for x in range(rounds_to_reload):
+        game.advance_round()
+
+    assert abs(game.ourRobots[0].explotions_points[2][0] - 0) < 0.00001
+    assert abs(game.ourRobots[0].explotions_points[2][1] - 500) < 0.00001
+    assert game.ourRobots[0].explotions_points[2][2] == 200
+
+    for x in range(rounds_to_reload):
+        game.advance_round()
+
+    assert abs(game.ourRobots[0].explotions_points[3][0] - 500) < 0.00001
+    assert abs(game.ourRobots[0].explotions_points[3][1] - 0) < 0.00001
+    assert game.ourRobots[0].explotions_points[3][2] == 200
+
+
+def test_missiles_json():
+    import app.tests.robots_for_testing.shooter as shooter
+    game: GameState = GameState(
+        [
+            ('shooter', shooter.shooter)
+        ],
+        for_animation=True
+    )
+
+    game.advance_round()
+    game.advance_round()
+
+    for x in range(2*rounds_to_reload):
+        game.advance_round()
+
+    result_for_animation: SimulationResult = game.get_result_for_animation()
+    json_output = result_for_animation.json_output()
+
+    assert json_output['robots'][0]['rounds'][2]['missile'] != None
+    assert json_output['robots'][0]['rounds'][2 + rounds_to_reload]['missile'] != None
+    assert json_output['robots'][0]['rounds'][2 + 2*rounds_to_reload]['missile'] != None
+
+
 def test_scanner_invalid():
     import app.tests.robots_for_testing.scan_invalid as scan_invalid
     game: GameState = GameState(
@@ -452,13 +547,13 @@ def test_scanner_invalid():
 
     assert game.ourRobots[0].damage == 0
     assert game.ourRobots[0].cause_of_death == None
-   
+
     assert game.round == 0
 
     assert len(game.ourRobots) == 1
-   
+
     game.advance_round()
-    
+
     assert game.round == 1
     assert game.ourRobots[0].scanner_result == None
     assert game.ourRobots[0].robot._last_scanned == None
@@ -469,6 +564,7 @@ def test_scanner_invalid():
     assert game.round == 3
     assert game.ourRobots[0].scanner_result == None
     assert game.ourRobots[0].robot._last_scanned == None
+
 
 def test_scanner():
     import app.tests.robots_for_testing.scan as scan
@@ -482,7 +578,7 @@ def test_scanner():
     )
 
     assert game.round == 0
-    
+
     assert len(game.ourRobots) == 2
     assert game.ourRobots[0].damage == 0
     assert game.ourRobots[1].damage == 0
@@ -490,22 +586,23 @@ def test_scanner():
     assert game.ourRobots[1].name == 'empty'
 
     game.ourRobots[0].position = (0,0)
-    
+
     game.ourRobots[1].position = (999,999)
 
     game.advance_round()
 
     assert game.round == 1
-    
+
     game.advance_round()
 
     assert game.round == 2
-    
+
     assert game.ourRobots[0].scanner_result != None
     assert game.ourRobots[0].robot._last_scanned != None
     assert game.ourRobots[0].robot._last_scanned == 1412.799348810722
 
-def test_scanner():
+
+def test_scanner2():
     import app.tests.robots_for_testing.scan2 as scan2
     import app.tests.robots_for_testing.empty as empty
 
@@ -585,5 +682,3 @@ def test_scanner():
     assert game.ourRobots[0].robot._last_scanned == math.sqrt(300**2 + 1**2)
     assert game.ourRobots[0].robot._scan_direction == None
     assert game.ourRobots[0].robot._resolution_in_degrees == None
-
-

@@ -34,3 +34,14 @@ def test_drive_speedlimit():
     assert r._set_velocity == 0.99
     assert r._set_direction == 220
 
+
+def test_is_cannon_ready():
+    r = Robot()
+    assert r._is_cannon_ready == True
+
+def test_cannon():
+    r = Robot()
+    r.cannon(300, 450)
+    assert r._shot[0] == 300
+    assert r._shot[1] == 450
+    assert r._is_shooting == True
