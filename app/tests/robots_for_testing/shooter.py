@@ -1,4 +1,5 @@
 from app.core.game.robot import Robot
+from app.core.game.constants import *
 
 class shooter(Robot):
     count: int
@@ -11,8 +12,8 @@ class shooter(Robot):
             pass
         elif self.count == 1:
             self.cannon(0, 300)
-        elif self.count == 3:
+        elif self.count == rounds_to_reload + 1:
             self.cannon(90, 400)
-        elif self.count == 5:
+        elif self.count == 2 * rounds_to_reload + 1:
             self.cannon(0, 1000)
         self.count += 1

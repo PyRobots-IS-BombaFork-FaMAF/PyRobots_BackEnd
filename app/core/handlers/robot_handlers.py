@@ -21,7 +21,7 @@ def get_robot_id(u: str, r: str):
 
 def generate_file_name(filename: str, u: User, r: RobotIn):
     uname = u["username"]
-    return f"{uname + r.name + filename}"
+    return f"{uname.lower() + r.name.lower() + filename}"
 
 
 def get_original_filename(u: User, r: str, filename: str):

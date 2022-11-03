@@ -456,20 +456,21 @@ def test_shoot():
     game.advance_round()
     game.advance_round()
 
-    assert game.ourRobots[0].explotions_points[0] == (800, 500, 0)
+    assert game.ourRobots[0].explotions_points[0] == (800, 500, 85)
 
-    game.advance_round()
-    game.advance_round()
+    for x in range(rounds_to_reload):
+        game.advance_round()
 
     assert len(game.ourRobots[0].explotions_points) == 2
-    assert game.ourRobots[0].explotions_points[1] == (500, 900, 1)
+    assert game.ourRobots[0].explotions_points[1] == (500, 900, 114)
 
     game.ourRobots[0].position = (10, 10)
-    game.advance_round()
-    game.advance_round()
+
+    for x in range(rounds_to_reload):
+        game.advance_round()
 
     assert len(game.ourRobots[0].explotions_points) == 3
-    assert game.ourRobots[0].explotions_points[2] == (710, 10, 2)
+    assert game.ourRobots[0].explotions_points[2] == (710, 10, 200)
 
 
 def test_shoot_out_of_bound():
@@ -488,28 +489,28 @@ def test_shoot_out_of_bound():
 
     assert abs(game.ourRobots[0].explotions_points[0][0] - 999) < 0.00001
     assert abs(game.ourRobots[0].explotions_points[0][1] - 500) < 0.00001
-    assert game.ourRobots[0].explotions_points[0][2] == 2
+    assert game.ourRobots[0].explotions_points[0][2] == 200
 
-    game.advance_round()
-    game.advance_round()
+    for x in range(rounds_to_reload):
+        game.advance_round()
 
     assert abs(game.ourRobots[0].explotions_points[1][0] - 500) < 0.00001
     assert abs(game.ourRobots[0].explotions_points[1][1] - 999) < 0.00001
-    assert game.ourRobots[0].explotions_points[1][2] == 2
+    assert game.ourRobots[0].explotions_points[1][2] == 200
 
-    game.advance_round()
-    game.advance_round()
+    for x in range(rounds_to_reload):
+        game.advance_round()
 
     assert abs(game.ourRobots[0].explotions_points[2][0] - 0) < 0.00001
     assert abs(game.ourRobots[0].explotions_points[2][1] - 500) < 0.00001
-    assert game.ourRobots[0].explotions_points[2][2] == 2
+    assert game.ourRobots[0].explotions_points[2][2] == 200
 
-    game.advance_round()
-    game.advance_round()
+    for x in range(rounds_to_reload):
+        game.advance_round()
 
     assert abs(game.ourRobots[0].explotions_points[3][0] - 500) < 0.00001
     assert abs(game.ourRobots[0].explotions_points[3][1] - 0) < 0.00001
-    assert game.ourRobots[0].explotions_points[3][2] == 2
+    assert game.ourRobots[0].explotions_points[3][2] == 200
 
 
 def test_missiles_json():
@@ -523,17 +524,16 @@ def test_missiles_json():
 
     game.advance_round()
     game.advance_round()
-    game.advance_round()
-    game.advance_round()
-    game.advance_round()
-    game.advance_round()
+
+    for x in range(2*rounds_to_reload):
+        game.advance_round()
 
     result_for_animation: SimulationResult = game.get_result_for_animation()
     json_output = result_for_animation.json_output()
 
     assert json_output['robots'][0]['rounds'][2]['missile'] != None
-    assert json_output['robots'][0]['rounds'][4]['missile'] != None
-    assert json_output['robots'][0]['rounds'][6]['missile'] != None
+    assert json_output['robots'][0]['rounds'][2 + rounds_to_reload]['missile'] != None
+    assert json_output['robots'][0]['rounds'][2 + 2*rounds_to_reload]['missile'] != None
 
 
 def test_scanner_invalid():
