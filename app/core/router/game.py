@@ -184,12 +184,13 @@ def get_player_results(
         raise HTTPException(status_code=404, detail= "No hay resultados")
     
     results_list = []
-    if list(games_played) != []:
+    if games_played != []:
         game_copy = games_played.copy()
         for game in games_played:
             #filtering the games where the player played
-            if not any(d['player'] == username for d in game.players):
-                game_copy = games_played.remove(game)
+            if not any(d['player'] == username.lower() for d in game.players):
+                print(any(dict(d)['player'] == username.lower() for d in list(game.players)))
+                game_copy.remove(game)
         #getting the results from the games where the player played
         results = list(Results.select().filter(lambda r: r.partida in game_copy))
         if game_copy != None:
