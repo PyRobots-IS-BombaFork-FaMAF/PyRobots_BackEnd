@@ -3,3 +3,4 @@ omit =
     app/tests/robots_for_testing/*
     app/core/handlers/userdb_handlers.py
     app/core/config.py
+    app/robot_code/*

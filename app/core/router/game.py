@@ -178,46 +178,51 @@ def get_player_results(
     """
     username = current_user["username"]
     #getting all finished games
-    games_played = Partida.select().filter(lambda p: p.game_over == 1)
-    for game in games_played:
-        #filtering the games where the player played
-        if not any(d['player'] == username for d in game.players):
-            games_played.pop(game)
-    #getting the results from the games where the player played
-    results = list(Results.select().filter(lambda r: r.partida in games_played))
+    try:
+        games_played = Partida.select().filter(lambda p: p.game_over == 1)
+    except:
+        raise HTTPException(status_code=404, detail= "No hay resultados")
+    
     results_list = []
-    for i in range(len(games_played)):
-        game = list(games_played)[i]
-        for result in results:
-            if result.partida == game:
-                game_result = result
-                break
-        #getting users and robots from results set
-        winners = list(UserDB.select().filter(lambda u: u in game_result.winners))
-        robots = list(RobotDB.select().filter(lambda u: u in game_result.robot_winners))
-        user_robot = []
-        #matching robots to their owner
-        for i in range(len(winners)):
-            uname = winners[i].username
-            for r in robots:
-                if r.user == winners[i]:
-                    robot_name = r.name
+    if games_played != []:
+        for game in games_played:
+            #filtering the games where the player played
+            if not any(d['player'] == username for d in game.players):
+                games_played.pop(game)
+        #getting the results from the games where the player played
+        results = list(Results.select().filter(lambda r: r.partida in games_played))
+        for i in range(len(games_played)):
+            game = list(games_played)[i]
+            for result in results:
+                if result.partida == game:
+                    game_result = result
                     break
-            user_robot.append({'player': uname, 'robot': robot_name})
-        result_dict = {
-            "id": game.id,
-            "name": game.name,
-            "creation_date": game.creation_date.strftime("%Y-%m-%d %H:%M:%S.%f"),
-            "creator": game.created_by.username,
-            "rounds": game.rounds,
-            "games": game.games,
-            "is_private": False if not game.password else True,
-            "players": game.players,
-            "duration": game_result.duration,
-            "winners": user_robot,
-            "rounds_won": game_result.rounds_won
-        }
-        results_list.append(result_dict)
+            #getting users and robots from results set
+            winners = list(UserDB.select().filter(lambda u: u in game_result.winners))
+            robots = list(RobotDB.select().filter(lambda u: u in game_result.robot_winners))
+            user_robot = []
+            #matching robots to their owner
+            for i in range(len(winners)):
+                uname = winners[i].username
+                for r in robots:
+                    if r.user == winners[i]:
+                        robot_name = r.name
+                        break
+                user_robot.append({'player': uname, 'robot': robot_name})
+            result_dict = {
+                "id": game.id,
+                "name": game.name,
+                "creation_date": game.creation_date.strftime("%Y-%m-%d %H:%M:%S.%f"),
+                "creator": game.created_by.username,
+                "rounds": game.rounds,
+                "games": game.games,
+                "is_private": False if not game.password else True,
+                "players": game.players,
+                "duration": game_result.duration,
+                "winners": user_robot,
+                "rounds_won": game_result.rounds_won
+            }
+            results_list.append(result_dict)
     return JSONResponse(results_list)
 
 

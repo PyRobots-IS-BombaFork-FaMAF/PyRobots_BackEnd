@@ -114,7 +114,7 @@ class PartidaObject():
             )
 
     @db_session
-    async def leave_game (self, username):
+    async def leave_game(self, username):
         for d in self._players:
             if d['player'] == username:
                 self._players.remove(d)
@@ -123,7 +123,7 @@ class PartidaObject():
         Partida[self._id].players = self._players
         db.flush()
         await self._connections.broadcast(
-            f"\n¡El jugador {username} se ha abandonado la partida!",
+            f"\n¡El jugador {username} ha abandonado la partida!",
             self._players, 1
         )
 
