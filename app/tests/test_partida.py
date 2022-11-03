@@ -53,7 +53,7 @@ def test_create_valid_partida_sin_pass1():
     )
     assert response.status_code == 201
     body = {
-            "rounds": 10000,
+            "rounds": 1,
             "games": 200,
             "name": "Exacto",
             "max_players": 4,
@@ -1105,8 +1105,3 @@ def test_abandonar_partida_en_ejecucion():
     )
     partida._gameStatus = 0
     assert response.status_code==403
-<<<<<<< HEAD
-=======
-
-
->>>>>>> e48bfa174c495c179dd2366e17a2d865a8a4340e
