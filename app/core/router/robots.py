@@ -64,7 +64,6 @@ def register(
             code.file.seek(0)
             contents = code.file.read()  # Important to wait
             code_name = CODEDIR + code.filename
-            print(code_name)
 
             with open(f"{code_name}", "wb") as f:
                 f.write(contents)
