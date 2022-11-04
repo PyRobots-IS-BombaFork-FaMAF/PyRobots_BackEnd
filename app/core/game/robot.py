@@ -16,7 +16,7 @@ class Robot(object):
     _damage: float
     _is_cannon_ready: bool
     _is_shooting: bool
-    _shot: Tuple[float,float]            # [direction of the shot in degree, shooting distance]
+    _shot: Optional[Tuple[float,float]]            # [direction of the shot in degree, shooting distance]
     _scan_direction: Optional[float]
     _resolution_in_degrees: Optional[float]
     _last_scanned: Optional[float]
