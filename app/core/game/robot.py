@@ -30,6 +30,7 @@ class Robot(object):
         self._damage = 0
         self._is_cannon_ready = True
         self._is_shooting = False
+        self._shot = None
         self._scan_direction = 0
         self._resolution_in_degrees = 0
         self._last_scanned = 0
