@@ -152,7 +152,9 @@ class RobotInGame():
 
     def explotion_calculation (self):
         self.is_cannon_ready += -1
-        if self.robot._is_shooting and self.is_cannon_ready <= 0 and self.robot._shot != None:
+        if (self.robot._is_shooting and self.is_cannon_ready <= 0 and
+            self.robot._shot != None and isinstance(self.robot._shot, tuple)):
+
             if (isinstance(self.robot._shot[0], numbers.Real) and
                 isinstance(self.robot._shot[1], numbers.Real)):
                 direction = self.robot._shot[0] % 360

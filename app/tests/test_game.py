@@ -682,3 +682,98 @@ def test_scanner2():
     assert game.ourRobots[0].robot._last_scanned == math.sqrt(300**2 + 1**2)
     assert game.ourRobots[0].robot._scan_direction == None
     assert game.ourRobots[0].robot._resolution_in_degrees == None
+
+
+def test_drive_out_of_bounds():
+    import app.tests.robots_for_testing.empty as empty
+    game: GameState = GameState(
+        [
+            ('empty', empty.empty)
+        ],
+        for_animation=True
+    )
+
+    game.ourRobots[0].robot._set_velocity = 1
+    game.ourRobots[0].actual_velocity = 1
+    game.ourRobots[0].desired_velocity = 1
+
+    game.ourRobots[0].direction = 0
+    game.ourRobots[0].robot._set_direction = 0
+    game.ourRobots[0].position = (998, 10)
+
+
+    game.advance_round()
+    assert game.ourRobots[0].position == (999, 10)
+    game.advance_round()
+    assert game.ourRobots[0].position == (999, 10)
+
+    game.ourRobots[0].direction = 90
+    game.ourRobots[0].robot._set_direction = 90
+    game.ourRobots[0].position = (10, 998)
+
+    game.advance_round()
+    assert game.ourRobots[0].position == (10, 999)
+    game.advance_round()
+    assert game.ourRobots[0].position == (10, 999)
+
+
+    game.ourRobots[0].direction = 180
+    game.ourRobots[0].robot._set_direction = 180
+    game.ourRobots[0].position = (1, 10)
+
+    game.advance_round()
+    assert game.ourRobots[0].position == (0, 10)
+    game.advance_round()
+    assert game.ourRobots[0].position == (0, 10)
+
+    game.ourRobots[0].direction = 270
+    game.ourRobots[0].robot._set_direction = 270
+    game.ourRobots[0].position = (10, 1)
+
+    game.advance_round()
+    assert game.ourRobots[0].position == (10, 0)
+    game.advance_round()
+    assert game.ourRobots[0].position == (10, 0)
+
+
+def test_invalid_shots():
+    import app.tests.robots_for_testing.empty as empty
+    game: GameState = GameState(
+        [
+            ('empty', empty.empty)
+        ],
+        for_animation=True
+    )
+
+    game.ourRobots[0].robot._is_cannon_ready = True
+    game.ourRobots[0].robot._is_shooting = True
+    game.ourRobots[0].robot._shot = None
+
+    game.advance_round()
+    assert game.ourRobots[0].explotions_points == []
+
+
+    game.ourRobots[0].robot.is_cannon_ready = 0
+    game.ourRobots[0].robot._is_cannon_ready = True
+    game.ourRobots[0].robot._is_shooting = True
+    game.ourRobots[0].robot._shot = 5
+
+    game.advance_round()
+    assert game.ourRobots[0].explotions_points == []
+
+    game.ourRobots[0].robot.is_cannon_ready = 0
+    game.ourRobots[0].robot._is_cannon_ready = True
+    game.ourRobots[0].robot._is_shooting = True
+    game.ourRobots[0].robot._shot = ("not a number",'a')
+
+    game.advance_round()
+    assert game.ourRobots[0].explotions_points == []
+
+    #valid shot
+    game.ourRobots[0].robot.is_cannon_ready = 0
+    game.ourRobots[0].robot._is_cannon_ready = True
+    game.ourRobots[0].robot._is_shooting = True
+    game.ourRobots[0].robot._shot = (1,1)
+
+    game.advance_round()
+    assert game.ourRobots[0].explotions_points != []
