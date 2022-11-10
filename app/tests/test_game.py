@@ -147,7 +147,7 @@ def test_empty_RobotInGame():
 
     assert robot.name == 'empty'
     assert robot.cause_of_death == None
-    assert robot.damage == 0     # When collisions are implemented, this may change
+    assert robot.damage == 0
     assert robot.direction == 135
     assert robot.actual_velocity == 0.1
     assert robot.desired_velocity == 0.1
@@ -342,7 +342,7 @@ def testGameState():
     assert game.round == 1
 
     assert game.ourRobots[0].cause_of_death == None
-    assert game.ourRobots[1].cause_of_death == None # NOTE: when adding collisions these may change
+    assert game.ourRobots[1].cause_of_death == None
     assert game.ourRobots[2].cause_of_death == "robot execution error"
     assert game.ourRobots[3].cause_of_death == "robot execution error"
 
