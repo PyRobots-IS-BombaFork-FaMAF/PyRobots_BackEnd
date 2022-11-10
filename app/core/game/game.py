@@ -99,8 +99,8 @@ class RobotInGame():
     damage: float     # with damage ∈ [0;1) robot is alive
     cause_of_death: Optional[str]
     is_shooting: bool
-    is_cannon_ready: int # the rounds needed to that the canon is ready, if is <= 0 then the canoon is ready
-    explotions_points: list[tuple[float,float,int]] # list of missile impacts positions launched [x,y, rounds to impact]
+    is_cannon_ready: int # the rounds needed to that the canon is ready, if is <= 0 then the cannon is ready
+    explosions_points: list[tuple[float,float,int]] # list of missile impacts positions launched [x,y, rounds to impact]
     scanner_result: float
 
     round_result_for_animation: Optional[RobotResult_round]
@@ -116,7 +116,7 @@ class RobotInGame():
         self.damage = 0
         self.is_cannon_ready = 0
         self.is_shooting: False
-        self.explotions_points = []
+        self.explosions_points = []
 
         if for_animation:
             self.round_result_for_animation = RobotResult_round(self.position, self.direction, self.actual_velocity)
@@ -150,7 +150,7 @@ class RobotInGame():
                 self.cause_of_death = "robot execution error"
 
 
-    def explotion_calculation (self):
+    def explosion_calculation (self):
         self.is_cannon_ready += -1
         if (self.robot._is_shooting and self.is_cannon_ready <= 0 and
             self.robot._shot != None and isinstance(self.robot._shot, tuple)):
@@ -164,13 +164,13 @@ class RobotInGame():
                 y: float = distance * math.sin(math.radians(direction)) + self.position[1]
 
                 #
-                x_explotion: float = 999 if x >= 1000 else (0 if x < 0 else x)
-                y_explotion: float = 999 if y >= 1000 else (0 if y < 0 else y)
+                x_explosion: float = 999 if x >= 1000 else (0 if x < 0 else x)
+                y_explosion: float = 999 if y >= 1000 else (0 if y < 0 else y)
 
-                rounds_to_explotion: int = distance // missile_velocity
+                rounds_to_explosion: int = distance // missile_velocity
 
-                explotion = (x_explotion, y_explotion, rounds_to_explotion)
-                self.explotions_points.append(explotion)
+                explosion = (x_explosion, y_explosion, rounds_to_explosion)
+                self.explosions_points.append(explosion)
 
                 self.is_shooting = False
                 self.is_cannon_ready = rounds_to_reload
@@ -308,8 +308,8 @@ class GameState():
                             x = x2_position - x1_position
                             y = y2_position - y1_position
                             angle = math.atan2(y, x) * (180.0 / math.pi)
-                            anglediff = (direction - angle + 180 + 360) % 360 - 180
-                            if anglediff >= -resolution and anglediff <= resolution and distance < shortest_distance:
+                            angleDiff = (direction - angle + 180 + 360) % 360 - 180
+                            if angleDiff >= -resolution and angleDiff <= resolution and distance < shortest_distance:
                                 shortest_distance = distance
                     robot.scanner_result = shortest_distance
                     if robot.round_result_for_animation != None:
@@ -320,8 +320,8 @@ class GameState():
         # Shoot
         for robotInGame in self.ourRobots:
             if robotInGame.damage < 1:
-                # Calculate the position and de round where the missile shots whill explote
-                robotInGame.explotion_calculation()
+                # Calculate the position and de round where the missile shots will explote
+                robotInGame.explosion_calculation()
 
 
         # Move

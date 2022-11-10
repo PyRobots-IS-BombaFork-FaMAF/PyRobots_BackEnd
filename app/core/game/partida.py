@@ -18,18 +18,18 @@ class PartidaObject():
     all = []
 
     @db_session
-    def __init__(self, name, rounds, games, max_players, min_players, creator, player_robot, 
+    def __init__(self, name, rounds, games, max_players, min_players, creator, player_robot,
                 current_players=None, id=None, creation_date=None, fromdb=None, password=None):
         self._id = id
         self._name = name
         self._rounds = rounds
-        self._games = games 
+        self._games = games
         self._max_players = max_players
         self._min_players = min_players
         self._creator = creator
         self._players = [player_robot] if not fromdb else player_robot
         self._current_players = len(self._players)
-        self._creation_date = (datetime.now().strftime("%Y-%m-%d %H:%M:%S.%f") 
+        self._creation_date = (datetime.now().strftime("%Y-%m-%d %H:%M:%S.%f")
             if not creation_date else creation_date)
         self._password = "" if not password else (hash_password(password) if not fromdb else password)
         self._private = False if not password else True
@@ -79,14 +79,14 @@ class PartidaObject():
     @classmethod
     def filter_by(cls, datec=None, creator=None, name=None, private=None):
         partidas = [
-            vars(x) for x in cls.all if 
-                (not datec 
-                or datetime.strptime(x._creation_date,"%Y-%m-%d %H:%M:%S.%f").date() == datec.date()) 
-                and (not creator or x._creator.lower() == creator.lower()) 
+            vars(x) for x in cls.all if
+                (not datec
+                or datetime.strptime(x._creation_date,"%Y-%m-%d %H:%M:%S.%f").date() == datec.date())
+                and (not creator or x._creator.lower() == creator.lower())
                 and (not name or x._name.lower() == name.lower())
                 and (x._private == private if private!=None else not private)]
         result = json.dumps(partidas, default=lambda o: '<not serializable>', indent=4)
-        return json.dumps(partidas, default=lambda o: '<not serializable>', 
+        return json.dumps(partidas, default=lambda o: '<not serializable>',
             sort_keys=True)
 
     @classmethod
@@ -94,7 +94,7 @@ class PartidaObject():
         partida = None
         for x in cls.all:
             if x._id == id:
-                partida = x 
+                partida = x
         return partida
 
     @db_session
@@ -106,7 +106,7 @@ class PartidaObject():
                 if d['player'] == username:
                     d['robot'] = robot
         self._current_players = len(self._players)
-        Partida[self._id].players = self._players 
+        Partida[self._id].players = self._players
         db.flush()
         await self._connections.broadcast(
             f"¡El jugador {username} se ha unido a la partida!",
@@ -136,15 +136,15 @@ class PartidaObject():
         for i in range(self._games):
             result = runSimulation(list_of_inputs, self._rounds)
             for index in result:
-                dict_player = robots_ingame[index] 
+                dict_player = robots_ingame[index]
                 dict_player["wins"] += 1
         self._gameStatus = 2
-        duration = (time.time() - start) #duracion de la partida en segundos
+        duration = (time.time() - start) # Game duration in seconds
         Partida[self._id].game_over = 1
         db.flush()
         results = save_results(robots_ingame, duration, self._id)
         winners = [d["username"] for d in results]
-        msg = f"¡La partida ha finalizado! " 
+        msg = f"¡La partida ha finalizado! "
         if len(winners) != 1:
             msg += f"Los ganadores son: " + str(winners)
         else:
@@ -169,13 +169,13 @@ def save_results(results, duration: int, id_game: int):
     sorted_winners = sorted(results, key=lambda x: x['wins'], reverse=True)
     max_winner = sorted_winners[0]
     max_wins = max_winner["wins"]
-    winners = [dict_player for dict_player 
+    winners = [dict_player for dict_player
         in sorted_winners if dict_player["wins"] == max_wins]
     Results(
         partida=id_game,
         winners= set(UserDB[dict_player["username"]] for dict_player in winners),
         robot_winners=set(
-            RobotDB[get_robot_id(dict_player["username"], dict_player["input"].name)] 
+            RobotDB[get_robot_id(dict_player["username"], dict_player["input"].name)]
             for dict_player in winners),
         duration=duration,
         rounds_won=max_wins
@@ -186,11 +186,11 @@ def save_results(results, duration: int, id_game: int):
 def get_robot_inputs(partida: PartidaObject):
     robots_ingame = []
     for player in partida._players:
-            robot_db = db.get("""select * from Robot 
+            robot_db = db.get("""select * from Robot
             where user LIKE $player['player'].lower() and name LIKE $player['robot'].lower()""")
             input = RobotInput(
                 pathToCode= robot_db.code.replace('/', '.')[:-3],
-                robotClassName=get_original_filename(player['player'], 
+                robotClassName=get_original_filename(player['player'],
                     robot_db.name, robot_db.code.rsplit('/', 1)[1])[:-3],
                 name=robot_db.name
             )
@@ -216,12 +216,12 @@ class ConnectionManager:
         self.connections.append(websocket)
 
     async def broadcast(self, data: str, players, status):
-        """ 
+        """
         status: 0 - Someone joined the game
         status: 1 - Someone left the game
         status: 2 - The game has started
-        status: 3 - The game has finished   
-        status: 4 - Welcome to the game (Not broadcasted, only sent to one websocket) 
+        status: 3 - The game has finished
+        status: 4 - Welcome to the game (Not broadcasted, only sent to one websocket)
         """
         for connection in self.connections:
             try:
