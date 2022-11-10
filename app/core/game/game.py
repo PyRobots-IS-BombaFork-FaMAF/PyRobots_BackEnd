@@ -252,6 +252,8 @@ class RobotInGame():
             impact_velocity = 0
 
         self.damage += impact_velocity / max_velocity / 25 # damage according to velocity
+        if self.damage >= 1:
+            self.cause_of_death = "out of life"
 
         x = board_size if x > board_size else (0 if x < 0 else x)
         y = board_size if y > board_size else (0 if y < 0 else y)
