@@ -19,6 +19,11 @@ def test_empty_RobotInGame():
     assert 0 <= robot.position[0] and robot.position[0] <= 1000
     assert 0 <= robot.position[1] and robot.position[1] <= 1000
 
+    random_position = (robot.position[0], robot.position[1])
+
+    robot.position = (400, 600)
+    robot.robot._position = (400, 600)
+
     position = robot.position # for later
 
     # `RobotInGame.robot` fields
@@ -33,7 +38,7 @@ def test_empty_RobotInGame():
     assert robot.result_for_animation.name == 'empty'
     assert robot.result_for_animation.cause_of_death == None
     assert len(robot.result_for_animation.rounds) == 1
-    assert robot.result_for_animation.rounds[0].coords == robot.position
+    assert robot.result_for_animation.rounds[0].coords == random_position
     assert robot.result_for_animation.rounds[0].direction == 0
     assert robot.result_for_animation.rounds[0].speed == 0
 
@@ -54,7 +59,7 @@ def test_empty_RobotInGame():
     assert robot.result_for_animation.name == 'empty'
     assert robot.result_for_animation.cause_of_death == None
     assert len(robot.result_for_animation.rounds) == 2
-    assert robot.result_for_animation.rounds[0].coords == position
+    assert robot.result_for_animation.rounds[0].coords == random_position
     assert robot.result_for_animation.rounds[0].direction == 0
     assert robot.result_for_animation.rounds[0].speed == 0
     assert robot.result_for_animation.rounds[1].coords == position
@@ -76,7 +81,7 @@ def test_empty_RobotInGame():
     assert robot.result_for_animation.name == 'empty'
     assert robot.result_for_animation.cause_of_death == None
     assert len(robot.result_for_animation.rounds) == 3
-    assert robot.result_for_animation.rounds[0].coords == position
+    assert robot.result_for_animation.rounds[0].coords == random_position
     assert robot.result_for_animation.rounds[0].direction == 0
     assert robot.result_for_animation.rounds[0].speed == 0
     assert robot.result_for_animation.rounds[1].coords == position
@@ -104,7 +109,7 @@ def test_empty_RobotInGame():
     assert robot.result_for_animation.name == 'empty'
     assert robot.result_for_animation.cause_of_death == None
     assert len(robot.result_for_animation.rounds) == 4
-    assert robot.result_for_animation.rounds[0].coords == position
+    assert robot.result_for_animation.rounds[0].coords == random_position
     assert robot.result_for_animation.rounds[0].direction == 0
     assert robot.result_for_animation.rounds[0].speed == 0
     assert robot.result_for_animation.rounds[1].coords == position
@@ -123,7 +128,7 @@ def test_empty_RobotInGame():
     assert result_for_animation.name == 'empty'
     assert result_for_animation.cause_of_death == None
     assert len(result_for_animation.rounds) == 4
-    assert result_for_animation.rounds[0].coords == position
+    assert result_for_animation.rounds[0].coords == random_position
     assert result_for_animation.rounds[0].direction == 0
     assert result_for_animation.rounds[0].speed == 0
     assert result_for_animation.rounds[1].coords == position
@@ -154,11 +159,11 @@ def test_empty_RobotInGame():
     assert json_output == {
         'name': 'empty',
         'rounds': [
-            { 'coords': {'x': position[0], 'y': position[1] }, 'direction': 0, 'speed': 0 },
-            { 'coords': {'x': position[0], 'y': position[1] }, 'direction': 0, 'speed': 0 },
-            { 'coords': {'x': position2[0], 'y': position2[1] }, 'direction': 0, 'speed': 0.1 },
-            { 'coords': {'x': position3[0], 'y': position3[1] }, 'direction': 135, 'speed': 0.3 },
-            { 'coords': {'x': robot.position[0], 'y': robot.position[1] }, 'direction': 135, 'speed': 0.1 }
+            { 'coords': {'x': random_position[0], 'y': random_position[1] }, 'direction': 0, 'speed': 0, 'damage': 0 },
+            { 'coords': {'x': position[0], 'y': position[1] }, 'direction': 0, 'speed': 0, 'damage': 0 },
+            { 'coords': {'x': position2[0], 'y': position2[1] }, 'direction': 0, 'speed': 0.1, 'damage': 0 },
+            { 'coords': {'x': position3[0], 'y': position3[1] }, 'direction': 135, 'speed': 0.3, 'damage': 0 },
+            { 'coords': {'x': robot.position[0], 'y': robot.position[1] }, 'direction': 135, 'speed': 0.1, 'damage': 0 }
         ]
     }
 
@@ -174,11 +179,12 @@ def test2_RobotInGame():
     assert robot.actual_velocity == 0
     assert robot.desired_velocity == 0
 
-    position = robot.position
-    assert 0 <= position[0] and position[0] <= 1000
-    assert 0 <= position[1] and position[1] <= 1000
+    assert 0 <= robot.position[0] and robot.position[0] <= 1000
+    assert 0 <= robot.position[1] and robot.position[1] <= 1000
+    robot.position = (347.543425423, 908.5412)
+    robot.robot._position = (347.543425423, 908.5412)
 
-    # NOTE: When we add collisions, the robot may day in the following tests
+    position = robot.position
 
     robot.executeRobotCode()
     robot.updateOurRobot_movement(robot.robot._set_velocity, robot.robot._set_direction)
@@ -341,7 +347,7 @@ def testGameState():
     assert game.ourRobots[3].cause_of_death == "robot execution error"
 
     assert game.ourRobots[0].damage == 0
-    assert game.ourRobots[1].damage == 0
+    assert game.ourRobots[1].damage <= 0.02 # May have collided with the wall
     assert game.ourRobots[2].damage == 1
     assert game.ourRobots[3].damage == 1
 
@@ -412,7 +418,7 @@ def testRunSimulation2():
 
     simulationResult = runSimulation(robotsForSimulation, 5, False)
 
-    assert simulationResult == [0, 1]
+    assert simulationResult == [0, 1] # To little rounds for death be collisions
 
 def testRunSimulation_forAnimation():
     robotsForSimulation: list[RobotInput] = [
@@ -438,7 +444,7 @@ def testRunSimulation_forAnimation():
     assert simulationResult.robots[3].name == 'Drives bad'
 
     assert simulationResult.robots[0].cause_of_death == None
-    assert simulationResult.robots[1].cause_of_death == None # NOTE: when adding collisions these may change
+    assert simulationResult.robots[1].cause_of_death == None # To little rounds for death be collisions
     assert simulationResult.robots[2].cause_of_death == "robot execution error"
     assert simulationResult.robots[3].cause_of_death == None
 
@@ -700,23 +706,30 @@ def test_drive_out_of_bounds():
 
     game.ourRobots[0].direction = 0
     game.ourRobots[0].robot._set_direction = 0
-    game.ourRobots[0].position = (999, 10)
+    game.ourRobots[0].position = (board_size - 1, 10)
 
 
     game.advance_round()
     assert game.ourRobots[0].position == (board_size, 10)
     game.advance_round()
     assert game.ourRobots[0].position == (board_size, 10)
+
+    game.ourRobots[0].robot._set_velocity = 1
+    game.ourRobots[0].actual_velocity = 1
+    game.ourRobots[0].desired_velocity = 1
 
     game.ourRobots[0].direction = 90
     game.ourRobots[0].robot._set_direction = 90
-    game.ourRobots[0].position = (10, board_size)
+    game.ourRobots[0].position = (10, board_size - 1)
 
     game.advance_round()
     assert game.ourRobots[0].position == (10, board_size)
     game.advance_round()
     assert game.ourRobots[0].position == (10, board_size)
 
+    game.ourRobots[0].robot._set_velocity = 1
+    game.ourRobots[0].actual_velocity = 1
+    game.ourRobots[0].desired_velocity = 1
 
     game.ourRobots[0].direction = 180
     game.ourRobots[0].robot._set_direction = 180
@@ -726,6 +739,10 @@ def test_drive_out_of_bounds():
     assert game.ourRobots[0].position == (0, 10)
     game.advance_round()
     assert game.ourRobots[0].position == (0, 10)
+
+    game.ourRobots[0].robot._set_velocity = 1
+    game.ourRobots[0].actual_velocity = 1
+    game.ourRobots[0].desired_velocity = 1
 
     game.ourRobots[0].direction = 270
     game.ourRobots[0].robot._set_direction = 270

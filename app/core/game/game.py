@@ -13,17 +13,19 @@ class RobotResult_round():
     coords: tuple[float, float]
     direction: float
     speed: float
+    damage: float
     missile: Optional[tuple[float, float]]
     scanner_direction: Optional[float]
     resolution_in_degrees: Optional[float]
 
-    def __init__(self, coords: tuple[float, float], direction: float, speed: float,
+    def __init__(self, coords: tuple[float, float], direction: float, speed: float, damage: float,
                  scanner_direction: Optional[float] = None, resolution_in_degrees: Optional[float] = None,
                  missile: Optional[tuple[float, float]] = None):
 
         self.coords = coords
         self.direction = direction
         self.speed = speed
+        self.damage = damage
         self.missile = missile
         self.scanner_direction = scanner_direction
         self.resolution_in_degrees = resolution_in_degrees
@@ -39,7 +41,8 @@ class RobotResult_round():
         res = {
             "coords": {"x": self.coords[0], "y": self.coords[1]},
             "direction": self.direction,
-            "speed": self.speed
+            "speed": self.speed,
+            "damage": self.damage
         }
         if self.resolution_in_degrees != None and self.scanner_direction != None:
             res["scanner"] = {
@@ -119,10 +122,10 @@ class RobotInGame():
         self.explosions_points = []
 
         if for_animation:
-            self.round_result_for_animation = RobotResult_round(self.position, self.direction, self.actual_velocity)
+            self.round_result_for_animation = RobotResult_round(self.position, self.direction, self.actual_velocity, self.damage)
             self.result_for_animation = RobotResult(
                 name,
-                [RobotResult_round(self.position, self.direction, self.actual_velocity)],
+                [RobotResult_round(self.position, self.direction, self.actual_velocity, self.damage)],
                 None
             )
         else:
@@ -231,6 +234,25 @@ class RobotInGame():
         y: float = self.position[1] + y_movement
 
         # Check to prevent it from going out of bounds
+        if (x < 0 or x > board_size) and (y < 0 or y > board_size):
+            self.actual_velocity = 0
+            self.desired_velocity = 0
+            impact_velocity = self.actual_velocity
+        elif x < 0 or x > board_size:
+            self.direction = 0 if x_component_direction >= 0 else 180
+            self.actual_velocity = x_component_direction * self.actual_velocity
+            self.desired_velocity = x_component_direction * self.desired_velocity
+            impact_velocity = abs(y_component_direction * self.actual_velocity)
+        elif y < 0 or y > board_size:
+            self.direction = 90 if y_component_direction >= 0 else 270
+            self.actual_velocity = y_component_direction * self.actual_velocity
+            self.desired_velocity = y_component_direction * self.desired_velocity
+            impact_velocity = abs(x_component_direction * self.actual_velocity)
+        else:
+            impact_velocity = 0
+
+        self.damage += impact_velocity / max_velocity / 25 # damage according to velocity
+
         x = board_size if x > board_size else (0 if x < 0 else x)
         y = board_size if y > board_size else (0 if y < 0 else y)
 
@@ -243,7 +265,7 @@ class RobotInGame():
         if self.result_for_animation != None:
             self.result_for_animation.rounds.append(
                 RobotResult_round(
-                    self.position, self.direction, self.actual_velocity,
+                    self.position, self.direction, self.actual_velocity, self.damage,
                     self.round_result_for_animation.scanner_direction,
                     self.round_result_for_animation.resolution_in_degrees,
                     self.round_result_for_animation.missile
