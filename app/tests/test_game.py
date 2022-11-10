@@ -1,5 +1,6 @@
 from app.core.game.game import *
 from app.core.game.robot import *
+from app.core.game.constants import *
 
 
 
@@ -487,7 +488,7 @@ def test_shoot_out_of_bound():
     game.advance_round()
     game.advance_round()
 
-    assert abs(game.ourRobots[0].explosions_points[0][0] - 999) < 0.00001
+    assert abs(game.ourRobots[0].explosions_points[0][0] - board_size) < 0.00001
     assert abs(game.ourRobots[0].explosions_points[0][1] - 500) < 0.00001
     assert game.ourRobots[0].explosions_points[0][2] == 200
 
@@ -495,7 +496,7 @@ def test_shoot_out_of_bound():
         game.advance_round()
 
     assert abs(game.ourRobots[0].explosions_points[1][0] - 500) < 0.00001
-    assert abs(game.ourRobots[0].explosions_points[1][1] - 999) < 0.00001
+    assert abs(game.ourRobots[0].explosions_points[1][1] - board_size) < 0.00001
     assert game.ourRobots[0].explosions_points[1][2] == 200
 
     for x in range(rounds_to_reload):
@@ -699,22 +700,22 @@ def test_drive_out_of_bounds():
 
     game.ourRobots[0].direction = 0
     game.ourRobots[0].robot._set_direction = 0
-    game.ourRobots[0].position = (998, 10)
+    game.ourRobots[0].position = (999, 10)
 
 
     game.advance_round()
-    assert game.ourRobots[0].position == (999, 10)
+    assert game.ourRobots[0].position == (board_size, 10)
     game.advance_round()
-    assert game.ourRobots[0].position == (999, 10)
+    assert game.ourRobots[0].position == (board_size, 10)
 
     game.ourRobots[0].direction = 90
     game.ourRobots[0].robot._set_direction = 90
-    game.ourRobots[0].position = (10, 998)
+    game.ourRobots[0].position = (10, board_size)
 
     game.advance_round()
-    assert game.ourRobots[0].position == (10, 999)
+    assert game.ourRobots[0].position == (10, board_size)
     game.advance_round()
-    assert game.ourRobots[0].position == (10, 999)
+    assert game.ourRobots[0].position == (10, board_size)
 
 
     game.ourRobots[0].direction = 180
@@ -747,7 +748,8 @@ def test_invalid_shots():
 
     game.ourRobots[0].robot._is_cannon_ready = True
     game.ourRobots[0].robot._is_shooting = True
-    game.ourRobots[0].robot._shot = None
+    game.ourRobots[0].robot._shot_direction = None
+    game.ourRobots[0].robot._shot_distance = None
 
     game.advance_round()
     assert game.ourRobots[0].explosions_points == []
@@ -756,7 +758,8 @@ def test_invalid_shots():
     game.ourRobots[0].robot.is_cannon_ready = 0
     game.ourRobots[0].robot._is_cannon_ready = True
     game.ourRobots[0].robot._is_shooting = True
-    game.ourRobots[0].robot._shot = 5
+    game.ourRobots[0].robot._shot_direction = (lambda x: x+1)
+    game.ourRobots[0].robot._shot_distance = 5
 
     game.advance_round()
     assert game.ourRobots[0].explosions_points == []
@@ -764,7 +767,8 @@ def test_invalid_shots():
     game.ourRobots[0].robot.is_cannon_ready = 0
     game.ourRobots[0].robot._is_cannon_ready = True
     game.ourRobots[0].robot._is_shooting = True
-    game.ourRobots[0].robot._shot = ("not a number",'a')
+    game.ourRobots[0].robot._shot_direction = "not a number"
+    game.ourRobots[0].robot._shot_distance = "a"
 
     game.advance_round()
     assert game.ourRobots[0].explosions_points == []
@@ -773,7 +777,8 @@ def test_invalid_shots():
     game.ourRobots[0].robot.is_cannon_ready = 0
     game.ourRobots[0].robot._is_cannon_ready = True
     game.ourRobots[0].robot._is_shooting = True
-    game.ourRobots[0].robot._shot = (1,1)
+    game.ourRobots[0].robot._shot_direction = 1
+    game.ourRobots[0].robot._shot_distance = 1
 
     game.advance_round()
     assert game.ourRobots[0].explosions_points != []

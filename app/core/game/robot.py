@@ -16,7 +16,8 @@ class Robot(object):
     _damage: float
     _is_cannon_ready: bool
     _is_shooting: bool
-    _shot: Optional[Tuple[float,float]]            # [direction of the shot in degree, shooting distance]
+    _shot_direction: Optional[float]
+    _shot_distance: Optional[float]
     _scan_direction: Optional[float]
     _resolution_in_degrees: Optional[float]
     _last_scanned: Optional[float]
@@ -30,7 +31,8 @@ class Robot(object):
         self._damage = 0
         self._is_cannon_ready = True
         self._is_shooting = False
-        self._shot = None
+        self._shot_direction = None
+        self._shot_distance = None
         self._scan_direction = 0
         self._resolution_in_degrees = 0
         self._last_scanned = 0
@@ -74,5 +76,6 @@ class Robot(object):
         return self._is_cannon_ready
 
     def cannon(self, degree, distance):
-        self._shot = (degree, distance)
+        self._shot_direction = degree
+        self._shot_distance = distance
         self._is_shooting = True

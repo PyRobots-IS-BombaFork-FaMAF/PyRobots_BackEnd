@@ -42,6 +42,6 @@ def test_is_cannon_ready():
 def test_cannon():
     r = Robot()
     r.cannon(300, 450)
-    assert r._shot[0] == 300
-    assert r._shot[1] == 450
+    assert r._shot_direction == 300
+    assert r._shot_distance == 450
     assert r._is_shooting == True
