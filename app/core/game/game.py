@@ -164,8 +164,8 @@ class RobotInGame():
                 y: float = distance * math.sin(math.radians(direction)) + self.position[1]
 
                 #
-                x_explosion: float = 999 if x >= 1000 else (0 if x < 0 else x)
-                y_explosion: float = 999 if y >= 1000 else (0 if y < 0 else y)
+                x_explosion: float = board_size if x > board_size else (0 if x < 0 else x)
+                y_explosion: float = board_size if y > board_size else (0 if y < 0 else y)
 
                 rounds_to_explosion: int = distance // missile_velocity
 
@@ -233,9 +233,10 @@ class RobotInGame():
         # Calculate new position
         x: float = self.position[0] + x_movement
         y: float = self.position[1] + y_movement
+
         # Check to prevent it from going out of bounds
-        x = 999 if x >= 1000 else (0 if x < 0 else x)
-        y = 999 if y >= 1000 else (0 if y < 0 else y)
+        x = board_size if x > board_size else (0 if x < 0 else x)
+        y = board_size if y > board_size else (0 if y < 0 else y)
 
         # Update position
         self.position = (x, y)
