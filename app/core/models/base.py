@@ -73,6 +73,17 @@ class Results(db.Entity):
     duration = Required(float)
     rounds_won = Required(int)
 
+class RecoveryCode(db.Entity):
+    """
+    Database table to store the code for 
+    password recoveries and the date it was 
+    issued
+    """
+    username = PrimaryKey(str)
+    code = Required(str)
+    date_issue = Required(datetime)
+    active = Required(bool, default=1)
+
 def define_database_and_entities(**db_params):
     global db
 
