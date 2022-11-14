@@ -223,7 +223,7 @@ def new_password(newpass: NewPass):
             print(time_diff)
             # Checking if the code hasn't been issued for over a day
             if newpass.code == recovery.code and time_diff < 86400 and recovery.active:
-                user.password = newpass.password
+                user.password = hash_password(newpass.password)
                 recovery.active = 0
                 msg = "¡La contraseña se ha cambiado exitosamente!"
             else:
