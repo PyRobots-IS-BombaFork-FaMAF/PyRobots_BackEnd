@@ -463,21 +463,23 @@ def test_shoot():
     game.advance_round()
     game.advance_round()
 
-    assert game.ourRobots[0].explosions_points[0] == (800, 500, 85)
+    assert game.future_explosions[0] == (800, 500, 85)
 
     for x in range(rounds_to_reload):
         game.advance_round()
 
-    assert len(game.ourRobots[0].explosions_points) == 2
-    assert game.ourRobots[0].explosions_points[1] == (500, 900, 114)
+    assert len(game.future_explosions) == 2
+    assert game.future_explosions[0] == (800, 500, 25)
+    assert game.future_explosions[1] == (500, 900, 114)
 
     game.ourRobots[0].position = (10, 10)
 
     for x in range(rounds_to_reload):
         game.advance_round()
 
-    assert len(game.ourRobots[0].explosions_points) == 3
-    assert game.ourRobots[0].explosions_points[2] == (710, 10, 200)
+    assert len(game.future_explosions) == 2
+    assert game.future_explosions[0] == (500, 900, 54)
+    assert game.future_explosions[1] == (710, 10, 200)
 
 
 def test_shoot_out_of_bound():
@@ -494,30 +496,30 @@ def test_shoot_out_of_bound():
     game.advance_round()
     game.advance_round()
 
-    assert abs(game.ourRobots[0].explosions_points[0][0] - board_size) < 0.00001
-    assert abs(game.ourRobots[0].explosions_points[0][1] - 500) < 0.00001
-    assert game.ourRobots[0].explosions_points[0][2] == 200
+    assert game.future_explosions[0][0] == board_size
+    assert abs(game.future_explosions[0][1] - 500) < 0.00001
+    assert game.future_explosions[0][2] == 200
 
     for x in range(rounds_to_reload):
         game.advance_round()
 
-    assert abs(game.ourRobots[0].explosions_points[1][0] - 500) < 0.00001
-    assert abs(game.ourRobots[0].explosions_points[1][1] - board_size) < 0.00001
-    assert game.ourRobots[0].explosions_points[1][2] == 200
+    assert abs(game.future_explosions[1][0] - 500) < 0.00001
+    assert game.future_explosions[1][1] == board_size
+    assert game.future_explosions[1][2] == 200
 
     for x in range(rounds_to_reload):
         game.advance_round()
 
-    assert abs(game.ourRobots[0].explosions_points[2][0] - 0) < 0.00001
-    assert abs(game.ourRobots[0].explosions_points[2][1] - 500) < 0.00001
-    assert game.ourRobots[0].explosions_points[2][2] == 200
+    assert game.future_explosions[2][0] == 0
+    assert abs(game.future_explosions[2][1] - 500) < 0.00001
+    assert game.future_explosions[2][2] == 200
 
     for x in range(rounds_to_reload):
         game.advance_round()
 
-    assert abs(game.ourRobots[0].explosions_points[3][0] - 500) < 0.00001
-    assert abs(game.ourRobots[0].explosions_points[3][1] - 0) < 0.00001
-    assert game.ourRobots[0].explosions_points[3][2] == 200
+    assert abs(game.future_explosions[3][0] - 500) < 0.00001
+    assert game.future_explosions[3][1] == 0
+    assert game.future_explosions[3][2] == 200
 
 
 def test_missiles_json():
@@ -769,7 +771,7 @@ def test_invalid_shots():
     game.ourRobots[0].robot._shot_distance = None
 
     game.advance_round()
-    assert game.ourRobots[0].explosions_points == []
+    assert game.future_explosions == []
 
 
     game.ourRobots[0].robot.is_cannon_ready = 0
@@ -779,7 +781,7 @@ def test_invalid_shots():
     game.ourRobots[0].robot._shot_distance = 5
 
     game.advance_round()
-    assert game.ourRobots[0].explosions_points == []
+    assert game.future_explosions == []
 
     game.ourRobots[0].robot.is_cannon_ready = 0
     game.ourRobots[0].robot._is_cannon_ready = True
@@ -788,7 +790,7 @@ def test_invalid_shots():
     game.ourRobots[0].robot._shot_distance = "a"
 
     game.advance_round()
-    assert game.ourRobots[0].explosions_points == []
+    assert game.future_explosions == []
 
     #valid shot
     game.ourRobots[0].robot.is_cannon_ready = 0
@@ -798,4 +800,4 @@ def test_invalid_shots():
     game.ourRobots[0].robot._shot_distance = 1
 
     game.advance_round()
-    assert game.ourRobots[0].explosions_points != []
+    assert game.future_explosions != []
