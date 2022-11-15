@@ -337,16 +337,13 @@ class GameState():
                     robot.scanner_result = None
 
         # Apply explosions
-        while self.future_explosions != [] and self.future_explosions[0][2] == 0:
-            explosion = self.future_explosions.pop(0)
-            self.apply_explosion(explosion[0], explosion[1])
-
-        # Reduce time for future explosions
-        for i in range(len(self.future_explosions)):
-            self.future_explosions[i] = (
-                self.future_explosions[i][0], self.future_explosions[i][1],
-                self.future_explosions[i][2] - 1
-            )
+        new_future_explosion: list[Tuple[float, float, int]] = []
+        for explosion in self.future_explosions:
+            if explosion[2] == 0:
+                self.apply_explosion(explosion[0], explosion[1])
+            else:
+                new_future_explosion.append((explosion[0], explosion[1], explosion[2] - 1))
+        self.future_explosions = new_future_explosion.copy()
 
         # Shoot
         for robotInGame in self.ourRobots:
@@ -363,8 +360,9 @@ class GameState():
                     (x, y, rounds_to_impact) = robotInGame.cannon_calculation(shot_direction, shot_distance)
                     robotInGame.is_cannon_ready = rounds_to_reload
                     self.future_explosions.append((x, y, rounds_to_impact))
-                    robotInGame.round_result_for_animation.set_missile((shot_direction, shot_distance))
-                else:
+                    if self.for_animation:
+                        robotInGame.round_result_for_animation.set_missile((shot_direction, shot_distance))
+                elif self.for_animation:
                     robotInGame.round_result_for_animation.set_missile(None)
                 robotInGame.is_cannon_ready -= 1
 
