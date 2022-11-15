@@ -351,10 +351,13 @@ class GameState():
                     shot_direction = robotInGame.robot._shot_direction
                     shot_distance = robotInGame.robot._shot_distance
 
+                    shot_direction = shot_direction % 360
+                    shot_distance = shot_distance if shot_distance < cannon_range else cannon_range
+
                     (x, y, rounds_to_impact) = robotInGame.cannon_calculation(shot_direction, shot_distance)
                     robotInGame.is_cannon_ready = rounds_to_reload
                     self.future_explosions.append((x, y, rounds_to_impact))
-                    robotInGame.round_result_for_animation.set_missile((x, y))
+                    robotInGame.round_result_for_animation.set_missile((shot_direction, shot_distance))
                 else:
                     robotInGame.round_result_for_animation.set_missile(None)
                 robotInGame.is_cannon_ready -= 1
