@@ -288,7 +288,7 @@ class GameState():
         for robotInGame in self.ourRobots:
             if robotInGame.damage < 1:
                 distance = math.sqrt((robotInGame.position[0] - x)**2 + (robotInGame.position[1] - y)**2)
-                new_damage = 0.1 if distance < 10 else 0 # TODO: The formula is in the rules
+                new_damage = 0 # TODO: The formula is in the rules
                 robotInGame.damage += new_damage
                 if robotInGame.damage >= 1:
                     robotInGame.cause_of_death = "out of life"
@@ -341,6 +341,12 @@ class GameState():
             explosion = self.future_explosions.pop(0)
             self.apply_explosion(explosion[0], explosion[1])
 
+        # Reduce time for future explosions
+        for i in range(len(self.future_explosions)):
+            self.future_explosions[i] = (
+                self.future_explosions[i][0], self.future_explosions[i][1],
+                self.future_explosions[i][2] - 1
+            )
 
         # Shoot
         for robotInGame in self.ourRobots:
