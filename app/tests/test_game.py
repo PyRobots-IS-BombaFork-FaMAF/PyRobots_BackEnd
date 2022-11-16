@@ -13,6 +13,7 @@ def test_empty_RobotInGame():
     assert robot.name == 'empty'
     assert robot.cause_of_death == None
     assert robot.damage == 0
+    assert robot.is_alive()
     assert robot.direction == 0
     assert robot.actual_velocity == 0
     assert robot.desired_velocity == 0
@@ -50,6 +51,7 @@ def test_empty_RobotInGame():
     assert robot.name == 'empty'
     assert robot.cause_of_death == None
     assert robot.damage == 0
+    assert robot.is_alive()
     assert robot.direction == 0
     assert robot.actual_velocity == 0
     assert robot.desired_velocity == 0
@@ -70,7 +72,8 @@ def test_empty_RobotInGame():
     robot.updateOurRobot_movement(velocity=0.1, direction=0)
     assert robot.name == 'empty'
     assert robot.cause_of_death == None
-    assert robot.damage == 0     # When collisions are implemented, this may change
+    assert robot.damage == 0
+    assert robot.is_alive()
     assert robot.direction == 0
     assert robot.actual_velocity == 0.1
     assert robot.desired_velocity == 0.1
@@ -98,7 +101,8 @@ def test_empty_RobotInGame():
 
     assert robot.name == 'empty'
     assert robot.cause_of_death == None
-    assert robot.damage == 0     # When collisions are implemented, this may change
+    assert robot.damage == 0
+    assert robot.is_alive()
     assert robot.direction == 135
     assert robot.actual_velocity == 0.3
     assert robot.desired_velocity == 0.3
@@ -148,6 +152,7 @@ def test_empty_RobotInGame():
     assert robot.name == 'empty'
     assert robot.cause_of_death == None
     assert robot.damage == 0
+    assert robot.is_alive()
     assert robot.direction == 135
     assert robot.actual_velocity == 0.1
     assert robot.desired_velocity == 0.1
@@ -175,6 +180,7 @@ def test2_RobotInGame():
     assert robot.name == 'simple'
     assert robot.cause_of_death == None
     assert robot.damage == 0
+    assert robot.is_alive()
     assert robot.direction == 0
     assert robot.actual_velocity == 0
     assert robot.desired_velocity == 0
@@ -191,30 +197,35 @@ def test2_RobotInGame():
     position2 = robot.position
     assert abs(position2[0] - (position[0] + 0.1 * math.cos(math.pi/4))) < 0.00001
     assert abs(position2[1] - (position[1] + 0.1 * math.sin(math.pi/4))) < 0.00001
+    assert robot.is_alive()
 
     robot.executeRobotCode()
     robot.updateOurRobot_movement(robot.robot._set_velocity, robot.robot._set_direction)
     position3 = robot.position
     assert abs(position3[0] - (position2[0] + 0.2 * math.cos(math.pi/4))) < 0.00001
     assert abs(position3[1] - (position2[1] + 0.2 * math.sin(math.pi/4))) < 0.00001
+    assert robot.is_alive()
 
     robot.executeRobotCode()
     robot.updateOurRobot_movement(robot.robot._set_velocity, robot.robot._set_direction)
     position4 = robot.position
     assert abs(position4[0] - (position3[0] - 0.2 * math.cos(math.pi/4))) < 0.00001
     assert abs(position4[1] - (position3[1] + 0.2 * math.sin(math.pi/4))) < 0.00001
+    assert robot.is_alive()
 
     robot.executeRobotCode()
     robot.updateOurRobot_movement(robot.robot._set_velocity, robot.robot._set_direction)
     position5 = robot.position
     assert abs(position5[0] - (position4[0] + 0.3 * math.cos(math.pi/4))) < 0.00001
     assert abs(position5[1] - (position4[1] + 0.3 * math.sin(math.pi/4))) < 0.00001
+    assert robot.is_alive()
 
     robot.executeRobotCode()
     robot.updateOurRobot_movement(robot.robot._set_velocity, robot.robot._set_direction)
     position6 = robot.position
     assert abs(position6[0] - (position5[0] + 0.5 * math.cos(math.pi/3))) < 0.00001
     assert abs(position6[1] - (position5[1] + 0.5 * math.sin(math.pi/3))) < 0.00001
+    assert robot.is_alive()
 
     assert robot.get_result_for_animation() == None
 
@@ -227,6 +238,7 @@ def testExceptions_RobotInGame():
     assert robot.name == 'exception_init'
     assert robot.cause_of_death == "robot execution error"
     assert robot.damage == 1
+    assert not robot.is_alive()
 
     assert robot.get_result_for_animation() == None
 
@@ -238,6 +250,7 @@ def testExceptions2_RobotInGame():
     assert robot.name == 'exception_initialize'
     assert robot.cause_of_death == "robot execution error"
     assert robot.damage == 1
+    assert not robot.is_alive()
 
     assert robot.get_result_for_animation() == None
 
@@ -250,11 +263,13 @@ def testExceptions3_RobotInGame():
 
     assert robot.cause_of_death == None
     assert robot.damage == 0
+    assert robot.is_alive()
 
     robot.executeRobotCode()
 
     assert robot.cause_of_death == "robot execution error"
     assert robot.damage == 1
+    assert not robot.is_alive()
 
     assert robot.get_result_for_animation() == None
 
@@ -266,6 +281,7 @@ def testInvalidDrives_RobotInGame():
     assert robot.name == 'invalid_drives'
     assert robot.cause_of_death == None
     assert robot.damage == 0
+    assert robot.is_alive()
 
     robot.executeRobotCode()
     robot.executeRobotCode()
@@ -275,9 +291,11 @@ def testInvalidDrives_RobotInGame():
     assert robot.name == 'invalid_drives'
     assert robot.cause_of_death == None
     assert robot.damage == 0
+    assert robot.is_alive()
 
     robot.updateOurRobot_movement(-3, 365)
     robot.updateOurRobot_movement(100, 365)
+    assert robot.is_alive()
 
     assert robot.get_result_for_animation() == None
 
@@ -447,6 +465,31 @@ def testRunSimulation_forAnimation():
     assert simulationResult.robots[1].cause_of_death == None # To little rounds for death be collisions
     assert simulationResult.robots[2].cause_of_death == "robot execution error"
     assert simulationResult.robots[3].cause_of_death == None
+
+
+def test_damage():
+    import app.tests.robots_for_testing.empty as empty
+
+    robot: RobotInGame = RobotInGame(empty.empty, "empty", False)
+
+    assert robot.is_alive()
+    assert robot.damage == 0
+
+    robot.apply_damage(0.1)
+    assert robot.is_alive()
+    assert robot.damage == 0.1
+
+    robot.apply_damage(0.8)
+    assert robot.is_alive()
+    assert robot.damage == 0.9
+
+    robot.apply_damage(0.2)
+    assert not robot.is_alive()
+    assert robot.damage == 1
+
+    robot.apply_damage(200)
+    assert not robot.is_alive()
+    assert robot.damage == 1
 
 
 def test_shoot():
