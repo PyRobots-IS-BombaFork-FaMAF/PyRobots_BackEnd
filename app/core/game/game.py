@@ -324,7 +324,7 @@ class GameState():
                             # Distance formula
                             x2_position: float = robotInGame.position[0]
                             y2_position: float = robotInGame.position[1]
-                            distance = math.sqrt((x2_position-x1_position)**2+(y2_position-y1_position)**2)
+                            distance: float = math.sqrt((x2_position-x1_position)**2+(y2_position-y1_position)**2)
 
                             # Angle formula
                             x = x2_position - x1_position
