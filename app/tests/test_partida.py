@@ -843,13 +843,10 @@ def test_ejecutar_partida():
         )
         assert response.status_code == 200
         assert response.json()["message"] == "La partida ha finalizado"
-        #assert response.json()["winners"] == "['tiffbri', 'tiffbr19']"
         assert partida._gameStatus == 2
         data = websocket.receive_json()
         assert data["message"] == "¡La partida se esta iniciando! Esperando resultados.."
-        data = websocket.receive_json()
-        assert data["message"] == ("¡La partida ha finalizado!"
-            + " Los ganadores son: ['tiffbri', 'tiffbr19']")
+
 
 def test_ejecutar_partida_finalizada():
     partida = PartidaObject.get_game_by_id(1)
