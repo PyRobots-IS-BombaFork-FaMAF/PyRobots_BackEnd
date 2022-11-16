@@ -141,7 +141,7 @@ class RobotInGame():
             self.cause_of_death = "robot execution error"
 
     def executeRobotCode(self):
-        if self.damage < 1:
+        if self.is_alive():
             try:
                 self.robot.respond()
             except:
@@ -258,6 +258,9 @@ class RobotInGame():
                 )
             )
 
+    def is_alive(self) -> bool:
+        return self.damage < 1
+
     def apply_damage(self, d: float):
         self.damage += d
         if self.damage >= 1:
@@ -290,24 +293,23 @@ class GameState():
 
     def apply_explosion(self, x: int, y: int):
         for robotInGame in self.ourRobots:
-            if robotInGame.damage < 1:
+            if robotInGame.is_alive():
                 distance = math.sqrt((robotInGame.position[0] - x)**2 + (robotInGame.position[1] - y)**2)
                 new_damage = 0 # TODO: The formula is in the rules
                 robotInGame.apply_damage(new_damage)
 
     def amount_of_robots_alive(self) -> int:
-        return sum([1 for robot in self.ourRobots if robot.damage < 1])
+        return sum([1 for robot in self.ourRobots if robot.is_alive()])
 
     def advance_round(self):
         self.round += 1
         for robotInGame in self.ourRobots:
-            # Execute `robotInGame.robot` code if it is alive
-            if robotInGame.damage < 1:
+            if robotInGame.is_alive():
                 robotInGame.executeRobotCode()
 
         # For scanner
         for robot in self.ourRobots:
-            if robot.damage < 1:
+            if robot.is_alive():
                 direction: Any = robot.robot._scan_direction
                 resolution: Any = robot.robot._resolution_in_degrees
                 x1_position: float = robot.position[0]
@@ -318,7 +320,7 @@ class GameState():
                     and resolution <= 10 and resolution >= 0):
                     direction = direction % 360
                     for robotInGame in self.ourRobots:
-                        if robotInGame is not robot and robotInGame.damage < 1:
+                        if robotInGame is not robot and robotInGame.is_alive():
                             # Distance formula
                             x2_position: float = robotInGame.position[0]
                             y2_position: float = robotInGame.position[1]
@@ -348,7 +350,7 @@ class GameState():
 
         # Shoot
         for robotInGame in self.ourRobots:
-            if robotInGame.damage < 1:
+            if robotInGame.is_alive():
                 if (robotInGame.is_cannon_ready <= 0 and
                         isinstance(robotInGame.robot._shot_direction, numbers.Real) and
                         isinstance(robotInGame.robot._shot_distance, numbers.Real)):
@@ -370,7 +372,7 @@ class GameState():
 
         # Move
         for robotInGame in self.ourRobots:
-            if robotInGame.damage < 1:
+            if robotInGame.is_alive():
                 # Extract new velocity and direction from `robotInGame.robot`
                 set_velocity: Any = robotInGame.robot._set_velocity
                 set_direction: Any = robotInGame.robot._set_direction
@@ -388,7 +390,7 @@ class GameState():
 
         # Update `Robot` fields
         for robotInGame in self.ourRobots:
-            if robotInGame.damage < 1:
+            if robotInGame.is_alive():
                 robotInGame.robot._set_velocity = None
                 robotInGame.robot._set_direction = None
                 robotInGame.robot._position = robotInGame.position
