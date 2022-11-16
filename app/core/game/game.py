@@ -295,7 +295,10 @@ class GameState():
         for robotInGame in self.ourRobots:
             if robotInGame.is_alive():
                 distance = math.sqrt((robotInGame.position[0] - x)**2 + (robotInGame.position[1] - y)**2)
-                new_damage = 0 # TODO: The formula is in the rules
+                new_damage = 0    if distance > 40 else (
+                             0.03 if distance > 20 else (
+                             0.05 if distance > 5 else (
+                             0.1 )))
                 robotInGame.apply_damage(new_damage)
 
     def amount_of_robots_alive(self) -> int:
