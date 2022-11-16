@@ -236,10 +236,8 @@ class RobotInGame():
         else:
             impact_velocity = 0
 
-        self.damage += impact_velocity / max_velocity / 25 # damage according to velocity
-        if self.damage >= 1:
-            self.cause_of_death = "out of life"
-            self.damage = 1
+        new_damage = impact_velocity / max_velocity / 25 # damage according to velocity
+        self.apply_damage(new_damage)
 
         x = board_size if x > board_size else (0 if x < 0 else x)
         y = board_size if y > board_size else (0 if y < 0 else y)
@@ -259,6 +257,12 @@ class RobotInGame():
                     self.round_result_for_animation.missile
                 )
             )
+
+    def apply_damage(self, d: float):
+        self.damage += d
+        if self.damage >= 1:
+            self.cause_of_death = "out of life"
+            self.damage = 1
 
     def get_result_for_animation(self) -> Optional[RobotResult]:
         if self.result_for_animation != None:
@@ -289,10 +293,7 @@ class GameState():
             if robotInGame.damage < 1:
                 distance = math.sqrt((robotInGame.position[0] - x)**2 + (robotInGame.position[1] - y)**2)
                 new_damage = 0 # TODO: The formula is in the rules
-                robotInGame.damage += new_damage
-                if robotInGame.damage >= 1:
-                    robotInGame.cause_of_death = "out of life"
-                    robotInGame.damage = 1
+                robotInGame.apply_damage(new_damage)
 
     def amount_of_robots_alive(self) -> int:
         return sum([1 for robot in self.ourRobots if robot.damage < 1])
