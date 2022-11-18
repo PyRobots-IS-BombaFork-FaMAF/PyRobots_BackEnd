@@ -219,25 +219,21 @@ class RobotInGame():
         y: float = self.position[1] + y_movement
 
         # Check to prevent it from going out of bounds
+        if x < 0 or x > board_size or y < 0 or y > board_size:
+            self.apply_damage(0.02)
+
+        # Check to prevent it from going out of bounds
         if (x < 0 or x > board_size) and (y < 0 or y > board_size):
             self.actual_velocity = 0
             self.desired_velocity = 0
-            impact_velocity = self.actual_velocity
         elif x < 0 or x > board_size:
             self.direction = 0 if x_component_direction >= 0 else 180
             self.actual_velocity = x_component_direction * self.actual_velocity
             self.desired_velocity = x_component_direction * self.desired_velocity
-            impact_velocity = abs(y_component_direction * self.actual_velocity)
         elif y < 0 or y > board_size:
             self.direction = 90 if y_component_direction >= 0 else 270
             self.actual_velocity = y_component_direction * self.actual_velocity
             self.desired_velocity = y_component_direction * self.desired_velocity
-            impact_velocity = abs(x_component_direction * self.actual_velocity)
-        else:
-            impact_velocity = 0
-
-        new_damage = impact_velocity / max_velocity / 25 # damage according to velocity
-        self.apply_damage(new_damage)
 
         x = board_size if x > board_size else (0 if x < 0 else x)
         y = board_size if y > board_size else (0 if y < 0 else y)
