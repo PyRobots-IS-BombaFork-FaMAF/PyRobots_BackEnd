@@ -21,7 +21,7 @@ def test_new_pass_invalid_user():
         "code": code,
         "password": "Tiffany123"
     })
-    response = client.post("/pass-change",
+    response = client.put("/pass-change",
                             data=payload)
     assert response.status_code == 403
 
@@ -34,7 +34,7 @@ def test_new_pass_invalid_code():
         "code": "AKkdmmsju8",
         "password": "Tiffany123"
     })
-    response = client.post("/pass-change",
+    response = client.put("/pass-change",
                             data=payload)
     assert response.status_code == 403
 
@@ -47,7 +47,7 @@ def test_new_pass_invalid_pass():
         "code": code,
         "password": "12345"
     })
-    response = client.post("/pass-change",
+    response = client.put("/pass-change",
                             data=payload)
     assert response.status_code == 422
 
@@ -62,7 +62,7 @@ def test_new_pass_expired():
         "code": code,
         "password": "Tiffany123"
     })
-    response = client.post("/pass-change",
+    response = client.put("/pass-change",
                             data=payload)
     assert response.status_code == 403
 
@@ -76,7 +76,7 @@ def test_new_pass():
         "code": code,
         "password": "Tiffany123"
     })
-    response = client.post("/pass-change",
+    response = client.put("/pass-change",
                             data=payload)
     assert response.status_code == 200
 
@@ -103,6 +103,6 @@ def test_new_pass_second_time():
         "code": code,
         "password": "Tiffany123"
     })
-    response = client.post("/pass-change",
+    response = client.put("/pass-change",
                             data=payload)
     assert response.status_code == 403

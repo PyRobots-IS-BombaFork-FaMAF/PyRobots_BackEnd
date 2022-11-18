@@ -201,7 +201,7 @@ def send_code(username: str, background_t: BackgroundTasks = BackgroundTasks()):
     msg = "¡Hemos enviado un código de recuperación a tu email!"
     return msg
 
-@router.post("/pass-change")
+@router.put("/pass-change")
 @db_session
 def new_password(newpass: NewPass):
     try:
