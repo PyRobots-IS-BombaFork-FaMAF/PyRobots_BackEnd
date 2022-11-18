@@ -116,3 +116,29 @@ def list_robots(
         listRobotsUser.append(listRobots)
     
     return JSONResponse(listRobotsUser)
+
+@router.get("/robot/statistics", status_code=200, tags=["robots"])
+@db_session
+def statistics_robots( 
+    current_user: User = Depends(get_current_active_user)
+):
+    """
+    returns a list of all created robots that the user has
+    """
+    uname = current_user["username"]
+    robots = db.select("select id, avatar from Robot where user = $uname")[:]
+    listRobots = dict()
+    listRobotsUser = []
+    for robot in robots:
+        robotStatistics = db.select("select * from RobotStatistics where id = $robot.id")[:]
+        listRobots = {
+            'id': robotStatistics.id,
+            'gamesPlayed': robotStatistics.gamesPlayed,
+            'wins': robotStatistics.wins,
+            'tied': robotStatistics.tied,
+            'losses': robotStatistics.losses,
+            'avatar': robot.avatar
+        }
+        listRobotsUser.append(listRobots)
+    
+    return JSONResponse(listRobotsUser)
