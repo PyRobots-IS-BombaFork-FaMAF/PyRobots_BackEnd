@@ -506,14 +506,14 @@ def test_shoot():
     game.advance_round()
     game.advance_round()
 
-    assert game.future_explosions[0] == (800, 500, 85)
+    assert game.future_explosions[0] == (800, 500, 84)
 
     for x in range(rounds_to_reload):
         game.advance_round()
 
     assert len(game.future_explosions) == 2
-    assert game.future_explosions[0] == (800, 500, 25)
-    assert game.future_explosions[1] == (500, 900, 114)
+    assert game.future_explosions[0] == (800, 500, 24)
+    assert game.future_explosions[1] == (500, 900, 113)
 
     game.ourRobots[0].position = (10, 10)
 
@@ -521,8 +521,8 @@ def test_shoot():
         game.advance_round()
 
     assert len(game.future_explosions) == 2
-    assert game.future_explosions[0] == (500, 900, 54)
-    assert game.future_explosions[1] == (710, 10, 200)
+    assert game.future_explosions[0] == (500, 900, 53)
+    assert game.future_explosions[1] == (710, 10, 199)
 
 
 def test_shoot_out_of_bound():
@@ -541,28 +541,28 @@ def test_shoot_out_of_bound():
 
     assert game.future_explosions[0][0] == board_size
     assert abs(game.future_explosions[0][1] - 500) < 0.00001
-    assert game.future_explosions[0][2] == 200
+    assert game.future_explosions[0][2] == 199
 
     for x in range(rounds_to_reload):
         game.advance_round()
 
     assert abs(game.future_explosions[1][0] - 500) < 0.00001
     assert game.future_explosions[1][1] == board_size
-    assert game.future_explosions[1][2] == 200
+    assert game.future_explosions[1][2] == 199
 
     for x in range(rounds_to_reload):
         game.advance_round()
 
     assert game.future_explosions[2][0] == 0
     assert abs(game.future_explosions[2][1] - 500) < 0.00001
-    assert game.future_explosions[2][2] == 200
+    assert game.future_explosions[2][2] == 199
 
     for x in range(rounds_to_reload):
         game.advance_round()
 
     assert abs(game.future_explosions[3][0] - 500) < 0.00001
     assert game.future_explosions[3][1] == 0
-    assert game.future_explosions[3][2] == 200
+    assert game.future_explosions[3][2] == 199
 
 
 def test_missiles_json():
