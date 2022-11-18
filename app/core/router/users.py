@@ -193,10 +193,12 @@ def user_info(
     """
     uname = current_user["username"]
     uavatar = current_user["avatar"]
+    uemail = current_user["email"]
 
     current_user_info = {
         'name': uname,
-        'avatar': uavatar
+        'avatar': uavatar,
+        'email': uemail
     }
 
     return JSONResponse(current_user_info)
