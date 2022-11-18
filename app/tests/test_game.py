@@ -2,6 +2,8 @@ from app.core.game.game import *
 from app.core.game.robot import *
 from app.core.game.constants import *
 
+import math
+
 
 
 def test_empty_RobotInGame():
@@ -926,3 +928,78 @@ def test_invalid_shots():
 
     game.advance_round()
     assert game.future_explosions != []
+
+
+def test_explosions():
+    import app.tests.robots_for_testing.empty as empty
+    game: GameState = GameState(
+        [
+            ('empty', empty.empty),
+            ('empty', empty.empty)
+        ],
+        for_animation=True
+    )
+
+    game.ourRobots[0].position = (100, 100)
+    game.ourRobots[1].position = (300, 100)
+
+    assert game.ourRobots[0].damage == 0
+    assert game.ourRobots[1].damage == 0
+    game.advance_round()
+    assert game.ourRobots[0].damage == 0
+    assert game.ourRobots[1].damage == 0
+
+    game.ourRobots[0].robot.cannon(0, 200)
+    for _ in range(int(200 // missile_velocity) + 1):
+        assert game.ourRobots[0].damage == 0
+        assert game.ourRobots[1].damage == 0
+        game.advance_round()
+    assert game.ourRobots[0].damage == 0
+    assert game.ourRobots[1].damage == 0.1
+
+    game.ourRobots[1].robot.cannon(180, 200)
+    for _ in range(int(200 // missile_velocity) + 1):
+        assert game.ourRobots[0].damage == 0
+        assert game.ourRobots[1].damage == 0.1
+        game.advance_round()
+    assert game.ourRobots[0].damage == 0.1
+    assert game.ourRobots[1].damage == 0.1
+
+    game.ourRobots[0].robot.cannon(math.atan(2/200) * 180/math.pi, math.sqrt(200**2 + 2**2))
+    for _ in range(int(math.sqrt(200**2 + 2**2) // missile_velocity) + 1):
+        assert game.ourRobots[0].damage == 0.1
+        assert game.ourRobots[1].damage == 0.1
+        game.advance_round()
+    assert game.ourRobots[0].damage == 0.1
+    assert game.ourRobots[1].damage == 0.1 + 0.1
+
+    while game.ourRobots[0].is_cannon_ready > 0 or game.ourRobots[1].is_cannon_ready > 0:
+        game.advance_round()
+
+    game.ourRobots[0].robot.cannon(0, 200)
+    game.ourRobots[1].robot.cannon(180, 200)
+    for _ in range(int(200 // missile_velocity) + 1):
+        assert game.ourRobots[0].damage == 0.1
+        assert game.ourRobots[1].damage == 0.1 + 0.1
+        game.advance_round()
+    assert game.ourRobots[0].damage == 0.1 + 0.1
+    assert game.ourRobots[1].damage == 0.1 + 0.1 + 0.1
+
+    while game.ourRobots[0].is_cannon_ready > 0 or game.ourRobots[1].is_cannon_ready > 0:
+        game.advance_round()
+
+    game.ourRobots[0].robot.cannon(0, 210)
+    for _ in range(int(210 // missile_velocity) + 1):
+        assert game.ourRobots[0].damage == 0.1 + 0.1
+        assert game.ourRobots[1].damage == 0.1 + 0.1 + 0.1
+        game.advance_round()
+    assert game.ourRobots[0].damage == 0.1 + 0.1
+    assert game.ourRobots[1].damage == 0.1 + 0.1 + 0.1 + 0.05
+
+    game.ourRobots[0].robot.cannon(0, 170)
+    for _ in range(int(170 // missile_velocity) + 1):
+        assert game.ourRobots[0].damage == 0.1 + 0.1
+        assert game.ourRobots[1].damage == 0.1 + 0.1 + 0.1 + 0.05
+        game.advance_round()
+    assert game.ourRobots[0].damage == 0.1 + 0.1
+    assert game.ourRobots[1].damage == 0.1 + 0.1 + 0.1 + 0.05 + 0.03
