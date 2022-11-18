@@ -8,6 +8,7 @@ from app.core.handlers.robot_handlers import *
 from app.core.handlers.auth_handlers import *
 from fastapi.responses import JSONResponse
 import uuid
+import zipfile
 
 IMAGEDIR = "app/robot_avatars/"
 CODEDIR = "app/robot_code/"
@@ -81,7 +82,7 @@ def register(
         )
 
         db.RobotStatistics(
-            id = robot.id
+            robot_id = get_robot_id(current_user["username"], robot.name)
         )
 
         msg = "¡Se creo el robot " + robot.name + " con éxito!"
@@ -127,18 +128,38 @@ def statistics_robots(
     """
     uname = current_user["username"]
     robots = db.select("select id, avatar from Robot where user = $uname")[:]
+
+    try:
+        import zlib
+        compression = zipfile.ZIP_DEFLATED
+    except:
+        compression = zipfile.ZIP_STORED
+
+    zf = zipfile.ZipFile('app/robot_avatars/avatars_robots.zip', mode="w")
+
     listRobots = dict()
     listRobotsUser = []
     for robot in robots:
-        robotStatistics = db.select("select * from RobotStatistics where id = $robot.id")[:]
-        listRobots = {
-            'id': robotStatistics.id,
-            'gamesPlayed': robotStatistics.gamesPlayed,
-            'wins': robotStatistics.wins,
-            'tied': robotStatistics.tied,
-            'losses': robotStatistics.losses,
-            'avatar': robot.avatar
-        }
-        listRobotsUser.append(listRobots)
+        zf.write(robot.avatar, compress_type=compression)
+        robotStatistics = db.select("select * from RobotStatistics where robot_id = $robot.id")[:]
+        for robotStats in robotStatistics:
+            listRobots = {
+                'robot_id': robotStats.robot_id,
+                'gamesPlayed': robotStats.gamesPlayed,
+                'wins': robotStats.wins,
+                'tied': robotStats.tied,
+                'losses': robotStats.losses,
+                'avatar_name': robot.avatar.rsplit('/', 1)[1].rsplit('.', 1)[0]
+            }
+            listRobotsUser.append(listRobots)
+    zf.close()
+
+    with open('app/robot_avatars/avatars_robots.zip', 'rb') as f:
+        avatars_contents = f.read()
+        f.close()
+
+    key = 'avatars_zip'
+    listRobots[key] = avatars_contents
     
     return JSONResponse(listRobotsUser)
+   

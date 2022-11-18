@@ -78,7 +78,7 @@ class RobotStatistics(db.Entity):
     Database table to store statistics
     the robots
     """
-    id = Required(int)
+    robot_id = PrimaryKey(int, auto=False)
     gamesPlayed = Required(int, default=0)
     wins = Required(int, default=0)
     tied = Required(int, default=0)
