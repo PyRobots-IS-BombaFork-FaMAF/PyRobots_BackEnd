@@ -227,13 +227,13 @@ class RobotInGame():
             self.actual_velocity = 0
             self.desired_velocity = 0
         elif x < 0 or x > board_size:
-            self.direction = 0 if x_component_direction >= 0 else 180
-            self.actual_velocity = x_component_direction * self.actual_velocity
-            self.desired_velocity = x_component_direction * self.desired_velocity
-        elif y < 0 or y > board_size:
             self.direction = 90 if y_component_direction >= 0 else 270
-            self.actual_velocity = y_component_direction * self.actual_velocity
-            self.desired_velocity = y_component_direction * self.desired_velocity
+            self.actual_velocity = abs(y_component_direction * self.actual_velocity)
+            self.desired_velocity = abs(y_component_direction * self.desired_velocity)
+        elif y < 0 or y > board_size:
+            self.direction = 0 if x_component_direction >= 0 else 180
+            self.actual_velocity = abs(x_component_direction * self.actual_velocity)
+            self.desired_velocity = abs(x_component_direction * self.desired_velocity)
 
         x = board_size if x > board_size else (0 if x < 0 else x)
         y = board_size if y > board_size else (0 if y < 0 else y)
