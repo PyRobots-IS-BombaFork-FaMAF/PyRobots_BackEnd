@@ -753,11 +753,21 @@ def test_drive_out_of_bounds():
     game.ourRobots[0].robot._set_direction = 0
     game.ourRobots[0].position = (board_size - 1, 10)
 
+    assert game.ourRobots[0].damage == 0
 
     game.advance_round()
     assert game.ourRobots[0].position == (board_size, 10)
+    assert game.ourRobots[0].damage == 0
+    assert game.ourRobots[0].actual_velocity == 1
+    assert game.ourRobots[0].desired_velocity == 1
+    assert game.ourRobots[0].direction == 0
     game.advance_round()
     assert game.ourRobots[0].position == (board_size, 10)
+    assert game.ourRobots[0].damage == 0.02
+    assert abs(game.ourRobots[0].actual_velocity) <= 0.00001
+    assert abs(game.ourRobots[0].desired_velocity) <= 0.00001
+    assert game.ourRobots[0].direction == 90
+
 
     game.ourRobots[0].robot._set_velocity = 1
     game.ourRobots[0].actual_velocity = 1
@@ -769,8 +779,17 @@ def test_drive_out_of_bounds():
 
     game.advance_round()
     assert game.ourRobots[0].position == (10, board_size)
+    assert game.ourRobots[0].damage == 0.02
+    assert game.ourRobots[0].actual_velocity == 1
+    assert game.ourRobots[0].desired_velocity == 1
+    assert game.ourRobots[0].direction == 90
     game.advance_round()
     assert game.ourRobots[0].position == (10, board_size)
+    assert game.ourRobots[0].damage == 0.04
+    assert abs(game.ourRobots[0].actual_velocity) <= 0.00001
+    assert abs(game.ourRobots[0].desired_velocity) <= 0.00001
+    assert game.ourRobots[0].direction == 0
+
 
     game.ourRobots[0].robot._set_velocity = 1
     game.ourRobots[0].actual_velocity = 1
@@ -782,8 +801,17 @@ def test_drive_out_of_bounds():
 
     game.advance_round()
     assert game.ourRobots[0].position == (0, 10)
+    assert game.ourRobots[0].damage == 0.04
+    assert game.ourRobots[0].actual_velocity == 1
+    assert game.ourRobots[0].desired_velocity == 1
+    assert game.ourRobots[0].direction == 180
     game.advance_round()
     assert game.ourRobots[0].position == (0, 10)
+    assert game.ourRobots[0].damage == 0.06
+    assert abs(game.ourRobots[0].actual_velocity) <= 0.00001
+    assert abs(game.ourRobots[0].desired_velocity) <= 0.00001
+    assert game.ourRobots[0].direction == 90
+
 
     game.ourRobots[0].robot._set_velocity = 1
     game.ourRobots[0].actual_velocity = 1
@@ -795,8 +823,62 @@ def test_drive_out_of_bounds():
 
     game.advance_round()
     assert game.ourRobots[0].position == (10, 0)
+    assert game.ourRobots[0].damage == 0.06
+    assert game.ourRobots[0].actual_velocity == 1
+    assert game.ourRobots[0].desired_velocity == 1
+    assert game.ourRobots[0].direction == 270
     game.advance_round()
     assert game.ourRobots[0].position == (10, 0)
+    assert game.ourRobots[0].damage == 0.08
+    assert abs(game.ourRobots[0].actual_velocity) <= 0.00001
+    assert abs(game.ourRobots[0].desired_velocity) <= 0.00001
+    assert game.ourRobots[0].direction == 180
+
+
+    game.ourRobots[0].robot._set_velocity = 1
+    game.ourRobots[0].actual_velocity = 1
+    game.ourRobots[0].desired_velocity = 1
+
+    game.ourRobots[0].direction = 45
+    game.ourRobots[0].robot._set_direction = 45
+    game.ourRobots[0].position = (board_size - 1, board_size - 1)
+
+    game.advance_round()
+    assert abs(game.ourRobots[0].position[0] - (board_size - 1 + 2**(-1/2))) <= 0.00001
+    assert abs(game.ourRobots[0].position[1] - (board_size - 1 + 2**(-1/2))) <= 0.00001
+    assert game.ourRobots[0].damage == 0.08
+    assert game.ourRobots[0].actual_velocity == 1
+    assert game.ourRobots[0].desired_velocity == 1
+    assert game.ourRobots[0].direction == 45
+    game.advance_round()
+    assert game.ourRobots[0].position == (board_size, board_size)
+    assert game.ourRobots[0].damage == 0.1
+    assert game.ourRobots[0].actual_velocity == 0
+    assert game.ourRobots[0].desired_velocity == 0
+
+
+    game.ourRobots[0].robot._set_velocity = (1/2)**(1/2)
+    game.ourRobots[0].actual_velocity = (1/2)**(1/2)
+    game.ourRobots[0].desired_velocity = (1/2)**(1/2)
+
+    game.ourRobots[0].direction = 225
+    game.ourRobots[0].robot._set_direction = 225
+    game.ourRobots[0].position = (10, 0.5)
+
+    game.advance_round()
+    assert abs(game.ourRobots[0].position[0] - 9.5) <= 0.00001
+    assert abs(game.ourRobots[0].position[1]) <= 0.00001
+    assert game.ourRobots[0].damage == 0.1
+    assert game.ourRobots[0].actual_velocity == (1/2)**(1/2)
+    assert game.ourRobots[0].desired_velocity == (1/2)**(1/2)
+    assert game.ourRobots[0].direction == 225
+    game.advance_round()
+    assert abs(game.ourRobots[0].position[0] - 9) <= 0.00001
+    assert game.ourRobots[0].position[1] == 0
+    assert abs(game.ourRobots[0].damage - 0.12) <= 0.00001
+    assert abs(game.ourRobots[0].actual_velocity - 1/2) <= 0.00001
+    assert abs(game.ourRobots[0].desired_velocity - 1/2) <= 0.00001
+    assert game.ourRobots[0].direction == 180
 
 
 def test_invalid_shots():
