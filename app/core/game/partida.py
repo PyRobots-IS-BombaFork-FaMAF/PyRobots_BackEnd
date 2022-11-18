@@ -174,8 +174,8 @@ def save_results(results, duration: int, id_game: int):
         in sorted_winners if dict_player["wins"] == max_wins]
     
     for player in results:
-        id = RobotDB(get_robot_id(player["username"], player["input"].name))
-        robot_Statistics = RobotStatisticsDB[id]
+        robot_id = RobotDB(get_robot_id(player["username"], player["input"].name))
+        robot_Statistics = RobotStatisticsDB[robot_id]
         robot_Statistics["gamesPlayed"] += 1
         if player in winners and len(winners) == 1:
             robot_Statistics["wins"] += 1

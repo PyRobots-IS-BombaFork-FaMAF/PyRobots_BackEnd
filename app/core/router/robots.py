@@ -81,7 +81,7 @@ def register(
         )
 
         db.RobotStatistics(
-            id = robot.id
+            robot_id = get_robot_id(current_user["username"], robot.name)
         )
 
         msg = "¡Se creo el robot " + robot.name + " con éxito!"
