@@ -183,3 +183,24 @@ async def logout(request: Request, current_user: User = Depends(get_current_acti
         detail="Incorrect password",
         headers={"WWW-Authenticate": "Bearer"},
     )
+
+@router.get("/user/info", status_code=200, tags=["Users"])
+@db_session
+def user_info(
+    current_user: User = Depends(get_current_active_user)):
+    """
+        Returns user information
+    """
+    uname = current_user["username"]
+    uavatar = current_user["avatar"]
+
+    current_user_info = {
+        'name': uname,
+        'avatar': uavatar
+    }
+
+    return JSONResponse(current_user_info)
+
+
+
+
