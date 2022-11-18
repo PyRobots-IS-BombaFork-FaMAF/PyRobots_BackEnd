@@ -73,11 +73,16 @@ def register(
         finally:
             code.file.close()
 
-        db.Robot(
+        robot = db.Robot(
             name=robot.name.lower(),
             avatar=avatar_name,
             code=code_name,
             user=current_user["username"]
+        )
+
+        db.RobotStatistics(
+            id = robot.id,
+            avatar = robot.avatar
         )
 
         msg = "¡Se creo el robot " + robot.name + " con éxito!"
