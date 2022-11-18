@@ -347,6 +347,18 @@ class GameState():
                 new_future_explosion.append((explosion[0], explosion[1], explosion[2] - 1))
         self.future_explosions = new_future_explosion.copy()
 
+        # Apply collisions between robots
+        for orRobot1 in self.ourRobots:
+            for orRobot2 in self.ourRobots:
+                if (orRobot1 is not orRobot2 and
+                        orRobot1.is_alive() and orRobot2.is_alive() and
+                        abs(orRobot1.position[0] - orRobot2.position[0]) < 1 and
+                        abs(orRobot1.position[1] - orRobot2.position[1]) < 1):
+                    orRobot1.apply_damage(0.1)
+                    orRobot2.apply_damage(0.1)
+                    # 0.1 of damage, because another 0.1 will be applied with `orRobot1`
+                    # as `orRobot2` and vice versa
+
         # Shoot
         for robotInGame in self.ourRobots:
             if robotInGame.is_alive():

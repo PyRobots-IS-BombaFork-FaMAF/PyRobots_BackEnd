@@ -1003,3 +1003,22 @@ def test_explosions():
         game.advance_round()
     assert game.ourRobots[0].damage == 0.1 + 0.1
     assert game.ourRobots[1].damage == 0.1 + 0.1 + 0.1 + 0.05 + 0.03
+
+
+def test_collisions_between_robots():
+    import app.tests.robots_for_testing.empty as empty
+    game: GameState = GameState(
+        [
+            ('empty', empty.empty),
+            ('empty', empty.empty)
+        ],
+        for_animation=True
+    )
+
+    game.ourRobots[0].position = (100, 100)
+    game.ourRobots[1].position = (100, 100)
+
+    game.advance_round()
+
+    assert game.ourRobots[0].damage == 0.2
+    assert game.ourRobots[1].damage == 0.2
