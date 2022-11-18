@@ -79,7 +79,6 @@ class RobotStatistics(db.Entity):
     the robots
     """
     id = Required(int)
-    avatar = Optional(str)
     gamesPlayed = Required(int, default=0)
     wins = Required(int, default=0)
     tied = Required(int, default=0)

@@ -81,8 +81,7 @@ def register(
         )
 
         db.RobotStatistics(
-            id = robot.id,
-            avatar = robot.avatar
+            id = robot.id
         )
 
         msg = "¡Se creo el robot " + robot.name + " con éxito!"
