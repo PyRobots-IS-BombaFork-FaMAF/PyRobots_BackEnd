@@ -10,6 +10,7 @@ from app.core.game.partida import *
 define_database_and_entities(
     provider=settings.DB_PROVIDER, filename=settings.DB_NAME, create_db=True)
 
+load_default_robots()
 
 def get_application():
     _app = FastAPI(title=settings.PROJECT_NAME)
