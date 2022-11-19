@@ -192,8 +192,7 @@ def user_info(
         Returns user information
     """
     uname = current_user["username"]
-    user = db.User[uname]
-    uavatar = user["avatar"]
+    uavatar = current_user["avatar"]
     uemail = current_user["email"]
 
     current_user_info = {
@@ -202,9 +201,9 @@ def user_info(
     }
     
     if os.path.exists(uavatar):
-        return FileResponse(uavatar, headers = current_user_info, media_type="image/jpeg")
+       return FileResponse(uavatar, headers = current_user_info, media_type="image/jpeg")
     else: 
-        raise HTTPException(status_code=403, detail= "No se encontro el archivo")
+       raise HTTPException(status_code=403, detail= "No se encontro el archivo")
 
 
 
