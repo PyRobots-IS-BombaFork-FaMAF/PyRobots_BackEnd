@@ -22,17 +22,12 @@ def test_user_name():
     token: str = rta["access_token"]
     token_type: str = "Bearer "
     head: str = token_type + token
-    body = {
-        }
     response = client.get(
         "/user/info",
         headers={"accept": "test_application/json", "Authorization": head},
-        json=body
     )
-    tmp_user = response.json()
     assert response.status_code == 200
-    assert len(tmp_user) == 3
-    assert tmp_user["name"] == "tiffbri"
+    assert response.headers["name"] == "tiffbri"
     
 
 def test_user_name_and_email():
@@ -53,18 +48,13 @@ def test_user_name_and_email():
     token: str = rta["access_token"]
     token_type: str = "Bearer "
     head: str = token_type + token
-    body = {
-        }
     response = client.get(
         "/user/info",
         headers={"accept": "test_application/json", "Authorization": head},
-        json=body
     )
-    tmp_user = response.json()
     assert response.status_code == 200
-    assert len(tmp_user) == 3
-    assert tmp_user["name"] == "tiffbri"
-    assert tmp_user["email"] == "tiffanybricett1281996@gmail.com"
+    assert response.headers["name"] == "tiffbri"
+    assert response.headers["email"] == "tiffanybricett1281996@gmail.com"
     
 
     
@@ -86,17 +76,27 @@ def test_username_invalid():
     token: str = rta["access_token"]
     token_type: str = "Bearer "
     head: str = token_type + token
-    body = {
-        }
     response = client.get(
         "/user/info",
         headers={"accept": "test_application/json", "Authorization": head},
-        json=body
     )
-    tmp_user = response.json()
     assert response.status_code == 200
-    assert len(tmp_user) == 3
-    assert tmp_user["name"] != "diferentName"
+    assert response.headers["email"] == "tiffanybricett1281996@gmail.com"
+    assert response.headers["name"] != "diferentName"
+
+def test_Unregistered_user():
+    response_login = client.post(
+        "/token",
+        data = {
+            "grant_type": "",
+            "username": "germandddd",
+            "password": "Tiffanyb19!",
+            "scope": "",
+            "client_id": "",
+            "client_secret": "",
+        },
+    )
+    assert response_login.status_code == 401
 
 def test_user_avatar():
     pass  
