@@ -5,7 +5,7 @@ from fastapi.security import OAuth2PasswordRequestForm
 from pony.orm import *
 from typing import Union, Optional
 from app.core.models.base import db
-from app.core.models.user_models import UserIn, User, Token, Password
+from app.core.models.user_models import UserIn, User, Token
 from app.core.handlers.auth_handlers import *
 from app.core.handlers.password_handlers import *
 from app.core.handlers.validation_handlers import *
@@ -183,50 +183,3 @@ async def logout(request: Request, current_user: User = Depends(get_current_acti
         detail="Incorrect password",
         headers={"WWW-Authenticate": "Bearer"},
     )
-
-
-@router.post("/user/avatar", tags=["Users"], status_code=200)
-@db_session
-def change_avatar(
-    current_user: User = Depends(get_current_active_user),
-    avatar: Optional[UploadFile] = File(None)):
-
-    uname = current_user["username"]
-
-    if avatar != None and avatar.filename != "":
-        if avatar.content_type not in ['image/jpeg', 'image/png', 'image/tiff', 'image/jpg']:
-            raise HTTPException(
-                409, detail="Tipo de archivo inválido")
-        else:
-            avatar.filename = f"{uname + str(uuid.uuid4())}.jpg"
-            try:
-                avatar.file.seek(0)
-                contents = avatar.file.read()  # Important to wait
-                avatar_name = IMAGEDIR + avatar.filename
-
-                with open(f"{avatar_name}", "wb") as f:
-                    f.write(contents)
-            except:
-                raise HTTPException(
-                    400, detail="Error leyendo imagen")
-            finally:
-                avatar.file.close()
-    else:
-        raise HTTPException(status_code=403, detail= "El archivo esta vacio")
-              
-
-    current_user["avatar"] = avatar_name
-    msg = "Se cambio el avatar con éxito"
-
-    return msg
-
-@router.post("/user/password", tags=["Users"], status_code=200)
-async def change_password(
-    current_user: User = Depends(get_current_active_user),
-    new_password: Password = str):
-
-    current_user["password"] = hash_password(new_password)
-
-    msg = "Se cambio la contraseña con éxito"
-
-    return msg
