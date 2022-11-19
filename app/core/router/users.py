@@ -1,6 +1,6 @@
 from datetime import datetime, timedelta
 from fastapi import *
-from fastapi.responses import JSONResponse, HTMLResponse
+from fastapi.responses import JSONResponse, HTMLResponse, FileResponse
 from fastapi.security import OAuth2PasswordRequestForm
 from pony.orm import *
 from typing import Union, Optional
@@ -12,7 +12,7 @@ from app.core.handlers.validation_handlers import *
 from app.core.handlers.userdb_handlers import *
 from urllib.parse import unquote
 import uuid
-
+import os
 
 IMAGEDIR = "app/avatars/"
 
@@ -192,16 +192,21 @@ def user_info(
         Returns user information
     """
     uname = current_user["username"]
-    uavatar = current_user["avatar"]
+    user = db.User[uname]
+    uavatar = user["avatar"]
     uemail = current_user["email"]
 
     current_user_info = {
         'name': uname,
-        'avatar': uavatar,
         'email': uemail
     }
+    
+    if os.path.exists(uavatar):
+        return FileResponse(uavatar, headers = current_user_info, media_type="image/jpeg")
+    else: 
+        raise HTTPException(status_code=403, detail= "No se encontro el archivo")
 
-    return JSONResponse(current_user_info)
+
 
 
 
