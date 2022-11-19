@@ -183,3 +183,58 @@ async def logout(request: Request, current_user: User = Depends(get_current_acti
         detail="Incorrect password",
         headers={"WWW-Authenticate": "Bearer"},
     )
+
+@router.post("/user/avatar", tags=["Users"], status_code=200)
+@db_session
+def change_avatar(
+    current_user: User = Depends(get_current_active_user),
+    new_avatar: Optional[UploadFile] = File(None)):
+
+    """
+    Endpoint to change the avatar
+    """
+
+    uname = current_user["username"]
+
+    if new_avatar != None and new_avatar.filename != "":
+        if new_avatar.content_type not in ['image/jpeg', 'image/png', 'image/tiff', 'image/jpg']:
+            raise HTTPException(
+                409, detail="Tipo de archivo inválido")
+        else:
+            new_avatar.filename = f"{uname + str(uuid.uuid4())}.jpg"
+            try:
+                new_avatar.file.seek(0)
+                contents = new_avatar.file.read()  # Important to wait
+                avatar_name = IMAGEDIR + new_avatar.filename
+
+                with open(f"{avatar_name}", "wb") as f:
+                    f.write(contents)
+            except:
+                raise HTTPException(
+                    400, detail="Error leyendo imagen")
+            finally:
+                new_avatar.file.close()
+    else:
+        raise HTTPException(status_code=403, detail= "El archivo esta vacio")
+
+    user = db.User[uname]
+    try:
+        user.avatar = avatar_name
+        msg = "Se ha cambiado el avatar exitosamente"
+    except: 
+        raise HTTPException(status_code=400, detail= "Error cambiando el avatar")
+
+    return{msg}
+
+"""
+@router.post("/user/password", tags=["Users"], status_code=200)
+async def change_password(
+    current_user: User = Depends(get_current_active_user),
+    new_password: Password = str):
+    
+    current_user["password"] = hash_password(new_password)
+
+    msg = "Se cambio la contraseña con éxito"
+
+    return msg
+"""
