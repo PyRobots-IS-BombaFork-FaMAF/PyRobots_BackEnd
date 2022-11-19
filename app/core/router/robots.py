@@ -6,9 +6,12 @@ from app.core.models.robot_models import *
 from app.core.models.user_models import *
 from app.core.handlers.robot_handlers import *
 from app.core.handlers.auth_handlers import *
-from fastapi.responses import JSONResponse
+from fastapi.responses import JSONResponse, FileResponse
 import uuid
 import zipfile
+import base64
+import json
+import io
 
 IMAGEDIR = "app/robot_avatars/"
 CODEDIR = "app/robot_code/"
@@ -130,12 +133,13 @@ def statistics_robots(
     robots = db.select("select id, avatar from Robot where user = $uname")[:]
 
     try:
-        import zlib
         compression = zipfile.ZIP_DEFLATED
     except:
         compression = zipfile.ZIP_STORED
 
-    zf = zipfile.ZipFile('app/robot_avatars/avatars_robots.zip', mode="w")
+    s = io.BytesIO()
+
+    zf = zipfile.ZipFile(s, mode="w")
 
     listRobots = dict()
     listRobotsUser = []
@@ -149,17 +153,16 @@ def statistics_robots(
                 'wins': robotStats.wins,
                 'tied': robotStats.tied,
                 'losses': robotStats.losses,
-                'avatar_name': robot.avatar.rsplit('/', 1)[1].rsplit('.', 1)[0]
+                'avatar_name': robot.avatar
             }
             listRobotsUser.append(listRobots)
     zf.close()
 
-    with open('app/robot_avatars/avatars_robots.zip', 'rb') as f:
-        avatars_contents = f.read()
-        f.close()
+    headers = {'X-data' : str(listRobotsUser)}
 
-    key = 'avatars_zip'
-    listRobots[key] = avatars_contents
-    
-    return JSONResponse(listRobotsUser)
-   
+    return Response(s.getvalue(), media_type="application/x-zip-compressed", headers=headers)
+
+
+
+
+
