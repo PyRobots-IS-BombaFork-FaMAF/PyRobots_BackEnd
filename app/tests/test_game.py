@@ -32,8 +32,8 @@ def test_empty_RobotInGame():
     # `RobotInGame.robot` fields
     assert robot.robot._actual_direction == 0
     assert robot.robot._actual_velocity == 0
-    assert robot.robot._set_velocity == 0
-    assert robot.robot._set_direction == 0
+    assert robot.robot._set_velocity == None
+    assert robot.robot._set_direction == None
     assert robot.robot._position == robot.position
     assert robot.robot._damage == 0
 
