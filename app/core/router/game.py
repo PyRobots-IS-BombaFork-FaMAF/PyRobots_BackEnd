@@ -238,12 +238,12 @@ async def websocket_endpoint(websocket: WebSocket, game_id: int):
         return "Partida inexistente"
     try:
         await partida._connections.connect(websocket, partida._players)
-    except RuntimeError:
+    except:
         raise "Error estableciendo conexión"
     while True:
         try:
             await websocket.receive()
-        except RuntimeError:
+        except:
             break
 
 @router.post("/game/{game_id}/leave", status_code=200, tags=["Game"])
