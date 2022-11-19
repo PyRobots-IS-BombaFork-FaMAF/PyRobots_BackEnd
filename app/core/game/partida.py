@@ -182,7 +182,7 @@ def save_results(results, duration: int, id_game: int):
         elif player in winners and len(winners) > 1:
             robot_Statistics.tied += 1
         else:
-            robot_Statistics.loses += 1
+            robot_Statistics.losses += 1
     
     Results(
         partida=id_game,
