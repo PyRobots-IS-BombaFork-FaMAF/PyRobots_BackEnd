@@ -45,3 +45,6 @@ class User(BaseModel):
 class Token(BaseModel):
     access_token: str
     token_type: str
+
+class Password(BaseModel):
+    new_password: str
