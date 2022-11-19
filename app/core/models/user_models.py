@@ -47,4 +47,5 @@ class Token(BaseModel):
     token_type: str
 
 class Password(BaseModel):
-    new_password: str
+    new_password: str = Field(..., min_length=8,
+                          regex=r"^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)[a-zA-Z\d\w\W]{8,}$")

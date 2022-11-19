@@ -10,6 +10,7 @@ from app.core.handlers.auth_handlers import *
 from app.core.handlers.password_handlers import *
 from app.core.handlers.validation_handlers import *
 from app.core.handlers.userdb_handlers import *
+from app.core.handlers.confirmation_handler import *
 from urllib.parse import unquote
 import uuid
 
@@ -184,7 +185,7 @@ async def logout(request: Request, current_user: User = Depends(get_current_acti
         headers={"WWW-Authenticate": "Bearer"},
     )
 
-@router.post("/user/avatar", tags=["Users"], status_code=200)
+@router.put("/user/avatar", tags=["Users"], status_code=200)
 @db_session
 def change_avatar(
     current_user: User = Depends(get_current_active_user),
@@ -227,17 +228,20 @@ def change_avatar(
     return msg
 
 
-@router.post("/user/password", tags=["Users"], status_code=200)
-async def change_password(
+@router.put("/user/password", tags=["Users"], status_code=200)
+@db_session
+def change_password(
+    new_password: Password,
     current_user: User = Depends(get_current_active_user),
-    new_password: Password = str):
+    background_t: BackgroundTasks = BackgroundTasks()):
     
     uname = current_user["username"]
     user = db.User[uname]
 
     try:
-        user.password = hash_password(new_password)
+        user.password = hash_password(new_password.new_password)
         msg = "Se cambio la contraseña con éxito"
+        background_t.add_task(send_confirmation_mail, user.email, uname)
 
     except:
         raise HTTPException(status_code=400, detail= "Error cambiando el password")
