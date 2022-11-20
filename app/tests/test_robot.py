@@ -1,6 +1,11 @@
 from app.core.game.robot import *
 
-
+def test_empty_getters():
+    r = Robot()
+    assert r.get_damage() == 0
+    assert r.get_velocity() == 0
+    assert r.scanned() == None
+    assert r.is_cannon_ready()
 
 def test_get_direction():
     r = Robot()
