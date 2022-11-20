@@ -91,7 +91,7 @@ async def validate_user(email: str, code: str):
     user = db.User.get(email=email)
     if user != None and user.validated:
         msg = "Ya tu cuenta se encuentra validada"
-    else:
+    elif not user.validated:
         try:
             email = unquote(email)
             data = db.get(
