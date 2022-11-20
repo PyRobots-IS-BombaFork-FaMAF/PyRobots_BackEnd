@@ -67,7 +67,6 @@ def test_create_valid_partida_sin_pass1():
         headers={"accept": "test_application/json", "Authorization": head},
         json=body
     )
-    print(response.json())
     assert response.status_code == 201
 
 def test_create_valid_partida_con_pass():

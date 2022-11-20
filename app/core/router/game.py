@@ -208,7 +208,6 @@ def get_player_results(
                 robots = list(RobotDB.select().filter(lambda u: u in game_result.robot_winners))
                 user_robot = []
                 #matching robots to their owner
-                print(game.players)
                 for i in range(len(winners)):
                     uname = winners[i].username
                     for players in game.players:
@@ -227,7 +226,7 @@ def get_player_results(
                     "players": game.players,
                     "duration": game_result.duration,
                     "winners": user_robot,
-                    "rounds_won": game_result.rounds_won
+                    "games_won": game_result.rounds_won
                 }
                 results_list.append(result_dict)
     return JSONResponse(results_list)
