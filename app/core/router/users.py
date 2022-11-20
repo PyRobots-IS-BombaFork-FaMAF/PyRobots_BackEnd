@@ -91,7 +91,7 @@ async def validate_user(email: str, code: str):
     user = db.User.get(email=email)
     if user != None and user.validated:
         msg = "Ya tu cuenta se encuentra validada"
-    elif not user.validated:
+    elif user != None and not user.validated:
         try:
             email = unquote(email)
             data = db.get(
@@ -104,6 +104,8 @@ async def validate_user(email: str, code: str):
                 status_code=409, detail="Código de validación inválido")
         user.validated = True
         msg = "¡Hemos validado tu cuenta!"
+    else:
+        raise HTTPException(status_code=404, detail="Usuario inexistente")
     return msg
 
 
