@@ -73,6 +73,17 @@ class Results(db.Entity):
     duration = Required(float)
     rounds_won = Required(int)
 
+class RobotStatistics(db.Entity):
+    """
+    Database table to store statistics
+    the robots
+    """
+    robot_id = PrimaryKey(int, auto=False)
+    gamesPlayed = Required(int, default=0)
+    wins = Required(int, default=0)
+    tied = Required(int, default=0)
+    losses = Required(int, default=0)
+
 def define_database_and_entities(**db_params):
     global db
 
