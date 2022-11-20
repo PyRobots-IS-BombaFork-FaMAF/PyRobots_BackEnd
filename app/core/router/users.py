@@ -13,6 +13,7 @@ from app.core.handlers.userdb_handlers import *
 from urllib.parse import unquote
 import uuid
 import os
+import base64
 
 IMAGEDIR = "app/avatars/"
 
@@ -194,14 +195,20 @@ def user_info(
     uname = current_user["username"]
     uavatar = current_user["avatar"]
     uemail = current_user["email"]
+    
+    with open(uavatar, 'rb') as f:
+        avatar_img = base64.b64encode(f.read())
+        f.close()
 
     current_user_info = {
         'name': uname,
-        'email': uemail
+        'email': uemail,
+        'avatar_name': uavatar.rsplit('/', 1)[1], 
+        'avatar_img': str(avatar_img)
     }
     
     if os.path.exists(uavatar):
-       return FileResponse(uavatar, headers = current_user_info, media_type="image/jpeg")
+       return JSONResponse(current_user_info)
     else: 
        raise HTTPException(status_code=403, detail= "No se encontro el archivo")
 
