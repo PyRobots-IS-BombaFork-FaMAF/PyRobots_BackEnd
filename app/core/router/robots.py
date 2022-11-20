@@ -147,7 +147,7 @@ def statistics_robots(
                 'wins': robotStats.wins,
                 'tied': robotStats.tied,
                 'losses': robotStats.losses,
-                'avatar_name': robot.avatar,
+                'avatar_name': robot.avatar.rsplit('/', 1)[1],
                 'avatar_img': str(avatar_img)
             }
             listRobotsUser.append(listRobots)
