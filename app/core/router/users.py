@@ -88,6 +88,9 @@ async def validate_user(email: str, code: str):
     clicking on the link they receive by e-mail, that way they can 
     log in and start playing
     """
+    user = db.User.get(email=email)
+    if user.validated:
+        msg = "Ya tu cuenta se encuentra validada"
     try:
         email = unquote(email)
         data = db.get(
@@ -98,11 +101,7 @@ async def validate_user(email: str, code: str):
     if data[1] != code:
         raise HTTPException(
             status_code=409, detail="Código de validación invalido")
-
-    user = db.User.get(email=email)
-    if user.validated == True:
-        msg = "Ya tu cuenta se encuentra validada"
-    else:
+    if not user.validated:
         user.validated = True
         msg = "¡Hemos validado tu cuenta!"
     return msg
