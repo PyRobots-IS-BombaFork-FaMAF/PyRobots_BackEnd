@@ -3,11 +3,12 @@ from fastapi import *
 from fastapi.responses import JSONResponse, HTMLResponse
 from fastapi.security import OAuth2PasswordRequestForm
 from pony.orm import *
-from typing import Union, Optional
+from typing import Optional
 from app.core.models.base import db
-from app.core.models.user_models import UserIn, User, Token
+from app.core.models.user_models import UserIn, User, Token, NewPass
 from app.core.handlers.auth_handlers import *
 from app.core.handlers.password_handlers import *
+from app.core.handlers.recovery_handler import *
 from app.core.handlers.validation_handlers import *
 from app.core.handlers.userdb_handlers import *
 from urllib.parse import unquote
@@ -217,3 +218,53 @@ def user_info(
 
 
 
+
+@router.get("/pass-recovery")
+@db_session
+def send_code(username: str, background_t: BackgroundTasks = BackgroundTasks()):
+    """
+    Endpoint to request a password recovery, 
+    the user recieves a code by email that can
+    be used to generate a new password
+    """
+    user = db.User.get(username = username)
+    if user != None:
+        recovery = RecoveryMail()
+        background_t.add_task(recovery.send_mail, user.email, user.username)
+    
+    msg = "¡Hemos enviado un código de recuperación a tu email!"
+    return msg
+
+@router.put("/pass-change")
+@db_session
+def new_password(newpass: NewPass):
+    try:
+        user = db.User.get(username = newpass.username)
+    except:
+        raise HTTPException(
+                status_code=403, detail="Usuario inexistente")
+    if user == None:
+        raise HTTPException(
+                status_code=403, detail="Usuario inexistente")
+    else:
+        try:
+            recovery = db.RecoveryCode.get(username=newpass.username)
+        except:
+            raise HTTPException(
+                    status_code=403, detail="Código de recuperación inválido")
+        if recovery != None:
+            time_diff = (datetime.now() - recovery.date_issue).seconds
+            print(time_diff)
+            # Checking if the code hasn't been issued for over a day
+            if newpass.code == recovery.code and time_diff < 86400 and recovery.active:
+                user.password = hash_password(newpass.password)
+                recovery.active = 0
+                msg = "¡La contraseña se ha cambiado exitosamente!"
+            else:
+                raise HTTPException(
+                    status_code=403, detail="Código de recuperación inválido")
+        else:
+            raise HTTPException(
+                status_code=403, detail="Código de recuperación inválido")
+
+    return msg

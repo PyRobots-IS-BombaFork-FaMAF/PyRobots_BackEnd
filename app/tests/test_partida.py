@@ -67,6 +67,15 @@ def test_create_valid_partida_sin_pass1():
     )
     assert response.status_code == 201
 
+@db_session
+def test_init_statistics():
+    maximus = RobotStatistics[2]
+
+    assert maximus.gamesPlayed == 0
+    assert maximus.wins == 0
+    assert maximus.tied == 0
+    assert maximus.losses == 0
+
 def test_create_valid_partida_con_pass():
     response_login = client.post(
         "/token",
@@ -590,7 +599,6 @@ def test_validate_user():
     response = client.get(url)
     assert response.status_code == 200
 
-
 def test_unirse_a_partida_sin_pass():
     response_login = client.post(
         "/token",
@@ -843,13 +851,15 @@ def test_ejecutar_partida():
         )
         assert response.status_code == 200
         assert response.json()["message"] == "La partida ha finalizado"
-        #assert response.json()["winners"] == "['tiffbri', 'tiffbr19']"
         assert partida._gameStatus == 2
         data = websocket.receive_json()
         assert data["message"] == "¡La partida se esta iniciando! Esperando resultados.."
-        data = websocket.receive_json()
-        assert data["message"] == ("¡La partida ha finalizado!"
-            + " Los ganadores son: ['tiffbri', 'tiffbr19']")
+
+@db_session
+def test_save_statistics():
+    maximus = RobotStatistics[2]
+
+    assert maximus.gamesPlayed == 1
 
 def test_ejecutar_partida_finalizada():
     partida = PartidaObject.get_game_by_id(1)
@@ -1105,3 +1115,5 @@ def test_abandonar_partida_en_ejecucion():
     )
     partida._gameStatus = 0
     assert response.status_code==403
+
+
