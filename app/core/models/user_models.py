@@ -1,6 +1,6 @@
 from tokenize import String
-from pydantic import BaseModel, Field, HttpUrl, validator
-from typing import Optional, Union
+from pydantic import BaseModel, Field, validator
+from typing import Optional
 from pydantic.networks import EmailStr
 from fastapi import *
 

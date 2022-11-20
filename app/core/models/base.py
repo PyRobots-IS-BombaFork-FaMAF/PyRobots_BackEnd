@@ -1,8 +1,7 @@
 from enum import unique
 import json
 from pony.orm import *
-from datetime import date, datetime
-from passlib.context import CryptContext
+from datetime import datetime
 
 db = Database()
 

@@ -6,12 +6,9 @@ from app.core.models.robot_models import *
 from app.core.models.user_models import *
 from app.core.handlers.robot_handlers import *
 from app.core.handlers.auth_handlers import *
-from fastapi.responses import JSONResponse, FileResponse
+from fastapi.responses import JSONResponse
 import uuid
-import zipfile
 import base64
-import json
-import io
 
 IMAGEDIR = "app/robot_avatars/"
 CODEDIR = "app/robot_code/"

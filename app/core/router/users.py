@@ -3,7 +3,7 @@ from fastapi import *
 from fastapi.responses import JSONResponse, HTMLResponse
 from fastapi.security import OAuth2PasswordRequestForm
 from pony.orm import *
-from typing import Union, Optional
+from typing import Optional
 from app.core.models.base import db
 from app.core.models.user_models import UserIn, User, Token, NewPass
 from app.core.handlers.auth_handlers import *
