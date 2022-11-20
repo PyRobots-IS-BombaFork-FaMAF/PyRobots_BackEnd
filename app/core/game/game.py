@@ -96,6 +96,15 @@ class SimulationResult():
 def executeRobotInitialize(r: Robot):
     r.initialize()
 
+@timeout_decorator.timeout(max_time_per_round, timeout_exception=TimeoutError)
+def createRobot(robotClass: type) -> Robot:
+    r = robotClass()
+    return r
+
+@timeout_decorator.timeout(max_time_per_round, timeout_exception=TimeoutError)
+def executeRobotrespond(r: Robot):
+    r.respond()
+
 
 class RobotInGame():
     name: str  # Only for generating the `json`
@@ -135,7 +144,7 @@ class RobotInGame():
 
         try:
             # There are no robots that do not inherit from Robot because that is checked in upload
-            self.robot = robotClass()
+            self.robot = createRobot(robotClass)
 
             # Update position of `robot`
             self.robot._position = self.position
@@ -144,18 +153,20 @@ class RobotInGame():
         except TimeoutError:
             self.damage = 1
             self.cause_of_death = "robot timeout error"
-        except:
+        except Exception as a:
             self.damage = 1
             self.cause_of_death = "robot execution error"
 
     @timeout_decorator.timeout(max_time_per_round, timeout_exception=TimeoutError)
     def executeRobotCode(self):
-        if self.is_alive():
-            try:
-                self.robot.respond()
-            except:
-                self.damage = 1
-                self.cause_of_death = "robot execution error"
+        try:
+            executeRobotrespond(self.robot)
+        except TimeoutError:
+            self.damage = 1
+            self.cause_of_death = "robot timeout error"
+        except:
+            self.damage = 1
+            self.cause_of_death = "robot execution error"
 
     def cannon_calculation(self, direction: float, distance: float) -> Tuple[float, float, int]:
         """
@@ -312,15 +323,7 @@ class GameState():
         self.round += 1
         for robotInGame in self.ourRobots:
             if robotInGame.is_alive():
-                try:
-                    robotInGame.executeRobotCode()
-                except TimeoutError:
-                    self.damage = 1
-                    self.cause_of_death = "robot timeout error"
-                except:
-                    self.damage = 1
-                    self.cause_of_death = "robot execution error"
-
+                robotInGame.executeRobotCode()
 
         # For scanner
         for robot in self.ourRobots:

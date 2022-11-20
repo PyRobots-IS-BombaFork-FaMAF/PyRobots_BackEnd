@@ -1022,3 +1022,42 @@ def test_collisions_between_robots():
 
     assert game.ourRobots[0].damage == 0.2
     assert game.ourRobots[1].damage == 0.2
+
+
+def test_timeout_init():
+    import app.tests.robots_for_testing.while_true_init as while_true_init
+    game: GameState = GameState(
+        [
+            ('while_true_init', while_true_init.while_true_init)
+        ],
+        for_animation=True
+    )
+
+    assert game.ourRobots[0].damage == 1
+    assert game.ourRobots[0].cause_of_death == "robot timeout error"
+
+def test_timeout_initialize():
+    import app.tests.robots_for_testing.while_true_initialize as while_true_initialize
+    game: GameState = GameState(
+        [
+            ('while_true_initialize', while_true_initialize.while_true_initialize)
+        ],
+        for_animation=True
+    )
+
+    assert game.ourRobots[0].damage == 1
+    assert game.ourRobots[0].cause_of_death == "robot timeout error"
+
+def test_timeout_respond():
+    import app.tests.robots_for_testing.while_true_respond as while_true_respond
+    game: GameState = GameState(
+        [
+            ('while_true_respond', while_true_respond.while_true_respond)
+        ],
+        for_animation=True
+    )
+
+    game.advance_round()
+
+    assert game.ourRobots[0].damage == 1
+    assert game.ourRobots[0].cause_of_death == "robot timeout error"
