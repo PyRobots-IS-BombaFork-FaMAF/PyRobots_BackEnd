@@ -229,7 +229,7 @@ def add_avatars(players):
     for player in new_list:
         user = UserDB[player["player"]]
         robot = RobotDB[get_robot_id(player["player"], player["robot"])]
-        with open(robot.avatar, 'rb') as f:
+        with open(user.avatar, 'rb') as f:
             avatar_img = base64.b64encode(f.read())
             f.close()
         with open(robot.avatar, 'rb') as f:
