@@ -13,6 +13,7 @@ import time
 from fastapi import WebSocket
 from typing import List
 import asyncio
+import base64
 
 class PartidaObject():
 
@@ -219,6 +220,27 @@ def get_robot_inputs(partida: PartidaObject):
             robots_ingame.append(dict_player)
     return robots_ingame
 
+@db_session
+def add_avatars(players):
+    new_list = []
+    for player in players:
+        p = dict.copy(player)
+        new_list.append(p)
+    for player in new_list:
+        user = UserDB[player["player"]]
+        robot = RobotDB[get_robot_id(player["player"], player["robot"])]
+        with open(robot.avatar, 'rb') as f:
+            avatar_img = base64.b64encode(f.read())
+            f.close()
+        with open(robot.avatar, 'rb') as f:
+            robot_img = base64.b64encode(f.read())
+            f.close()
+        player["avatar_user_image"] = str(avatar_img)
+        player["avatar_robot_image"] = str(robot_img)
+        player["avatar_user_name"] = user.avatar.rsplit('/', 1)[1]
+        player["avatar_robot_name"] = robot.avatar.rsplit('/', 1)[1]
+    return new_list
+
 class ConnectionManager:
     def __init__(self):
         self.connections: List[WebSocket] = []
@@ -232,7 +254,7 @@ class ConnectionManager:
         await websocket.send_json(
             {"status": 4,
             "message": "Bienvenido a la partida",
-            "players": players}
+            "players": add_avatars(players)}
             )
         self.connections.append(websocket)
 
@@ -249,7 +271,7 @@ class ConnectionManager:
                 await connection.send_json(
                     {"status": status,
                     "message": data,
-                    "players": players}
+                    "players": add_avatars(players)}
                 )
             except:
                 self.connections.remove(connection)
