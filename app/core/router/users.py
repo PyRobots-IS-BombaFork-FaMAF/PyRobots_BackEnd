@@ -82,7 +82,7 @@ def register(
 
 @router.get("/validate", tags=["Users"], status_code=200)
 @db_session
-def validate_user(email: str, code: str):
+async def validate_user(email: str, code: str):
     """
     validation endpoint to allow users to validate their account by
     clicking on the link they receive by e-mail, that way they can 
@@ -101,7 +101,7 @@ def validate_user(email: str, code: str):
 
         if data[1] != code:
             raise HTTPException(
-                status_code=409, detail="Código de validación invalido")
+                status_code=409, detail="Código de validación inválido")
         user.validated = True
         msg = "¡Hemos validado tu cuenta!"
     return msg
