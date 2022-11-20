@@ -6,8 +6,12 @@ from app.core.models.robot_models import *
 from app.core.models.user_models import *
 from app.core.handlers.robot_handlers import *
 from app.core.handlers.auth_handlers import *
-from fastapi.responses import JSONResponse
+from fastapi.responses import JSONResponse, FileResponse
 import uuid
+import zipfile
+import base64
+import json
+import io
 
 IMAGEDIR = "app/robot_avatars/"
 CODEDIR = "app/robot_code/"
@@ -73,11 +77,15 @@ def register(
         finally:
             code.file.close()
 
-        db.Robot(
+        robot = db.Robot(
             name=robot.name.lower(),
             avatar=avatar_name,
             code=code_name,
             user=current_user["username"]
+        )
+
+        db.RobotStatistics(
+            robot_id = get_robot_id(current_user["username"], robot.name)
         )
 
         msg = "¡Se creo el robot " + robot.name + " con éxito!"
@@ -120,3 +128,49 @@ def list_robots(
         listRobotsUser.append(listRobots)
     
     return JSONResponse(listRobotsUser)
+
+@router.get("/robot/statistics", status_code=200, tags=["robots"])
+@db_session
+def statistics_robots( 
+    current_user: User = Depends(get_current_active_user)
+):
+    """
+    returns a list of all created robots that the user has
+    """
+    uname = current_user["username"]
+    robots = db.select("select id, avatar from Robot where user = $uname")[:]
+
+    try:
+        compression = zipfile.ZIP_DEFLATED
+    except:
+        compression = zipfile.ZIP_STORED
+
+    s = io.BytesIO()
+
+    zf = zipfile.ZipFile(s, mode="w")
+
+    listRobots = dict()
+    listRobotsUser = []
+    for robot in robots:
+        zf.write(robot.avatar, compress_type=compression)
+        robotStatistics = db.select("select * from RobotStatistics where robot_id = $robot.id")[:]
+        for robotStats in robotStatistics:
+            listRobots = {
+                'robot_id': robotStats.robot_id,
+                'gamesPlayed': robotStats.gamesPlayed,
+                'wins': robotStats.wins,
+                'tied': robotStats.tied,
+                'losses': robotStats.losses,
+                'avatar_name': robot.avatar
+            }
+            listRobotsUser.append(listRobots)
+    zf.close()
+
+    headers = {'X-data' : str(listRobotsUser)}
+
+    return Response(s.getvalue(), media_type="application/x-zip-compressed", headers=headers)
+
+
+
+
+

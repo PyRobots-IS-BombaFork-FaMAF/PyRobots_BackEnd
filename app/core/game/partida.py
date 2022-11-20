@@ -2,6 +2,7 @@ from datetime import date, datetime
 from app.core.models.base import *
 from app.core.models.base import User as UserDB
 from app.core.models.base import Robot as RobotDB
+from app.core.models.base import RobotStatistics as RobotStatisticsDB
 from app.core.handlers.password_handlers import *
 from app.core.handlers.robot_handlers import *
 from app.core.handlers.userdb_handlers import *
@@ -172,6 +173,18 @@ def save_results(results, duration: int, id_game: int):
     max_wins = max_winner["wins"]
     winners = [dict_player for dict_player
         in sorted_winners if dict_player["wins"] == max_wins]
+    
+    for player in results:
+        robot_id = get_robot_id(player["username"], player["input"].name)
+        robot_Statistics = RobotStatisticsDB[robot_id]
+        robot_Statistics.gamesPlayed += 1
+        if player in winners and len(winners) == 1:
+            robot_Statistics.wins += 1
+        elif player in winners and len(winners) > 1:
+            robot_Statistics.tied += 1
+        else:
+            robot_Statistics.losses += 1
+    
     Results(
         partida=id_game,
         winners= set(UserDB[dict_player["username"]] for dict_player in winners),
