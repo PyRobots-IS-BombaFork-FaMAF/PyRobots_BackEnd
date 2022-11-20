@@ -6,7 +6,8 @@ from typing import NamedTuple
 import math
 from app.core.game.constants import *
 import numbers
-
+import time
+import timeout_decorator
 
 
 class RobotResult_round():
@@ -91,6 +92,10 @@ class SimulationResult():
         }
 
 
+@timeout_decorator.timeout(max_time_per_round, timeout_exception=TimeoutError)
+def executeRobotInitialize(r: Robot):
+    r.initialize()
+
 
 class RobotInGame():
     name: str  # Only for generating the `json`
@@ -135,11 +140,15 @@ class RobotInGame():
             # Update position of `robot`
             self.robot._position = self.position
 
-            self.robot.initialize()
+            executeRobotInitialize(self.robot)
+        except TimeoutError:
+            self.damage = 1
+            self.cause_of_death = "robot timeout error"
         except:
             self.damage = 1
             self.cause_of_death = "robot execution error"
 
+    @timeout_decorator.timeout(max_time_per_round, timeout_exception=TimeoutError)
     def executeRobotCode(self):
         if self.is_alive():
             try:
@@ -147,7 +156,6 @@ class RobotInGame():
             except:
                 self.damage = 1
                 self.cause_of_death = "robot execution error"
-
 
     def cannon_calculation(self, direction: float, distance: float) -> Tuple[float, float, int]:
         """
@@ -304,7 +312,15 @@ class GameState():
         self.round += 1
         for robotInGame in self.ourRobots:
             if robotInGame.is_alive():
-                robotInGame.executeRobotCode()
+                try:
+                    robotInGame.executeRobotCode()
+                except TimeoutError:
+                    self.damage = 1
+                    self.cause_of_death = "robot timeout error"
+                except:
+                    self.damage = 1
+                    self.cause_of_death = "robot execution error"
+
 
         # For scanner
         for robot in self.ourRobots:
