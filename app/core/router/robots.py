@@ -138,37 +138,29 @@ def statistics_robots(
     returns a list of all created robots that the user has
     """
     uname = current_user["username"]
-    robots = db.select("select id, avatar from Robot where user = $uname")[:]
-
-    try:
-        compression = zipfile.ZIP_DEFLATED
-    except:
-        compression = zipfile.ZIP_STORED
-
-    s = io.BytesIO()
-
-    zf = zipfile.ZipFile(s, mode="w")
+    robots = db.select("select id, name, avatar from Robot where user = $uname")[:]
 
     listRobots = dict()
     listRobotsUser = []
     for robot in robots:
-        zf.write(robot.avatar, compress_type=compression)
         robotStatistics = db.select("select * from RobotStatistics where robot_id = $robot.id")[:]
         for robotStats in robotStatistics:
+            with open(robot.avatar, 'rb') as f:
+                avatar_img = base64.b64encode(f.read())
+                f.close()
             listRobots = {
                 'robot_id': robotStats.robot_id,
+                'robot_name': robot.name,
                 'gamesPlayed': robotStats.gamesPlayed,
                 'wins': robotStats.wins,
                 'tied': robotStats.tied,
                 'losses': robotStats.losses,
-                'avatar_name': robot.avatar
+                'avatar_name': robot.avatar.rsplit('/', 1)[1],
+                'avatar_img': str(avatar_img)
             }
             listRobotsUser.append(listRobots)
-    zf.close()
 
-    headers = {'X-data' : str(listRobotsUser)}
-
-    return Response(s.getvalue(), media_type="application/x-zip-compressed", headers=headers)
+    return JSONResponse(listRobotsUser)
 
 
 
