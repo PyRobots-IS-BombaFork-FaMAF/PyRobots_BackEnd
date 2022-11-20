@@ -18,7 +18,7 @@ router = APIRouter()
 
 @router.post("/game/create", status_code=201, tags=["Game"])
 @db_session
-async def create_game(
+def create_game(
     partida: PartidaIn,
     current_user: User = Depends(get_current_active_user)
 ):
