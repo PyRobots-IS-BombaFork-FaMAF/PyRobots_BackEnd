@@ -82,7 +82,7 @@ def register(
 
 @router.get("/validate", tags=["Users"], status_code=200)
 @db_session
-async def validate_user(email: str, code: str):
+def validate_user(email: str, code: str):
     """
     validation endpoint to allow users to validate their account by
     clicking on the link they receive by e-mail, that way they can 
