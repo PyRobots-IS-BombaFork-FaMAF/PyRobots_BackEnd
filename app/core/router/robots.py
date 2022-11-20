@@ -8,6 +8,7 @@ from app.core.handlers.robot_handlers import *
 from app.core.handlers.auth_handlers import *
 from fastapi.responses import JSONResponse
 import uuid
+import base64
 
 IMAGEDIR = "app/robot_avatars/"
 CODEDIR = "app/robot_code/"
@@ -116,3 +117,41 @@ def list_robots(
         listRobotsUser.append(listRobots)
     
     return JSONResponse(listRobotsUser)
+
+@router.get("/robot/statistics", status_code=200, tags=["robots"])
+@db_session
+def statistics_robots( 
+    current_user: User = Depends(get_current_active_user)
+):
+    """
+    returns a list of all created robots that the user has
+    """
+    uname = current_user["username"]
+    robots = db.select("select id, name, avatar from Robot where user = $uname")[:]
+
+    listRobots = dict()
+    listRobotsUser = []
+    for robot in robots:
+        robotStatistics = db.select("select * from RobotStatistics where robot_id = $robot.id")[:]
+        for robotStats in robotStatistics:
+            with open(robot.avatar, 'rb') as f:
+                avatar_img = base64.b64encode(f.read())
+                f.close()
+            listRobots = {
+                'robot_id': robotStats.robot_id,
+                'robot_name': robot.name,
+                'gamesPlayed': robotStats.gamesPlayed,
+                'wins': robotStats.wins,
+                'tied': robotStats.tied,
+                'losses': robotStats.losses,
+                'avatar_name': robot.avatar.rsplit('/', 1)[1],
+                'avatar_img': str(avatar_img)
+            }
+            listRobotsUser.append(listRobots)
+
+    return JSONResponse(listRobotsUser)
+
+
+
+
+
