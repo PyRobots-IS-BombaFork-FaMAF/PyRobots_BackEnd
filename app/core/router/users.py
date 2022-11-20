@@ -1,6 +1,6 @@
 from datetime import datetime, timedelta
 from fastapi import *
-from fastapi.responses import JSONResponse, HTMLResponse, FileResponse
+from fastapi.responses import JSONResponse, HTMLResponse
 from fastapi.security import OAuth2PasswordRequestForm
 from pony.orm import *
 from typing import Union, Optional
@@ -195,7 +195,7 @@ def user_info(
     uname = current_user["username"]
     uavatar = current_user["avatar"]
     uemail = current_user["email"]
-    
+
     with open(uavatar, 'rb') as f:
         avatar_img = base64.b64encode(f.read())
         f.close()
