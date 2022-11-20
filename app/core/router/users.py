@@ -89,19 +89,19 @@ async def validate_user(email: str, code: str):
     log in and start playing
     """
     user = db.User.get(email=email)
-    if user.validated:
+    if user != None and user.validated:
         msg = "Ya tu cuenta se encuentra validada"
-    try:
-        email = unquote(email)
-        data = db.get(
-            "select email,code from Validation_data where email=$email")
-    except:
-        raise HTTPException(status_code=404, detail="Email no encontrado")
+    else:
+        try:
+            email = unquote(email)
+            data = db.get(
+                "select email,code from Validation_data where email=$email")
+        except:
+            raise HTTPException(status_code=404, detail="Email no encontrado")
 
-    if data[1] != code:
-        raise HTTPException(
-            status_code=409, detail="Código de validación invalido")
-    if not user.validated:
+        if data[1] != code:
+            raise HTTPException(
+                status_code=409, detail="Código de validación invalido")
         user.validated = True
         msg = "¡Hemos validado tu cuenta!"
     return msg
