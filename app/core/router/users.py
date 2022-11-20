@@ -80,46 +80,31 @@ def register(
 
 
 @router.get("/validate", tags=["Users"], status_code=200)
+@db_session
 async def validate_user(email: str, code: str):
     """
     validation endpoint to allow users to validate their account by
     clicking on the link they receive by e-mail, that way they can 
     log in and start playing
     """
-    with db_session:
-        try:
-            email = unquote(email)
-            data = db.get(
-                "select email,code from Validation_data where email=$email")
-        except:
-            raise HTTPException(status_code=404, detail="Email no encontrado")
+    try:
+        email = unquote(email)
+        data = db.get(
+            "select email,code from Validation_data where email=$email")
+    except:
+        raise HTTPException(status_code=404, detail="Email no encontrado")
 
-        if data[1] != code:
-            raise HTTPException(
-                status_code=409, detail="Código de validación invalido")
-        print()
-        user = db.User.get(email=email)
+    if data[1] != code:
+        raise HTTPException(
+            status_code=409, detail="Código de validación invalido")
+
+    user = db.User.get(email=email)
+    if user.validated == True:
+        msg = "Ya tu cuenta se encuentra validada"
+    else:
         user.validated = True
-        db.commit()
-    html = """
-<!DOCTYPE html>
-<html>
-    <head>
-        <title>PyRobots</title>
-    </head>
-    <body style="background-color:white; text-align: center;">
-        <h1 style="text-align: center; padding-top: 60px;font-family:verdana" >¡E-mail validado!</h1>
-        <h5 style="text-align: center;font-family:verdana" >
-            ¡Ya puedes empezar a jugar!
-        </h5>
-        <div>
-            <img src="https://img.freepik.com/vector-gratis/juguete-robot-vintage-sobre-fondo-blanco_1308-77501.jpg"; style="width: 300px;height: 400px;">
-            </img>
-        </div>
-    </body>
-</html>
-"""
-    return HTMLResponse(html)
+        msg = "¡Hemos validado tu cuenta!"
+    return msg
 
 
 @router.post("/token", tags=["Login"], response_model=Token, status_code=200)
