@@ -5,7 +5,6 @@ from pony.orm import db_session, commit
 from urllib.parse import quote
 import random
 import string
-import smtplib
 import yagmail
 
 
