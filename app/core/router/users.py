@@ -214,11 +214,6 @@ def user_info(
        raise HTTPException(status_code=403, detail= "No se encontro el archivo")
 
 
-
-
-
-
-
 @router.get("/pass-recovery")
 @db_session
 def send_code(username: str, background_t: BackgroundTasks = BackgroundTasks()):
