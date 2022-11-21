@@ -13,7 +13,8 @@ from app.core.handlers.validation_handlers import *
 from app.core.handlers.userdb_handlers import *
 from urllib.parse import unquote
 import uuid
-
+import os
+import base64
 
 IMAGEDIR = "app/avatars/"
 
@@ -184,6 +185,34 @@ async def logout(request: Request, current_user: User = Depends(get_current_acti
         detail="Incorrect password",
         headers={"WWW-Authenticate": "Bearer"},
     )
+
+@router.get("/user/info", status_code=200, tags=["Users"])
+@db_session
+def user_info(
+    current_user: User = Depends(get_current_active_user)):
+    """
+        Returns user information
+    """
+    uname = current_user["username"]
+    uavatar = current_user["avatar"]
+    uemail = current_user["email"]
+
+    with open(uavatar, 'rb') as f:
+        avatar_img = base64.b64encode(f.read())
+        f.close()
+
+    current_user_info = {
+        'name': uname,
+        'email': uemail,
+        'avatar_name': uavatar.rsplit('/', 1)[1], 
+        'avatar_img': str(avatar_img)
+    }
+    
+    if os.path.exists(uavatar):
+       return JSONResponse(current_user_info)
+    else: 
+       raise HTTPException(status_code=403, detail= "No se encontró el archivo")
+
 
 @router.get("/pass-recovery")
 @db_session
