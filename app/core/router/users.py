@@ -231,6 +231,7 @@ def change_avatar(
 @router.put("/user/password", tags=["Users"], status_code=200)
 @db_session
 def change_password(
+    current_password: Password,
     new_password: Password,
     current_user: User = Depends(get_current_active_user),
     background_t: BackgroundTasks = BackgroundTasks()):
@@ -238,12 +239,16 @@ def change_password(
     uname = current_user["username"]
     user = db.User[uname]
 
-    try:
-        user.password = hash_password(new_password.new_password)
-        msg = "Se cambio la contraseña con éxito"
-        background_t.add_task(send_confirmation_mail, user.email, uname)
+    if verify_password(user.password, current_password):
+        try:
+            user.password = hash_password(new_password.new_password)
+            msg = "Se cambio la contraseña con éxito"
+            background_t.add_task(send_confirmation_mail, user.email, uname)
 
-    except:
-        raise HTTPException(status_code=400, detail= "Error cambiando el password")
+        except:
+            raise HTTPException(status_code=400, detail= "Error cambiando el password")
+
+    else: 
+        raise HTTPException(status_code=401, detail="Password incorrecto")
 
     return msg
