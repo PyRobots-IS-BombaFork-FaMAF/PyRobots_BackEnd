@@ -104,16 +104,15 @@ def list_robots(
     returns a list of all created robots that the user has
     """
     uname = current_user["username"]
-    robots = db.select("select * from Robot where user = $uname")[:]
+    robots = db.select("select * from Robot where user = $uname or user is null")[:]
     listRobots = dict()
     listRobotsUser = []
     for robot in robots:
         listRobots = {
-            'id': robot.id,
-            'name': robot.name,
-            'code': get_original_filename(uname, robot.name, robot.code.rsplit('/', 1)[1]),
-            'avatar': robot.avatar
-        }
+                'id': robot.id,
+                'name': robot.name,
+                'avatar': robot.avatar
+            }
         listRobotsUser.append(listRobots)
     
     return JSONResponse(listRobotsUser)

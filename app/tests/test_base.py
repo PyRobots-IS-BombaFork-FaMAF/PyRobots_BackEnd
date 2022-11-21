@@ -1,5 +1,7 @@
 from pony.orm import *
-from app.core.models.base import User, Robot
+from datetime import date
+from app.core.models.base import User, db, Robot
+from app.core.models.base import load_default_robots
 from fastapi.testclient import TestClient
 from app.tests.test_main import app_test
 from app.core.handlers.password_handlers import verify_password, hash_password
@@ -66,3 +68,10 @@ def test_delete_user():
     except ObjectNotFound:
         tiff = None
     assert tiff == None
+
+@db_session
+def test_load_default_robots():
+    load_default_robots()
+    assert db.exists("select * from Robot where name = 'default_circle' and user is null")
+    assert db.exists("select * from Robot where name = 'default_scan_attack' and user is null")
+
