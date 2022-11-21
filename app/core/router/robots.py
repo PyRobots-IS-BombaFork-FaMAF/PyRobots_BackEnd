@@ -69,13 +69,13 @@ def register(
             code_name = CODEDIR + code.filename
 
             with open(f"{code_name}", "wb") as f:
-                f.write(contents)
+                f.write("from app.core.game.robot import Robot\n".encode('utf-8') + contents)
 
             validate_robot_code(
                 code_name.replace('/', '.')[:-3],
                 get_original_filename(current_user["username"], robot.name, code.filename)[:-3]
             )
-        except Exception as e:
+        except:
             raise HTTPException(
                 400, detail="Error leyendo archivo")
         finally:
