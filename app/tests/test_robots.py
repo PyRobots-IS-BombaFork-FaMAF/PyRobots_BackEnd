@@ -340,13 +340,6 @@ def test_create_syntax_error_robot():
     )
     assert response.status_code == 400
 
-def test_create_nonexistent_avatar():
-    pass
-
-
-def test_create_nonexistent_code():
-    pass
-
 
 def test_list_all_robots():
     response_login = client.post(
