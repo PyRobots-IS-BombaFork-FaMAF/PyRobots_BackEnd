@@ -75,9 +75,11 @@ def register(
                 code_name.replace('/', '.')[:-3],
                 get_original_filename(current_user["username"], robot.name, code.filename)[:-3]
             )
-        except:
-            raise HTTPException(
-                400, detail="Error leyendo archivo")
+        except Exception as error:
+            if type(error) == HTTPException:
+                raise HTTPException(error.status_code, error.detail)
+            else:
+                raise HTTPException(400, "Error leyendo el archivo.")
         finally:
             code.file.close()
 
@@ -166,6 +168,9 @@ def validate_robot_code(pathToCode: str, robotClassName: str):
     Trows an exception if the code is invalid
     """
     robotModule: ModuleType = __import__(pathToCode, fromlist=[robotClassName])
-    robotClass: type = getattr(robotModule, robotClassName)
+    try:
+        robotClass: type = getattr(robotModule, robotClassName)
+    except:
+        raise HTTPException(400, detail= "El nombre del archivo debe ser igual al nombre de la clase.")
     if not issubclass(robotClass, RobotClass):
-        raise Exception("La clase del robot debe heredar de Robot")
+        raise HTTPException(400, detail="La clase del robot debe heredar de Robot.")
