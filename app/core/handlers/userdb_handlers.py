@@ -1,4 +1,4 @@
-from pony.orm import db_session, select
+from pony.orm import db_session
 from app.core.models.user_models import UserIn
 from app.core.models.base import db
 

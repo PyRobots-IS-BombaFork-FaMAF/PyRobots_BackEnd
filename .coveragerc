@@ -8,3 +8,4 @@ omit =
     app/core/handlers/robot_handlers.py
     app/core/router/game.py
     app/core/handlers/recovery_handler.py
+    app/core/models/base.py
