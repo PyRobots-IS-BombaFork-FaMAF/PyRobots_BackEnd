@@ -1,4 +1,3 @@
-from tokenize import String
 from pydantic import BaseModel, Field, validator
 from typing import Optional
 from pydantic.networks import EmailStr

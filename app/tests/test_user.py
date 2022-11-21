@@ -1,6 +1,6 @@
 from fastapi.testclient import TestClient
 from app.tests.test_main import app_test
-from app.core.models.base import User, Validation_data, db, Robot, RecoveryCode
+from app.core.models.base import db
 from datetime import datetime, timedelta
 from urllib.parse import quote
 import json

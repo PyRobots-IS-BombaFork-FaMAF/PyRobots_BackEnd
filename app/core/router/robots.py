@@ -1,6 +1,6 @@
 from fastapi import *
 from pony.orm import *
-from typing import Union, Optional
+from typing import Optional
 from app.core.models.base import db
 from app.core.models.robot_models import *
 from app.core.models.user_models import *

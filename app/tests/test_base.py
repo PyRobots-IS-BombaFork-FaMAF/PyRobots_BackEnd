@@ -1,6 +1,5 @@
 from pony.orm import *
-from datetime import date
-from app.core.models.base import User, db, Robot, Validation_data
+from app.core.models.base import User, Robot
 from fastapi.testclient import TestClient
 from app.tests.test_main import app_test
 from app.core.handlers.password_handlers import verify_password, hash_password

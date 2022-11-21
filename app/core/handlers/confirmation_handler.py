@@ -1,11 +1,4 @@
-from app.core.models.base import db
-from email.mime.multipart import MIMEMultipart
-from email.mime.text import MIMEText
-from pony.orm import db_session, commit
-from urllib.parse import quote
-import random
-import string
-import smtplib
+from pony.orm import db_session
 import yagmail
 from datetime import date
 

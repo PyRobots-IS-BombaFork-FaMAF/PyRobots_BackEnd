@@ -1,8 +1,7 @@
 from fastapi.testclient import TestClient
 from app.tests.test_main import app_test
-from app.core.models.base import User, db
+from app.core.models.base import User
 from pony.orm import *
-from app.core.handlers.password_handlers import verify_password
 import json
 
 IMAGEDIR = "app/avatars/"
