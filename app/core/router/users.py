@@ -5,7 +5,7 @@ from fastapi.security import OAuth2PasswordRequestForm
 from pony.orm import *
 from typing import Union, Optional
 from app.core.models.base import db
-from app.core.models.user_models import UserIn, User, Token, Password
+from app.core.models.user_models import UserIn, User, Token, PasswordChange
 from app.core.handlers.auth_handlers import *
 from app.core.handlers.password_handlers import *
 from app.core.handlers.validation_handlers import *
@@ -231,17 +231,16 @@ def change_avatar(
 @router.put("/user/password", tags=["Users"], status_code=200)
 @db_session
 def change_password(
-    current_password: Password,
-    new_password: Password,
+    passwords: PasswordChange,
     current_user: User = Depends(get_current_active_user),
     background_t: BackgroundTasks = BackgroundTasks()):
     
     uname = current_user["username"]
     user = db.User[uname]
 
-    if verify_password(user.password, current_password):
+    if verify_password(user.password, passwords.old_password):
         try:
-            user.password = hash_password(new_password.new_password)
+            user.password = hash_password(passwords.new_password)
             msg = "Se cambio la contraseña con éxito"
             background_t.add_task(send_confirmation_mail, user.email, uname)
 
