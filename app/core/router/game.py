@@ -9,10 +9,7 @@ from app.core.handlers.password_handlers import *
 from app.core.models.game_models import *
 from app.core.models.robot_models import *
 from app.core.game.partida import *
-from datetime import datetime
-import asyncio
 from app.core.game.game import *
-import pathlib
 
 router = APIRouter()
 
@@ -238,13 +235,14 @@ async def websocket_endpoint(websocket: WebSocket, game_id: int):
         return "Partida inexistente"
     try:
         await partida._connections.connect(websocket, partida._players)
-    except RuntimeError:
+    except:
         raise "Error estableciendo conexión"
-    while True:
-        try:
+    try:
+        while True:
             await websocket.receive()
-        except RuntimeError:
-            break
+    except:
+        pass
+
 
 @router.post("/game/{game_id}/leave", status_code=200, tags=["Game"])
 async def leave_game(

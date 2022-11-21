@@ -1,15 +1,12 @@
-from calendar import c
 from datetime import datetime
-from http.client import HTTPException
 from fastapi.testclient import TestClient
 from app.tests.test_main import app_test
-from app.core.models.base import User, Validation_data, db, Robot
+from app.core.models.base import db
 from pony.orm import *
 import json
 from urllib.parse import quote
 from app.core.game.partida import *
 from pony.orm import *
-import pytest
 
 client = TestClient(app_test)
 
@@ -66,6 +63,15 @@ def test_create_valid_partida_sin_pass1():
         json=body
     )
     assert response.status_code == 201
+
+@db_session
+def test_init_statistics():
+    maximus = RobotStatistics[2]
+
+    assert maximus.gamesPlayed == 0
+    assert maximus.wins == 0
+    assert maximus.tied == 0
+    assert maximus.losses == 0
 
 def test_create_valid_partida_con_pass():
     response_login = client.post(
@@ -590,7 +596,6 @@ def test_validate_user():
     response = client.get(url)
     assert response.status_code == 200
 
-
 def test_unirse_a_partida_sin_pass():
     response_login = client.post(
         "/token",
@@ -847,6 +852,11 @@ def test_ejecutar_partida():
         data = websocket.receive_json()
         assert data["message"] == "¡La partida se esta iniciando! Esperando resultados.."
 
+@db_session
+def test_save_statistics():
+    maximus = RobotStatistics[2]
+
+    assert maximus.gamesPlayed == 1
 
 def test_ejecutar_partida_finalizada():
     partida = PartidaObject.get_game_by_id(1)
@@ -1102,3 +1112,5 @@ def test_abandonar_partida_en_ejecucion():
     )
     partida._gameStatus = 0
     assert response.status_code==403
+
+

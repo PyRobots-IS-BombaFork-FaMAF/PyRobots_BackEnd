@@ -20,7 +20,7 @@ def test_change_avatar():
         data = {
             "grant_type": "",
             "username": "tiffbri",
-            "password": "Tiffanyb19!",
+            "password": "Tiffany123",
             "scope": "",
             "client_id": "",
             "client_secret": "",
@@ -53,7 +53,7 @@ def test_invalid_avatar():
         data={
             "grant_type": "",
             "username": "tiffbri",
-            "password": "Tiffanyb19!",
+            "password": "Tiffany123",
             "scope": "",
             "client_id": "",
             "client_secret": "",
@@ -77,7 +77,7 @@ def test_valid_change_password():
         data = {
             "grant_type": "",
             "username": "tiffbri",
-            "password": "Tiffanyb19!",
+            "password": "Tiffany123",
             "scope": "",
             "client_id": "",
             "client_secret": "",
@@ -89,8 +89,8 @@ def test_valid_change_password():
     token_type: str = "Bearer "
     head: str = token_type + token
     payload = json.dumps({
-        "old_password": "Tiffanyb19!",
-        "new_password": "Tiffany123"
+        "old_password": "Tiffany123",
+        "new_password": "Tiffanyb19!"
     })
     response= client.put(
         "/user/password", headers={"accept": "test_application/json", "Authorization": head},
@@ -104,7 +104,7 @@ def test_login_with_new_pass():
         data = {
             "grant_type": "",
             "username": "tiffbri",
-            "password": "Tiffany123",
+            "password": "Tiffanyb19!",
             "scope": "",
             "client_id": "",
             "client_secret": "",
@@ -118,7 +118,7 @@ def test_login_with_old_pass():
         data = {
             "grant_type": "",
             "username": "tiffbri",
-            "password": "Tiffanyb19!",
+            "password": "Tiffany123",
             "scope": "",
             "client_id": "",
             "client_secret": "",
@@ -132,7 +132,7 @@ def test_invalid_change_password1():
         data = {
             "grant_type": "",
             "username": "tiffbri",
-            "password": "Tiffany123",
+            "password": "Tiffanyb19!",
             "scope": "",
             "client_id": "",
             "client_secret": "",
@@ -144,7 +144,7 @@ def test_invalid_change_password1():
     token_type: str = "Bearer "
     head: str = token_type + token
     payload = json.dumps({
-        "old_password": "Tiffanyb19!", #Wrong password
+        "old_password": "Tiffanybric1!", #Wrong password
         "new_password": "Tiffany123"
     })
     response= client.put(
@@ -159,7 +159,7 @@ def test_invalid_change_password2():
         data = {
             "grant_type": "",
             "username": "tiffbri",
-            "password": "Tiffany123",
+            "password": "Tiffanyb19!",
             "scope": "",
             "client_id": "",
             "client_secret": "",
@@ -171,7 +171,7 @@ def test_invalid_change_password2():
     token_type: str = "Bearer "
     head: str = token_type + token
     payload = json.dumps({
-        "old_password": "Tiffany123", 
+        "old_password": "Tiffanyb19!", 
         "new_password": "12345678" #No cumple restricciones
     })
     response= client.put(

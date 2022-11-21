@@ -25,17 +25,17 @@ class Robot(object):
     def __init__(self):
         self._actual_velocity = 0
         self._actual_direction = 0
-        self._set_velocity = 0
-        self._set_direction = 0
+        self._set_velocity = None
+        self._set_direction = None
         self._position = (0,0)
         self._damage = 0
         self._is_cannon_ready = True
         self._is_shooting = False
         self._shot_direction = None
         self._shot_distance = None
-        self._scan_direction = 0
-        self._resolution_in_degrees = 0
-        self._last_scanned = 0
+        self._scan_direction = None
+        self._resolution_in_degrees = None
+        self._last_scanned = None
 
     @abstractmethod
     def initialize(self):
