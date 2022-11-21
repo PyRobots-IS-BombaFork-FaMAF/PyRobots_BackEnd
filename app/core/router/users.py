@@ -1,6 +1,6 @@
 from datetime import datetime, timedelta
 from fastapi import *
-from fastapi.responses import JSONResponse, HTMLResponse
+from fastapi.responses import JSONResponse
 from fastapi.security import OAuth2PasswordRequestForm
 from pony.orm import *
 from typing import Optional
