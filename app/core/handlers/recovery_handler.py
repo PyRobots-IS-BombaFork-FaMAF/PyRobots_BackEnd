@@ -1,7 +1,6 @@
 from app.core.models.base import db
 from datetime import datetime
-from pony.orm import db_session, commit
-from urllib.parse import quote
+from pony.orm import db_session
 import random
 import string
 import yagmail
