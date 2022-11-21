@@ -6,7 +6,7 @@ from typing_extensions import Required
 from unicodedata import name
 from pydantic import BaseModel, Field, validator
 from fastapi import *
-from fastapi.exceptions import RequestValidationError, ValidationError
+from fastapi.exceptions import ValidationError
 
 class PartidaIn(BaseModel):
     """

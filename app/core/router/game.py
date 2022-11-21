@@ -9,10 +9,7 @@ from app.core.handlers.password_handlers import *
 from app.core.models.game_models import *
 from app.core.models.robot_models import *
 from app.core.game.partida import *
-from datetime import datetime
-import asyncio
 from app.core.game.game import *
-import pathlib
 
 router = APIRouter()
 
