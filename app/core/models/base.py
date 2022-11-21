@@ -1,4 +1,3 @@
-from enum import unique
 from pony.orm import *
 from datetime import datetime
 

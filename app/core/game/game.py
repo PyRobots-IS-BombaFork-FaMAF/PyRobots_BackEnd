@@ -1,5 +1,5 @@
 import random
-from typing import Any, Dict, Optional, Tuple, Union
+from typing import Any, Optional, Tuple, Union
 from app.core.game.robot import Robot
 from types import ModuleType
 from typing import NamedTuple

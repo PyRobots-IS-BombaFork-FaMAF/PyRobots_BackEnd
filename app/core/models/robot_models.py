@@ -1,6 +1,4 @@
 from typing import Optional
-from typing_extensions import Required
-from unicodedata import name
 from pydantic import BaseModel, Field, validator
 from fastapi import *
 

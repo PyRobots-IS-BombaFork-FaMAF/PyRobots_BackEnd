@@ -1,10 +1,6 @@
-from calendar import c
-from datetime import datetime
 from fastapi.testclient import TestClient
 from app.tests.test_main import app_test
-from app.core.models.base import User, Validation_data, db, Robot
 from pony.orm import *
-from urllib.parse import quote
 from pony.orm import *
 
 client = TestClient(app_test)

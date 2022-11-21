@@ -1,4 +1,4 @@
-from datetime import date, datetime
+from datetime import datetime
 from app.core.models.base import *
 from app.core.models.base import User as UserDB
 from app.core.models.base import Robot as RobotDB
@@ -177,7 +177,12 @@ def save_results(results, duration: int, id_game: int):
     
     for player in results:
         robot_id = get_robot_id(player["username"], player["input"].name)
-        robot_Statistics = RobotStatisticsDB[robot_id]
+        try:
+            robot_Statistics = RobotStatisticsDB[robot_id]
+        except:
+            robot_Statistics = RobotStatisticsDB(
+                robot_id = robot_id
+            )
         robot_Statistics.gamesPlayed += 1
         if player in winners and len(winners) == 1:
             robot_Statistics.wins += 1
