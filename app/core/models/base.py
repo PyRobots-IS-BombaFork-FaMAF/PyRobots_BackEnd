@@ -1,5 +1,4 @@
 from enum import unique
-import json
 from pony.orm import *
 from datetime import datetime
 
@@ -28,7 +27,7 @@ class Robot(db.Entity):
     name = Required(str)
     code = Required(str)
     avatar = Optional(str)
-    user = Required(User)
+    user = Optional(User)
     results = Set('Results')
     composite_key(user, name)
 
@@ -99,4 +98,24 @@ def define_database_and_entities(**db_params):
     db.bind(**db_params)
     db.generate_mapping(create_tables=True)
 
-    pass
+@db_session
+def load_default_robots():
+    try:
+        exists_circle = db.exists("select * from Robot where name = 'default_circle' and user is null")
+        if not exists_circle:
+            Robot(
+                name = "default_circle",
+                code = "app/tests/robots_for_testing/circle.py",
+                avatar = "app/robot_avatars/default.jpg"
+            )
+            db.flush()
+        exists_scaa = db.exists("select * from Robot where name = 'default_scan_attack' and user is null")
+        if not exists_scaa:
+            Robot(
+                name = "default_scan_attack",
+                code = "app/tests/robots_for_testing/Scan_and_attack.py",
+                avatar = "app/robot_avatars/default.jpg"
+            )
+            db.flush()
+    except:
+        pass

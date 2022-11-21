@@ -13,6 +13,7 @@ import time
 from fastapi import WebSocket
 from typing import List
 import asyncio
+import base64
 
 class PartidaObject():
 
@@ -99,13 +100,14 @@ class PartidaObject():
         return partida
 
     @db_session
-    async def join_game(self, username, robot):
+    async def join_game(self, username, robotid):
+        robot = RobotDB[robotid]
         if not any(d['player'] == username for d in self._players):
-            self._players.append({'player': username, 'robot': robot})
+            self._players.append({'player': username, 'robot': robot.name})
         else:
             for d in self._players:
                 if d['player'] == username:
-                    d['robot'] = robot
+                    d['robot'] = robot.name
         self._current_players = len(self._players)
         Partida[self._id].players = self._players
         db.flush()
@@ -175,7 +177,12 @@ def save_results(results, duration: int, id_game: int):
     
     for player in results:
         robot_id = get_robot_id(player["username"], player["input"].name)
-        robot_Statistics = RobotStatisticsDB[robot_id]
+        try:
+            robot_Statistics = RobotStatisticsDB[robot_id]
+        except:
+            robot_Statistics = RobotStatisticsDB(
+                robot_id = robot_id
+            )
         robot_Statistics.gamesPlayed += 1
         if player in winners and len(winners) == 1:
             robot_Statistics.wins += 1
@@ -199,17 +206,45 @@ def save_results(results, duration: int, id_game: int):
 def get_robot_inputs(partida: PartidaObject):
     robots_ingame = []
     for player in partida._players:
-            robot_db = db.get("""select * from Robot
-            where user LIKE $player['player'].lower() and name LIKE $player['robot'].lower()""")
-            input = RobotInput(
-                pathToCode= robot_db.code.replace('/', '.')[:-3],
-                robotClassName=get_original_filename(player['player'],
-                    robot_db.name, robot_db.code.rsplit('/', 1)[1])[:-3],
-                name=robot_db.name
-            )
+            robot_db = RobotDB[get_robot_id(player['player'], player['robot'])]
+            if robot_db.user != None:
+                input = RobotInput(
+                    pathToCode= robot_db.code.replace('/', '.')[:-3],
+                    robotClassName=get_original_filename(player['player'],
+                        robot_db.name, robot_db.code.rsplit('/', 1)[1])[:-3],
+                    name=robot_db.name
+                )
+            else:
+                pathToCode= robot_db.code.replace('/', '.')[:-3]
+                input = RobotInput(
+                    pathToCode= pathToCode,
+                    robotClassName= pathToCode.rsplit('.', 1)[1],
+                    name=robot_db.name
+                )
             dict_player = {"input": input, "username": player["player"], "wins": 0}
             robots_ingame.append(dict_player)
     return robots_ingame
+
+@db_session
+def add_avatars(players):
+    new_list = []
+    for player in players:
+        p = dict.copy(player)
+        new_list.append(p)
+    for player in new_list:
+        user = UserDB[player["player"]]
+        robot = RobotDB[get_robot_id(player["player"], player["robot"])]
+        with open(user.avatar, 'rb') as f:
+            avatar_img = base64.b64encode(f.read())
+            f.close()
+        with open(robot.avatar, 'rb') as f:
+            robot_img = base64.b64encode(f.read())
+            f.close()
+        player["avatar_user_image"] = str(avatar_img)
+        player["avatar_robot_image"] = str(robot_img)
+        player["avatar_user_name"] = user.avatar.rsplit('/', 1)[1]
+        player["avatar_robot_name"] = robot.avatar.rsplit('/', 1)[1]
+    return new_list
 
 class ConnectionManager:
     def __init__(self):
@@ -224,7 +259,7 @@ class ConnectionManager:
         await websocket.send_json(
             {"status": 4,
             "message": "Bienvenido a la partida",
-            "players": players}
+            "players": add_avatars(players)}
             )
         self.connections.append(websocket)
 
@@ -241,7 +276,7 @@ class ConnectionManager:
                 await connection.send_json(
                     {"status": status,
                     "message": data,
-                    "players": players}
+                    "players": add_avatars(players)}
                 )
             except:
                 self.connections.remove(connection)

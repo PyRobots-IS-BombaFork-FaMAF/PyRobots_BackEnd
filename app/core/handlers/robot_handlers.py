@@ -1,5 +1,5 @@
 from pony.orm import db_session, select
-from app.core.models.robot_models import Robot, RobotIn
+from app.core.models.robot_models import RobotIn
 from app.core.models.user_models import User
 from app.core.models.base import db
 
@@ -8,13 +8,18 @@ from app.core.models.base import db
 def is_robot_created(u: User, r: RobotIn):
     uname = u["username"].lower()
     rname = r.name.lower()
-    return db.exists("select * from Robot where name = $rname and user = $uname")
+    by_user = db.exists("select * from Robot where name = $rname and user = $uname")
+    default = db.exists("select * from Robot where name = $rname and user is null")
+    return by_user or default
 
 db_session
 def get_robot_id(u: str, r: str):
     robot = None
     try:
-        robot = db.get("select * from Robot where name = $r and user = $u")
+        if db.exists("select * from Robot where name = $r and user = $u"):
+            robot = db.get("select * from Robot where name = $r and user = $u")
+        else:
+            robot = db.get("select * from Robot where name=$r and user is null")
     except:
         pass
     return robot.id

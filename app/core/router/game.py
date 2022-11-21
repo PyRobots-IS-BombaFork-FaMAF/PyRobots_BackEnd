@@ -14,7 +14,8 @@ from app.core.game.game import *
 router = APIRouter()
 
 @router.post("/game/create", status_code=201, tags=["Game"])
-async def create_game(
+@db_session
+def create_game(
     partida: PartidaIn,
     current_user: User = Depends(get_current_active_user)
 ):
@@ -29,7 +30,7 @@ async def create_game(
         max_players=partida.max_players,
         min_players=partida.min_players,
         creator=current_user["username"],
-        player_robot={'player': current_user["username"], 'robot': partida.robot},
+        player_robot={'player': current_user["username"], 'robot': RobotDB[partida.robot].name},
         password=partida.password
     )
     msg = {"msg" : "Se creo la partida con éxito!", "WebSocket" : partida._websocketurl}
@@ -78,7 +79,7 @@ def simulation(
     robotInputs = []
     if(len(robots) >= 2 and len(robots) <= 4):
         for robot in robots:
-            allRobotsUser = db.select("select * from Robot where user = $uname and id = $robot.id")
+            allRobotsUser = db.select("select * from Robot where (user = $uname or user is null) and id = $robot.id")
             if(allRobotsUser == []):
                 raise HTTPException(400, detail="robot invalido")
             listRobots.append(allRobotsUser)
@@ -86,9 +87,12 @@ def simulation(
         raise HTTPException(400, detail="Cantidad de robots invalida")
     for bot in listRobots:
         pathCodeRobot = bot[0].code.replace('/', '.')[:-3]
-        robotInputs.append(RobotInput(pathCodeRobot, 
-                                    get_original_filename(uname, bot[0].name, bot[0].code.rsplit('/', 1)[1])[:-3], 
-                                    bot[0].name))
+        if bot[0].user != None:
+            robotInputs.append(RobotInput(pathCodeRobot, 
+                                        get_original_filename(uname, bot[0].name, bot[0].code.rsplit('/', 1)[1])[:-3], 
+                                        bot[0].name))
+        else:
+            robotInputs.append(RobotInput(pathCodeRobot, pathCodeRobot.rsplit('.', 1)[1], bot[0].name))
     resultSimulation = runSimulation(robotInputs, rounds.rounds, True).json_output()
 
     return JSONResponse(resultSimulation)
@@ -178,7 +182,7 @@ def get_player_results(
     try:
         games_played = list(Partida.select().filter(lambda p: p.game_over == 1)[:])
     except:
-        raise HTTPException(status_code=404, detail= "No hay resultados")
+        return {"msg": "No hay resultados"}
     
     results_list = []
     if games_played != []:
@@ -203,9 +207,9 @@ def get_player_results(
                 #matching robots to their owner
                 for i in range(len(winners)):
                     uname = winners[i].username
-                    for r in robots:
-                        if r.user == winners[i]:
-                            robot_name = r.name
+                    for players in game.players:
+                        if players["player"] == uname:
+                            robot_name = players["robot"]
                             break
                     user_robot.append({'player': uname, 'robot': robot_name})
                 result_dict = {
@@ -219,7 +223,7 @@ def get_player_results(
                     "players": game.players,
                     "duration": game_result.duration,
                     "winners": user_robot,
-                    "rounds_won": game_result.rounds_won
+                    "games_won": game_result.rounds_won
                 }
                 results_list.append(result_dict)
     return JSONResponse(results_list)
