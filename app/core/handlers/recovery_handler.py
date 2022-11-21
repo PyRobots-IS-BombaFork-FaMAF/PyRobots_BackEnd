@@ -35,10 +35,10 @@ class RecoveryMail:
           pass
         if recovery == None:
           db.RecoveryCode(
-            username=username, 
-            code=self.recovery_code, 
+            username=username,
+            code=self.recovery_code,
             date_issue=datetime.now().strftime("%Y-%m-%d %H:%M:%S.%f"))
-        else: 
+        else:
           recovery.code = self.recovery_code
           recovery.date_issue = datetime.now().strftime("%Y-%m-%d %H:%M:%S.%f")
           recovery.active = 1

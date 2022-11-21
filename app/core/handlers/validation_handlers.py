@@ -24,7 +24,7 @@ class ValidationMail:
         body = "Hola " + username + " ¡Gracias por registrar una cuenta en PyRobots! \n"
         body += "Antes de comenzar, solo necesitamos confirmar que eres tú."
         body += " Haz clic a continuación para verificar tu dirección de correo electrónico \n"
-        body += "http://127.0.0.1:8000/validate?email=" + \
+        body += "http://127.0.0.1:3000/validate?email=" + \
             quote(to) + "&code=" + self.verification_code
 
         yag = yagmail.SMTP(from_user, password)

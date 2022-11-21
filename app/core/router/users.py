@@ -1,6 +1,6 @@
 from datetime import datetime, timedelta
 from fastapi import *
-from fastapi.responses import JSONResponse, HTMLResponse
+from fastapi.responses import JSONResponse
 from fastapi.security import OAuth2PasswordRequestForm
 from pony.orm import *
 from typing import Optional
@@ -83,13 +83,17 @@ def register(
 
 
 @router.get("/validate", tags=["Users"], status_code=200)
-async def validate_user(email: str, code: str):
+@db_session
+def validate_user(email: str, code: str):
     """
     validation endpoint to allow users to validate their account by
     clicking on the link they receive by e-mail, that way they can 
     log in and start playing
     """
-    with db_session:
+    user = db.User.get(email=email)
+    if user != None and user.validated:
+        msg = "Ya tu cuenta se encuentra validada"
+    elif user != None and not user.validated:
         try:
             email = unquote(email)
             data = db.get(
@@ -99,30 +103,12 @@ async def validate_user(email: str, code: str):
 
         if data[1] != code:
             raise HTTPException(
-                status_code=409, detail="Código de validación invalido")
-        print()
-        user = db.User.get(email=email)
+                status_code=409, detail="Código de validación inválido")
         user.validated = True
-        db.commit()
-    html = """
-<!DOCTYPE html>
-<html>
-    <head>
-        <title>PyRobots</title>
-    </head>
-    <body style="background-color:white; text-align: center;">
-        <h1 style="text-align: center; padding-top: 60px;font-family:verdana" >¡E-mail validado!</h1>
-        <h5 style="text-align: center;font-family:verdana" >
-            ¡Ya puedes empezar a jugar!
-        </h5>
-        <div>
-            <img src="https://img.freepik.com/vector-gratis/juguete-robot-vintage-sobre-fondo-blanco_1308-77501.jpg"; style="width: 300px;height: 400px;">
-            </img>
-        </div>
-    </body>
-</html>
-"""
-    return HTMLResponse(html)
+        msg = "¡Hemos validado tu cuenta!"
+    else:
+        raise HTTPException(status_code=404, detail="Usuario inexistente")
+    return msg
 
 
 @router.post("/token", tags=["Login"], response_model=Token, status_code=200)
