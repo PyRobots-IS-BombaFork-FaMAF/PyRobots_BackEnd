@@ -1,7 +1,7 @@
 from app.core.models.base import db
 from datetime import datetime
-from pony.orm import db_session, commit
-from urllib.parse import quote
+from pony.orm import db_session
+from pony.orm import db_session
 import random
 import string
 import yagmail
@@ -36,10 +36,10 @@ class RecoveryMail:
           pass
         if recovery == None:
           db.RecoveryCode(
-            username=username, 
-            code=self.recovery_code, 
+            username=username,
+            code=self.recovery_code,
             date_issue=datetime.now().strftime("%Y-%m-%d %H:%M:%S.%f"))
-        else: 
+        else:
           recovery.code = self.recovery_code
           recovery.date_issue = datetime.now().strftime("%Y-%m-%d %H:%M:%S.%f")
           recovery.active = 1

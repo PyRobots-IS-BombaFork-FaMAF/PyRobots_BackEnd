@@ -1,7 +1,5 @@
 # Robot que escnea en todas las direcciones, y cuendo encuentra otro robot
 # ataca y avanza en esa dirección hasta que lo pierde de vista
-# Bomba Fork - Iván Renison
-
 from app.core.game.robot import Robot
 from typing import Optional
 import random

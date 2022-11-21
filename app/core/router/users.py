@@ -5,15 +5,17 @@ from fastapi.security import OAuth2PasswordRequestForm
 from pony.orm import *
 from typing import Optional
 from app.core.models.base import db
-from app.core.models.user_models import UserIn, User, Token, NewPass
+from app.core.models.user_models import UserIn, User, Token, PasswordChange, NewPass
 from app.core.handlers.auth_handlers import *
 from app.core.handlers.password_handlers import *
 from app.core.handlers.recovery_handler import *
 from app.core.handlers.validation_handlers import *
 from app.core.handlers.userdb_handlers import *
+from app.core.handlers.confirmation_handler import *
 from urllib.parse import unquote
 import uuid
-
+import os
+import base64
 
 IMAGEDIR = "app/avatars/"
 
@@ -171,6 +173,101 @@ async def logout(request: Request, current_user: User = Depends(get_current_acti
         headers={"WWW-Authenticate": "Bearer"},
     )
 
+@router.put("/user/avatar", tags=["Users"], status_code=200)
+@db_session
+def change_avatar(
+    current_user: User = Depends(get_current_active_user),
+    new_avatar: Optional[UploadFile] = File(None)):
+
+    """
+    Endpoint to change the avatar
+    """
+
+    uname = current_user["username"]
+
+    if new_avatar != None and new_avatar.filename != "":
+        if new_avatar.content_type not in ['image/jpeg', 'image/png', 'image/tiff', 'image/jpg']:
+            raise HTTPException(
+                409, detail="Tipo de archivo inválido")
+        else:
+            new_avatar.filename = f"{uname + str(uuid.uuid4())}.jpg"
+            try:
+                new_avatar.file.seek(0)
+                contents = new_avatar.file.read()  # Important to wait
+                avatar_name = IMAGEDIR + new_avatar.filename
+
+                with open(f"{avatar_name}", "wb") as f:
+                    f.write(contents)
+            except:
+                raise HTTPException(
+                    400, detail="Error leyendo imagen")
+            finally:
+                new_avatar.file.close()
+    else:
+        raise HTTPException(status_code=403, detail= "El archivo esta vacio")
+
+    user = db.User[uname]
+    try:
+        user.avatar = avatar_name
+        msg = "Se ha cambiado el avatar exitosamente"
+    except: 
+        raise HTTPException(status_code=400, detail= "Error cambiando el avatar")
+
+    return msg
+
+
+@router.put("/user/password", tags=["Users"], status_code=200)
+@db_session
+def change_password(
+    passwords: PasswordChange,
+    current_user: User = Depends(get_current_active_user),
+    background_t: BackgroundTasks = BackgroundTasks()):
+    
+    uname = current_user["username"]
+    user = db.User[uname]
+
+    if verify_password(user.password, passwords.old_password):
+        try:
+            user.password = hash_password(passwords.new_password)
+            msg = "Se cambio la contraseña con éxito"
+            background_t.add_task(send_confirmation_mail, user.email, uname)
+
+        except:
+            raise HTTPException(status_code=400, detail= "Error cambiando el password")
+
+    else: 
+        raise HTTPException(status_code=401, detail="Password incorrecto")
+
+    return msg
+
+@router.get("/user/info", status_code=200, tags=["Users"])
+@db_session
+def user_info(
+    current_user: User = Depends(get_current_active_user)):
+    """
+        Returns user information
+    """
+    uname = current_user["username"]
+    uavatar = current_user["avatar"]
+    uemail = current_user["email"]
+
+    with open(uavatar, 'rb') as f:
+        avatar_img = base64.b64encode(f.read())
+        f.close()
+
+    current_user_info = {
+        'name': uname,
+        'email': uemail,
+        'avatar_name': uavatar.rsplit('/', 1)[1], 
+        'avatar_img': str(avatar_img)
+    }
+    
+    if os.path.exists(uavatar):
+       return JSONResponse(current_user_info)
+    else: 
+       raise HTTPException(status_code=403, detail= "No se encontró el archivo")
+
+
 @router.get("/pass-recovery")
 @db_session
 def send_code(username: str, background_t: BackgroundTasks = BackgroundTasks()):
@@ -220,3 +317,4 @@ def new_password(newpass: NewPass):
                 status_code=403, detail="Código de recuperación inválido")
 
     return msg
+

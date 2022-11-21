@@ -1,8 +1,8 @@
 from fastapi import Depends, HTTPException, status
 from fastapi.security import OAuth2PasswordBearer
-from pony.orm import db_session, select, commit
+from pony.orm import db_session
 from jose import JWTError, jwt
-from app.core.models.base import db  # , DB_User
+from app.core.models.base import db
 from app.core.handlers.password_handlers import verify_password
 from typing import Optional
 from datetime import datetime, timedelta
