@@ -211,7 +211,7 @@ def user_info(
     if os.path.exists(uavatar):
        return JSONResponse(current_user_info)
     else: 
-       raise HTTPException(status_code=403, detail= "No se encontro el archivo")
+       raise HTTPException(status_code=403, detail= "No se encontró el archivo")
 
 
 @router.get("/pass-recovery")
