@@ -1,6 +1,6 @@
 from fastapi import *
 from pony.orm import *
-from typing import Union, Optional
+from typing import Optional
 from app.core.models.base import db
 from app.core.models.robot_models import *
 from app.core.models.user_models import *
@@ -108,18 +108,9 @@ def list_robots(
     listRobots = dict()
     listRobotsUser = []
     for robot in robots:
-        if robot.user != None:
-            listRobots = {
+        listRobots = {
                 'id': robot.id,
                 'name': robot.name,
-                'code': get_original_filename(uname, robot.name, robot.code.rsplit('/', 1)[1]),
-                'avatar': robot.avatar
-            }
-        else: 
-            listRobots = {
-                'id': robot.id,
-                'name': robot.name,
-                'code': robot.code.rsplit('/', 1)[1],
                 'avatar': robot.avatar
             }
         listRobotsUser.append(listRobots)

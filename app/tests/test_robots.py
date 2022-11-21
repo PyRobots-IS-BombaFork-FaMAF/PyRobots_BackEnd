@@ -313,7 +313,7 @@ def test_list_all_robots():
         json=body
     )
     tmp_list = response.json()
-    assert response.status_code == 200 and len(tmp_list) == 4
+    assert response.status_code == 200 and len(tmp_list) == 6
 
 def test_statistics_robots():
     response_login = client.post(
