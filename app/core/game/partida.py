@@ -1,4 +1,4 @@
-from datetime import date, datetime
+from datetime import datetime
 from app.core.models.base import *
 from app.core.models.base import User as UserDB
 from app.core.models.base import Robot as RobotDB

@@ -1,12 +1,12 @@
 from fastapi import Depends, HTTPException, status
-from fastapi.security import OAuth2PasswordBearer, OAuth2PasswordRequestForm
-from pony.orm import db_session, select, commit
+from fastapi.security import OAuth2PasswordBearer
+from pony.orm import db_session
 from jose import JWTError, jwt
-from app.core.models.base import db  # , DB_User
+from app.core.models.base import db 
 from app.core.handlers.password_handlers import verify_password
 from typing import Optional
 from datetime import datetime, timedelta
-from app.core.models.user_models import Token, User
+from app.core.models.user_models import User
 
 """
 Definition of constants and algorithms used in the json web token
