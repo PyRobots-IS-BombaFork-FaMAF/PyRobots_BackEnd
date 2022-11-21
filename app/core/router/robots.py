@@ -1,3 +1,4 @@
+from types import ModuleType
 from fastapi import *
 from pony.orm import *
 from typing import Optional
@@ -6,6 +7,7 @@ from app.core.models.robot_models import *
 from app.core.models.user_models import *
 from app.core.handlers.robot_handlers import *
 from app.core.handlers.auth_handlers import *
+from app.core.game.robot import Robot as RobotClass
 from fastapi.responses import JSONResponse
 import uuid
 import base64
@@ -60,17 +62,24 @@ def register(
                     avatar.file.close()
         else:
             avatar_name = IMAGEDIR + "default.jpg"
-            
+
         try:
             code.file.seek(0)
             contents = code.file.read()  # Important to wait
             code_name = CODEDIR + code.filename
 
             with open(f"{code_name}", "wb") as f:
-                f.write(contents)
-        except:
-            raise HTTPException(
-                400, detail="Error leyendo archivo")
+                f.write("from app.core.game.robot import Robot\n".encode('utf-8') + contents)
+
+            validate_robot_code(
+                code_name.replace('/', '.')[:-3],
+                get_original_filename(current_user["username"], robot.name, code.filename)[:-3]
+            )
+        except Exception as error:
+            if type(error) == HTTPException:
+                raise HTTPException(error.status_code, error.detail)
+            else:
+                raise HTTPException(400, "Error leyendo el archivo.")
         finally:
             code.file.close()
 
@@ -97,7 +106,7 @@ def register(
 
 @router.get("/robot/list", status_code=200, tags=["robots"])
 @db_session
-def list_robots( 
+def list_robots(
     current_user: User = Depends(get_current_active_user)
 ):
     """
@@ -114,12 +123,12 @@ def list_robots(
                 'avatar': robot.avatar
             }
         listRobotsUser.append(listRobots)
-    
+
     return JSONResponse(listRobotsUser)
 
 @router.get("/robot/statistics", status_code=200, tags=["robots"])
 @db_session
-def statistics_robots( 
+def statistics_robots(
     current_user: User = Depends(get_current_active_user)
 ):
     """
@@ -151,6 +160,17 @@ def statistics_robots(
     return JSONResponse(listRobotsUser)
 
 
+def validate_robot_code(pathToCode: str, robotClassName: str):
+    """
+    Validates the code of the robot
+    `pathToCode` has to be in python format (e.g. 'app.robot_code.robot1')
 
-
-
+    Trows an exception if the code is invalid
+    """
+    robotModule: ModuleType = __import__(pathToCode, fromlist=[robotClassName])
+    try:
+        robotClass: type = getattr(robotModule, robotClassName)
+    except:
+        raise HTTPException(400, detail= "El nombre del archivo debe ser igual al nombre de la clase.")
+    if not issubclass(robotClass, RobotClass):
+        raise HTTPException(400, detail="La clase del robot debe heredar de Robot.")
