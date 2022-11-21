@@ -10,10 +10,10 @@ client = TestClient(app_test)
 
 
 def test_create_valid_robot_without_avatar():
-    with open('app/main.py', 'rb') as f:
+    with open('app/tests/robots_for_testing/circle.py', 'rb') as f:
         code_contents = f.read()
         f.close()
-    code_file = {"code": ("code.py", code_contents,
+    code_file = {"code": ("circle.py", code_contents,
                           "application/x-python-code")}
     response_login = client.post(
         "/token",
@@ -43,13 +43,13 @@ def test_create_valid_robot_without_avatar():
 
 
 def test_create_valid_robot_with_avatar():
-    with open('app/main.py', 'rb') as f:
+    with open('app/tests/robots_for_testing/circle.py', 'rb') as f:
         code_contents = f.read()
         f.close()
     with open('app/avatars/default.jpg', 'rb') as f:
         avatar_img = f.read()
         f.close()
-    code_file = {"code": ("code.py", code_contents, "application/x-python-code"),
+    code_file = {"code": ("circle.py", code_contents, "application/x-python-code"),
                  "avatar": ("avatar", avatar_img, "image/jpeg")}
     response_login = client.post(
         "/token",
@@ -79,13 +79,13 @@ def test_create_valid_robot_with_avatar():
 
 
 def test_create_invalid_robot_name1():
-    with open('app/main.py', 'rb') as f:
+    with open('app/tests/robots_for_testing/circle.py', 'rb') as f:
         code_contents = f.read()
         f.close()
     with open('app/avatars/default.jpg', 'rb') as f:
         avatar_img = f.read()
         f.close()
-    code_file = {"code": ("code.py", code_contents, "application/x-python-code"),
+    code_file = {"code": ("circle.py", code_contents, "application/x-python-code"),
                  "avatar": ("avatar", avatar_img, "images/jpeg")}
     response_login = client.post(
         "/token",
@@ -115,13 +115,13 @@ def test_create_invalid_robot_name1():
 
 
 def test_create_invalid_robot_name2():
-    with open('app/main.py', 'rb') as f:
+    with open('app/tests/robots_for_testing/circle.py', 'rb') as f:
         code_contents = f.read()
         f.close()
     with open('app/avatars/default.jpg', 'rb') as f:
         avatar_img = f.read()
         f.close()
-    code_file = {"code": ("code.py", code_contents, "application/x-python-code"),
+    code_file = {"code": ("circle.py", code_contents, "application/x-python-code"),
                  "avatar": ("avatar", avatar_img, "images/jpeg")}
     response_login = client.post(
         "/token",
@@ -151,10 +151,10 @@ def test_create_invalid_robot_name2():
 
 
 def test_create_invalid_avatar_type():
-    with open('app/main.py', 'rb') as f:
+    with open('app/tests/robots_for_testing/circle.py', 'rb') as f:
         code_contents = f.read()
         f.close()
-    code_file = {"code": ("code.py", code_contents, "application/x-python-code"),
+    code_file = {"code": ("circle.py", code_contents, "application/x-python-code"),
                  "avatar": ("avatar", code_contents, "images/jpeg")}
     response_login = client.post(
         "/token",
@@ -216,10 +216,10 @@ def test_create_invalid_code_type():
 
 
 def test_create_existing_robot():
-    with open('app/main.py', 'rb') as f:
+    with open('app/tests/robots_for_testing/circle.py', 'rb') as f:
         code_contents = f.read()
         f.close()
-    code_file = {"code": ("code.py", code_contents,
+    code_file = {"code": ("circle.py", code_contents,
                           "application/x-python-code")}
     response_login = client.post(
         "/token",
@@ -249,7 +249,7 @@ def test_create_existing_robot():
 
 
 def test_create_without_code():
-    with open('app/main.py', 'rb') as f:
+    with open('app/tests/robots_for_testing/circle.py', 'rb') as f:
         code_contents = f.read()
         f.close()
     code_file = {"code": ("", code_contents, "application/x-python-code")}
@@ -339,4 +339,4 @@ def test_statistics_robots():
         headers={"accept": "test_application/json", "Authorization": head},
         json=body
     )
-    assert response.status_code == 200 
+    assert response.status_code == 200

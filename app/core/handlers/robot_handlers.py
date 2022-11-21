@@ -30,7 +30,7 @@ def generate_file_name(filename: str, u: User, r: RobotIn):
 
 
 def get_original_filename(u: User, r: str, filename: str):
-    if isinstance(u, User): 
+    if isinstance(u, User):
         uname = u["username"]
     else:
         uname = u
