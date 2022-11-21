@@ -279,6 +279,66 @@ def test_create_without_code():
     )
     assert response.status_code == 400
 
+def test_create_invalid_robot():
+    with open('app/tests/robots_for_testing/invalid.py', 'rb') as f:
+        code_contents = f.read()
+        f.close()
+    code_file = {"code": ("invalid.py", code_contents,
+                          "application/x-python-code")}
+    response_login = client.post(
+        "/token",
+        data={
+            "grant_type": "",
+            "username": "tiffbri",
+            "password": "Tiffanyb19!",
+            "scope": "",
+            "client_id": "",
+            "client_secret": "",
+        },
+    )
+    assert response_login.status_code == 200
+    rta: dict = response_login.json()
+    token: str = rta["access_token"]
+    token_type: str = "Bearer "
+    head: str = token_type + token
+    response = client.post(
+        "/robots/create",
+        headers={"accept": "test_application/json", "Authorization": head},
+        data={
+            "name": "invalid"
+        },
+        files=code_file
+    )
+    assert response.status_code == 400
+
+def test_create_syntax_error_robot():
+    code_file = {"code": ("syntax_error.py", "not python code",
+                          "application/x-python-code")}
+    response_login = client.post(
+        "/token",
+        data={
+            "grant_type": "",
+            "username": "tiffbri",
+            "password": "Tiffanyb19!",
+            "scope": "",
+            "client_id": "",
+            "client_secret": "",
+        },
+    )
+    assert response_login.status_code == 200
+    rta: dict = response_login.json()
+    token: str = rta["access_token"]
+    token_type: str = "Bearer "
+    head: str = token_type + token
+    response = client.post(
+        "/robots/create",
+        headers={"accept": "test_application/json", "Authorization": head},
+        data={
+            "name": "syntax_error"
+        },
+        files=code_file
+    )
+    assert response.status_code == 400
 
 def test_create_nonexistent_avatar():
     pass
