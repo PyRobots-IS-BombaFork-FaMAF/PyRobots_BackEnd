@@ -1,8 +1,7 @@
 from enum import unique
 import json
 from pony.orm import *
-from datetime import date, datetime
-from passlib.context import CryptContext
+from datetime import datetime
 
 db = Database()
 
@@ -73,6 +72,16 @@ class Results(db.Entity):
     duration = Required(float)
     rounds_won = Required(int)
 
+class RecoveryCode(db.Entity):
+    """
+    Database table to store the code for 
+    password recoveries and the date it was 
+    issued
+    """
+    username = PrimaryKey(str)
+    code = Required(str)
+    date_issue = Required(datetime)
+    active = Required(bool, default=1)
 class RobotStatistics(db.Entity):
     """
     Database table to store statistics

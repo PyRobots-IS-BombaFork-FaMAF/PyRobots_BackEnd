@@ -4,3 +4,7 @@ omit =
     app/core/handlers/userdb_handlers.py
     app/core/config.py
     app/robot_code/*
+    app/core/handlers/auth_handlers.py
+    app/core/handlers/robot_handlers.py
+    app/core/router/game.py
+    app/core/handlers/recovery_handler.py
