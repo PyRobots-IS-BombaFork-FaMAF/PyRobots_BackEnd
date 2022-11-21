@@ -1,8 +1,9 @@
 from fastapi.testclient import TestClient
 from app.tests.test_main import app_test
-from app.core.models.base import User, Validation_data, db
+from app.core.models.base import User, db
 from pony.orm import *
 from app.core.handlers.password_handlers import verify_password
+import json
 
 IMAGEDIR = "app/avatars/"
 
@@ -70,7 +71,6 @@ def test_invalid_avatar():
     )
     assert response.status_code == 409
 
-"""
 def test_valid_change_password():
     response_login = client.post(
         "/token",
@@ -88,20 +88,31 @@ def test_valid_change_password():
     token: str = rta["access_token"]
     token_type: str = "Bearer "
     head: str = token_type + token
+    payload = json.dumps({
+        "old_password": "Tiffanyb19!",
+        "new_password": "Tiffany123"
+    })
     response= client.put(
         "/user/password", headers={"accept": "test_application/json", "Authorization": head},
-        data={
-            "new_password": "GermanJohn1"
-        }
+        data=payload
     )
     assert response.status_code == 200
 
-@db_
-def test_verify_password(): 
-    tiff = User["tiffbri"]
-    assert verify_password(tiff.password, "GermanJohn1") == True
+def test_login_with_new_pass(): 
+    response_login = client.post(
+        "/token",
+        data = {
+            "grant_type": "",
+            "username": "tiffbri",
+            "password": "Tiffany123",
+            "scope": "",
+            "client_id": "",
+            "client_secret": "",
+        },
+    )
+    assert response_login.status_code == 200
 
-def test_valid_change_password():
+def test_login_with_old_pass(): 
     response_login = client.post(
         "/token",
         data = {
@@ -113,16 +124,58 @@ def test_valid_change_password():
             "client_secret": "",
         },
     )
+    assert response_login.status_code == 401
+
+def test_invalid_change_password1():
+    response_login = client.post(
+        "/token",
+        data = {
+            "grant_type": "",
+            "username": "tiffbri",
+            "password": "Tiffany123",
+            "scope": "",
+            "client_id": "",
+            "client_secret": "",
+        },
+    )
     assert response_login.status_code == 200
     rta: dict = response_login.json()
     token: str = rta["access_token"]
     token_type: str = "Bearer "
     head: str = token_type + token
-    response = client.put(
+    payload = json.dumps({
+        "old_password": "Tiffanyb19!", #Wrong password
+        "new_password": "Tiffany123"
+    })
+    response= client.put(
         "/user/password", headers={"accept": "test_application/json", "Authorization": head},
-        data={
-            "new_password": "asdfsdsasd"
-        }
+        data=payload
+    )
+    assert response.status_code == 401
+
+def test_invalid_change_password2():
+    response_login = client.post(
+        "/token",
+        data = {
+            "grant_type": "",
+            "username": "tiffbri",
+            "password": "Tiffany123",
+            "scope": "",
+            "client_id": "",
+            "client_secret": "",
+        },
+    )
+    assert response_login.status_code == 200
+    rta: dict = response_login.json()
+    token: str = rta["access_token"]
+    token_type: str = "Bearer "
+    head: str = token_type + token
+    payload = json.dumps({
+        "old_password": "Tiffany123", 
+        "new_password": "12345678" #No cumple restricciones
+    })
+    response= client.put(
+        "/user/password", headers={"accept": "test_application/json", "Authorization": head},
+        data=payload
     )
     assert response.status_code == 422
-"""
