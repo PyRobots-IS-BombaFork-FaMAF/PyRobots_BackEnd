@@ -35,16 +35,7 @@ def test_login_and_get_non_validated_user():
             "client_secret": "",
         },
     )
-    assert response_login.status_code == 200
-    rta: dict = response_login.json()
-    token: str = rta["access_token"]
-    token_type: str = "Bearer "
-    head: str = token_type + token
-    response_get = client.get(
-        "/users/me", headers={"accept": "test_application/json", "Authorization": head}
-    )
-    assert response_get.status_code == 400
-
+    assert response_login.status_code == 401
 
 @db_session
 def test_validate_user_wrong_code():
