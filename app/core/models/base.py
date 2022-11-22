@@ -107,7 +107,6 @@ def load_default_robots():
                 code = "app/tests/robots_for_testing/circle.py",
                 avatar = "app/robot_avatars/default.jpg"
             )
-            db.flush()
         exists_scaa = db.exists("select * from Robot where name = 'default_scan_attack' and user is null")
         if not exists_scaa:
             Robot(
@@ -115,6 +114,5 @@ def load_default_robots():
                 code = "app/tests/robots_for_testing/Scan_and_attack.py",
                 avatar = "app/robot_avatars/default.jpg"
             )
-            db.flush()
     except:
         pass

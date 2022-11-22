@@ -125,6 +125,12 @@ async def login_for_token(form_data: OAuth2PasswordRequestForm = Depends()):
             detail="Contraseña o usuario incorrecto",
             headers={"WWW-Authenticate": "Bearer"},
         )
+    if not user["validated"]:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Usuario no validado",
+            headers={"WWW-Authenticate": "Bearer"},
+        ) 
     access_token_expires = timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES)
     access_token = create_access_token(
         data={"username": user["username"].lower()},
@@ -243,7 +249,7 @@ def change_password(
 @router.get("/user/info", status_code=200, tags=["Users"])
 @db_session
 def user_info(
-    current_user: User = Depends(get_current_active_user)):
+    current_user: User = Depends(get_current_user)):
     """
         Returns user information
     """
