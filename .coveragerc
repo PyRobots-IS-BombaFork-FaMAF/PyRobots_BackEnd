@@ -9,3 +9,4 @@ omit =
     app/core/router/game.py
     app/core/handlers/recovery_handler.py
     app/core/models/base.py
+    app/core/router/users.py   
