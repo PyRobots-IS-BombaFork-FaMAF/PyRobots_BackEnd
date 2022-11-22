@@ -4,7 +4,7 @@ pony
 passlib
 bcrypt
 pytest
-pydantic 
+pydantic
 pydantic[email]
 pydantic[dotenv]
 python-multipart
@@ -14,3 +14,7 @@ coverage
 pycryptodome
 social-auth-core[openidconnect]
 fastapi_websocket_pubsub
+<<<<<<< HEAD
+timeout-decorator
+=======
+>>>>>>> develop

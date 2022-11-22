@@ -6,7 +6,9 @@ from typing import NamedTuple
 import math
 from app.core.game.constants import *
 import numbers
-
+import time
+from wrapt_timeout_decorator import *
+import timeout_decorator
 
 
 class RobotResult_round():
@@ -91,6 +93,15 @@ class SimulationResult():
         }
 
 
+@timeout(max_time_per_round, use_signals=False, timeout_exception=TimeoutError)
+def executeRobotInitialize(r: Robot):
+    r.initialize()
+    return r
+    
+@timeout(max_time_per_round, use_signals=False, timeout_exception=TimeoutError)
+def createRobot(robotClass: type) -> Robot:
+    r = robotClass()
+    return r
 
 class RobotInGame():
     name: str  # Only for generating the `json`
@@ -130,24 +141,31 @@ class RobotInGame():
 
         try:
             # There are no robots that do not inherit from Robot because that is checked in upload
-            self.robot = robotClass()
+            self.robot = createRobot(robotClass)
 
             # Update position of `robot`
             self.robot._position = self.position
 
-            self.robot.initialize()
-        except:
+            self.robot = executeRobotInitialize(self.robot)
+        except TimeoutError:
+            self.damage = 1
+            self.cause_of_death = "robot timeout error"
+        except Exception as a:
             self.damage = 1
             self.cause_of_death = "robot execution error"
 
+    @timeout(max_time_per_round, use_signals=False, timeout_exception=TimeoutError)
     def executeRobotCode(self):
-        if self.is_alive():
-            try:
+        try:
+            if self.is_alive():
                 self.robot.respond()
-            except:
-                self.damage = 1
-                self.cause_of_death = "robot execution error"
-
+        except TimeoutError:
+            self.damage = 1
+            self.cause_of_death = "robot timeout error"
+        except Exception as a:
+            print(a)
+            self.damage = 1
+            self.cause_of_death = "robot execution error"
 
     def cannon_calculation(self, direction: float, distance: float) -> Tuple[float, float, int]:
         """
@@ -459,6 +477,7 @@ def runSimulation(robots: list[RobotInput], rounds: int, for_animation: bool = F
     gameState: GameState = GameState(list(zip(robotsNames, robotsClasses)), for_animation)
 
     while gameState.amount_of_robots_alive() > 1 and gameState.round < rounds:
+        print(gameState.round)
         gameState.advance_round()
 
     if for_animation:
