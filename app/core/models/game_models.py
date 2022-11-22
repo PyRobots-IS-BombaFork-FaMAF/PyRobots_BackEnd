@@ -1,12 +1,8 @@
-from ast import Str
 from datetime import datetime
-from operator import ge, le
 from typing import Optional
-from typing_extensions import Required
-from unicodedata import name
 from pydantic import BaseModel, Field, validator
 from fastapi import *
-from fastapi.exceptions import RequestValidationError, ValidationError
+from fastapi.exceptions import ValidationError
 
 class PartidaIn(BaseModel):
     """
@@ -19,7 +15,7 @@ class PartidaIn(BaseModel):
     max_players: Optional[int] = Field(4, ge=2, le=4)
     min_players: Optional[int] = Field(2, ge=2, le=4)
     password: str = Field(None, min_length=8, max_length=16)
-    robot: str
+    robot: int
 
     @validator("min_players")
     def check_range(cls, v, values):
@@ -66,5 +62,5 @@ class PartidaJoin(BaseModel):
     a game
     """
     game_id: int
-    robot: str
+    robot: int
     password: Optional[str] = Field(None)

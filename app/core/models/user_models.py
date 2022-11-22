@@ -1,6 +1,5 @@
-from tokenize import String
-from pydantic import BaseModel, Field, HttpUrl, validator
-from typing import Optional, Union
+from pydantic import BaseModel, Field, validator
+from typing import Optional
 from pydantic.networks import EmailStr
 from fastapi import *
 
@@ -45,3 +44,20 @@ class User(BaseModel):
 class Token(BaseModel):
     access_token: str
     token_type: str
+
+
+class PasswordChange(BaseModel):
+    old_password: str = Field(..., min_length=8,
+                          regex=r"^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)[a-zA-Z\d\w\W]{8,}$")
+    new_password: str = Field(..., min_length=8,
+                          regex=r"^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)[a-zA-Z\d\w\W]{8,}$")
+
+class NewPass(BaseModel):
+    '''
+    BaseModel for the data neccesary
+    to generate a new password
+    '''
+    username: str
+    code: str
+    password: str = Field(..., min_length=8,
+                          regex=r"^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)[a-zA-Z\d\w\W]{8,}$")

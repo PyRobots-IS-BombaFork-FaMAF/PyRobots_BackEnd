@@ -14,4 +14,7 @@ coverage
 pycryptodome
 social-auth-core[openidconnect]
 fastapi_websocket_pubsub
+<<<<<<< HEAD
 timeout-decorator
+=======
+>>>>>>> develop

@@ -1,6 +1,6 @@
 from fastapi import *
 from pony.orm import *
-from typing import Union, Optional
+from typing import Optional
 from app.core.models.base import db
 from app.core.models.robot_models import *
 from app.core.models.user_models import *
@@ -8,6 +8,7 @@ from app.core.handlers.robot_handlers import *
 from app.core.handlers.auth_handlers import *
 from fastapi.responses import JSONResponse
 import uuid
+import base64
 
 IMAGEDIR = "app/robot_avatars/"
 CODEDIR = "app/robot_code/"
@@ -73,11 +74,15 @@ def register(
         finally:
             code.file.close()
 
-        db.Robot(
+        robot = db.Robot(
             name=robot.name.lower(),
             avatar=avatar_name,
             code=code_name,
             user=current_user["username"]
+        )
+
+        db.RobotStatistics(
+            robot_id = get_robot_id(current_user["username"], robot.name)
         )
 
         msg = "¡Se creo el robot " + robot.name + " con éxito!"
@@ -99,16 +104,53 @@ def list_robots(
     returns a list of all created robots that the user has
     """
     uname = current_user["username"]
-    robots = db.select("select * from Robot where user = $uname")[:]
+    robots = db.select("select * from Robot where user = $uname or user is null")[:]
     listRobots = dict()
     listRobotsUser = []
     for robot in robots:
         listRobots = {
-            'id': robot.id,
-            'name': robot.name,
-            'code': get_original_filename(uname, robot.name, robot.code.rsplit('/', 1)[1]),
-            'avatar': robot.avatar
-        }
+                'id': robot.id,
+                'name': robot.name,
+                'avatar': robot.avatar
+            }
         listRobotsUser.append(listRobots)
     
     return JSONResponse(listRobotsUser)
+
+@router.get("/robot/statistics", status_code=200, tags=["robots"])
+@db_session
+def statistics_robots( 
+    current_user: User = Depends(get_current_active_user)
+):
+    """
+    returns a list of all created robots that the user has
+    """
+    uname = current_user["username"]
+    robots = db.select("select id, name, avatar from Robot where user = $uname")[:]
+
+    listRobots = dict()
+    listRobotsUser = []
+    for robot in robots:
+        robotStatistics = db.select("select * from RobotStatistics where robot_id = $robot.id")[:]
+        for robotStats in robotStatistics:
+            with open(robot.avatar, 'rb') as f:
+                avatar_img = base64.b64encode(f.read())
+                f.close()
+            listRobots = {
+                'robot_id': robotStats.robot_id,
+                'robot_name': robot.name,
+                'gamesPlayed': robotStats.gamesPlayed,
+                'wins': robotStats.wins,
+                'tied': robotStats.tied,
+                'losses': robotStats.losses,
+                'avatar_name': robot.avatar.rsplit('/', 1)[1],
+                'avatar_img': str(avatar_img)
+            }
+            listRobotsUser.append(listRobots)
+
+    return JSONResponse(listRobotsUser)
+
+
+
+
+

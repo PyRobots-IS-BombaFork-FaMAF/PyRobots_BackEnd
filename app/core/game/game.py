@@ -1,5 +1,5 @@
 import random
-from typing import Any, Dict, Optional, Tuple, Union
+from typing import Any, Optional, Tuple, Union
 from app.core.game.robot import Robot
 from types import ModuleType
 from typing import NamedTuple
@@ -7,6 +7,7 @@ import math
 from app.core.game.constants import *
 import numbers
 import time
+from wrapt_timeout_decorator import *
 import timeout_decorator
 
 
@@ -92,19 +93,15 @@ class SimulationResult():
         }
 
 
-@timeout_decorator.timeout(max_time_per_round, timeout_exception=TimeoutError)
+@timeout(max_time_per_round, use_signals=False, timeout_exception=TimeoutError)
 def executeRobotInitialize(r: Robot):
     r.initialize()
-
-@timeout_decorator.timeout(max_time_per_round, timeout_exception=TimeoutError)
+    return r
+    
+@timeout(max_time_per_round, use_signals=False, timeout_exception=TimeoutError)
 def createRobot(robotClass: type) -> Robot:
     r = robotClass()
     return r
-
-@timeout_decorator.timeout(max_time_per_round, timeout_exception=TimeoutError)
-def executeRobotrespond(r: Robot):
-    r.respond()
-
 
 class RobotInGame():
     name: str  # Only for generating the `json`
@@ -149,7 +146,7 @@ class RobotInGame():
             # Update position of `robot`
             self.robot._position = self.position
 
-            executeRobotInitialize(self.robot)
+            self.robot = executeRobotInitialize(self.robot)
         except TimeoutError:
             self.damage = 1
             self.cause_of_death = "robot timeout error"
@@ -157,14 +154,16 @@ class RobotInGame():
             self.damage = 1
             self.cause_of_death = "robot execution error"
 
-    @timeout_decorator.timeout(max_time_per_round, timeout_exception=TimeoutError)
+    @timeout(max_time_per_round, use_signals=False, timeout_exception=TimeoutError)
     def executeRobotCode(self):
         try:
-            executeRobotrespond(self.robot)
+            if self.is_alive():
+                self.robot.respond()
         except TimeoutError:
             self.damage = 1
             self.cause_of_death = "robot timeout error"
-        except:
+        except Exception as a:
+            print(a)
             self.damage = 1
             self.cause_of_death = "robot execution error"
 
@@ -478,6 +477,7 @@ def runSimulation(robots: list[RobotInput], rounds: int, for_animation: bool = F
     gameState: GameState = GameState(list(zip(robotsNames, robotsClasses)), for_animation)
 
     while gameState.amount_of_robots_alive() > 1 and gameState.round < rounds:
+        print(gameState.round)
         gameState.advance_round()
 
     if for_animation:

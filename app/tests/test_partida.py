@@ -1,18 +1,16 @@
-from calendar import c
 from datetime import datetime
-from http.client import HTTPException
 from fastapi.testclient import TestClient
 from app.tests.test_main import app_test
-from app.core.models.base import User, Validation_data, db, Robot
+from app.core.models.base import db
 from pony.orm import *
 import json
 from urllib.parse import quote
 from app.core.game.partida import *
 from pony.orm import *
-import pytest
 
 client = TestClient(app_test)
 
+@db_session
 def test_create_valid_partida_sin_pass1():
     response_login = client.post(
         "/token",
@@ -51,6 +49,7 @@ def test_create_valid_partida_sin_pass1():
         },
         files=code_file
     )
+    flush()
     assert response.status_code == 201
     body = {
             "rounds": 1,
@@ -58,7 +57,7 @@ def test_create_valid_partida_sin_pass1():
             "name": "Exacto",
             "max_players": 4,
             "min_players": 2,
-            "robot": "Maximus"
+            "robot": 4
         }
     response = client.post(
         "/game/create",
@@ -66,6 +65,15 @@ def test_create_valid_partida_sin_pass1():
         json=body
     )
     assert response.status_code == 201
+
+@db_session
+def test_init_statistics():
+    maximus = RobotStatistics[4]
+
+    assert maximus.gamesPlayed == 0
+    assert maximus.wins == 0
+    assert maximus.tied == 0
+    assert maximus.losses == 0
 
 def test_create_valid_partida_con_pass():
     response_login = client.post(
@@ -91,7 +99,7 @@ def test_create_valid_partida_con_pass():
             "max_players": 4,
             "min_players": 2,
             "password": "Tiffany123",
-            "robot": "Maximus"
+            "robot": 4
         }
     response = client.post(
         "/game/create",
@@ -122,7 +130,7 @@ def test_create_valid_partida_default_rounds():
             "name": "Prueba1",
             "max_players": 4,
             "min_players": 2,
-            "robot": "Maximus"
+            "robot": 4
         }
     response = client.post(
         "/game/create",
@@ -152,7 +160,7 @@ def test_create_valid_partida_default_games():
             "name": "Prueba1",
             "max_players": 4,
             "min_players": 2,
-            "robot": "Maximus"
+            "robot": 4
         }
     response = client.post(
         "/game/create",
@@ -181,7 +189,7 @@ def test_create_valid_partida_default_max_players():
     body = {
             "name": "Prueba1",
             "min_players": 2,
-            "robot": "Maximus"
+            "robot": 4
         }
     response = client.post(
         "/game/create",
@@ -209,7 +217,7 @@ def test_create_valid_partida_default_min_players():
     head: str = token_type + token
     body = {
             "name": "Prueba1",
-            "robot": "Maximus"
+            "robot": 2
         }
     response = client.post(
         "/game/create",
@@ -241,7 +249,7 @@ def test_create_valid_partida_invalid_rounds1():
             "name": "Prueba1",
             "max_players": 4,
             "min_players": 2,
-            "robot": "Maximus"
+            "robot": 4
         }
     response = client.post(
         "/game/create",
@@ -273,7 +281,7 @@ def test_create_valid_partida_invalid_rounds2():
             "name": "Prueba1",
             "max_players": 4,
             "min_players": 2,
-            "robot": "Maximus"
+            "robot": 4
         }
     response = client.post(
         "/game/create",
@@ -305,7 +313,7 @@ def test_create_valid_partida_invalid_games1():
             "name": "Prueba1",
             "max_players": 4,
             "min_players": 2,
-            "robot": "Maximus"
+            "robot": 4
         }
     response = client.post(
         "/game/create",
@@ -337,7 +345,7 @@ def test_create_valid_partida_invalid_games2():
             "name": "Prueba1",
             "max_players": 4,
             "min_players": 2,
-            "robot": "Maximus"
+            "robot": 4
         }
     response = client.post(
         "/game/create",
@@ -369,7 +377,7 @@ def test_create_valid_partida_invalid_max_players1():
             "name": "Prueba1",
             "max_players": 1, # max_player < 2
             "min_players": 2,
-            "robot": "Maximus"
+            "robot": 4
         }
     response = client.post(
         "/game/create",
@@ -401,7 +409,7 @@ def test_create_invalid_players():
             "name": "Prueba1",
             "max_players": 3, # min_player > max_player
             "min_players": 4,
-            "robot": "Maximus"
+            "robot": 4
         }
     response = client.post(
         "/game/create",
@@ -417,7 +425,7 @@ def test_create_partida_without_login():
             "name": "Prueba1",
             "max_players": 4, # min_player > max_player
             "min_players": 2,
-            "robot": "Maximus"
+            "robot": 4
         }
     response = client.post(
         "/game/create",
@@ -590,7 +598,6 @@ def test_validate_user():
     response = client.get(url)
     assert response.status_code == 200
 
-
 def test_unirse_a_partida_sin_pass():
     response_login = client.post(
         "/token",
@@ -623,7 +630,7 @@ def test_unirse_a_partida_sin_pass():
     )
     body = {
         "game_id": 1,
-        "robot": "Felipe"
+        "robot": 6
         }
     response = client.post(
         "/game/1/join",
@@ -651,7 +658,7 @@ def test_unirse_a_partida_con_pass():
     head: str = token_type + token
     body = {
         "game_id": 2,
-        "robot": "Felipe",
+        "robot": 6,
         "password": "Tiffany123"
         }
     response = client.post(
@@ -680,7 +687,7 @@ def test_unirse_a_partida_con_pass_invalido():
     head: str = token_type + token
     body = {
         "game_id": 2,
-        "robot": "Felipe",
+        "robot": 6,
         "password": "12345678"
         }
     response = client.post(
@@ -741,7 +748,7 @@ def test_websocket_join():
     head: str = token_type + token
     body = {
         "game_id": 1,
-        "robot": "Felipe"
+        "robot": 6
         }
     with client.websocket_connect("/game/lobby/1") as websocket:
         data = websocket.receive_json()
@@ -776,7 +783,7 @@ def test_unirse_a_partida_llena():
     partida._current_players = 4
     body = {
         "game_id": 1,
-        "robot": "Felipe"
+        "robot": 6
         }
     response = client.post(
         "/game/2/join",
@@ -806,7 +813,7 @@ def test_unirse_a_partida_en_curso():
     partida._gameStatus = 1
     body = {
         "game_id": 1,
-        "robot": "Felipe"
+        "robot": 6
         }
     response = client.post(
         "/game/2/join",
@@ -847,6 +854,11 @@ def test_ejecutar_partida():
         data = websocket.receive_json()
         assert data["message"] == "¡La partida se esta iniciando! Esperando resultados.."
 
+@db_session
+def test_save_statistics():
+    maximus = RobotStatistics[4]
+
+    assert maximus.gamesPlayed == 1
 
 def test_ejecutar_partida_finalizada():
     partida = PartidaObject.get_game_by_id(1)
@@ -1102,3 +1114,5 @@ def test_abandonar_partida_en_ejecucion():
     )
     partida._gameStatus = 0
     assert response.status_code==403
+
+

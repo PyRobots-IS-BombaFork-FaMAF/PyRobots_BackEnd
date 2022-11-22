@@ -1,11 +1,8 @@
 from app.core.models.base import db
-from email.mime.multipart import MIMEMultipart
-from email.mime.text import MIMEText
-from pony.orm import db_session, commit
+from pony.orm import db_session
 from urllib.parse import quote
 import random
 import string
-import smtplib
 import yagmail
 
 
@@ -24,10 +21,10 @@ class ValidationMail:
         from_user = "pyrobotsfamaf@gmail.com"
         password = "rkioqsrmpflkkvgg"
 
-        body = "Hola " + username + " ¡Gracias por registrar una cuenta en PyRobots! "
+        body = "Hola " + username + " ¡Gracias por registrar una cuenta en PyRobots! \n"
         body += "Antes de comenzar, solo necesitamos confirmar que eres tú."
         body += " Haz clic a continuación para verificar tu dirección de correo electrónico \n"
-        body += "http://127.0.0.1:8000/validate?email=" + \
+        body += "http://127.0.0.1:3000/validate?email=" + \
             quote(to) + "&code=" + self.verification_code
 
         yag = yagmail.SMTP(from_user, password)

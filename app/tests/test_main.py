@@ -1,5 +1,5 @@
 # test_main.py
-from fastapi import FastAPI, Depends
+from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.exceptions import RequestValidationError, ValidationError
 from fastapi.responses import PlainTextResponse

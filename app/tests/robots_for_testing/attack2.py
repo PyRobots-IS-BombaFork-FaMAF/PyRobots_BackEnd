@@ -1,6 +1,5 @@
 from app.core.game.robot import Robot
 from typing import Optional, Tuple
-import random
 import math
 
 class attack2(Robot):
